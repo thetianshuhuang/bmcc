@@ -1,143 +1,141 @@
 #include <cstdlib>
-#include <cmath>
-#include <set>
 #include <algorithm>
 
+#include "util.h"
 
-/**
- * Sample proportionally from a weight vector
- * @param weights : list of weights
- * @param size : length of weight vector
- * @return index sampled from the len(weights) proportional to weight
- */
-int sample_proportional(float *weights, int *size)
+
+#define DOCSTRING_CRP_GIBBS \
+    "Run gibbs sampler for bayesian clustering using pCRP prior\n" \
+    "\n" \
+    "Parameters\n" \
+    "----------\n" \
+    "data : np.array\n" \
+    "    Data matrix. Points are stored along dimension 0 (i.e. data[i]) is " \
+        "a single\n" \
+    "point\n" \
+    "assignments : np.array\n"\
+    "    Assignment matrix. Should have assignments.shape[1] = data.shape[0] " \
+        "and\n" \
+    "    assignments.shape[0] = floor((iterations - burn_in) / thinning).\n" \
+    "l_uncond : f(data, idx) -> float\n"\
+    "    Unconditional likelihood function p(x_i | beta) where beta consists " \
+        "of all\n" \
+    "    model hyperparameters (distribution of means, etc)\n" \
+    "l_cond : f(data, cluster, mean, variance) -> float\n" \
+    "    Conditional likelihood function p(z_i = k | z_{!=i}, alpha); the " \
+        "likelihood\n" \
+    "    function used by the gibbs update step\n" \
+    "\n" \
+    "Keyword Args\n" \
+    "------------\n" \
+    "r : float\n" \
+    "    pCRP cluster weighting power parameter\n" \
+    "    [default: 1 (no power)]\n" \
+    "alpha : float\n" \
+    "    CRP new cluster probability coefficient\n" \
+    "    [default: 1]\n" \
+    "thinning : int\n" \
+    "    Thinning ratio for gibbs sampler; keep 1/thinning samples\n" \
+    "    [default: 1 (1/1 samples kept)]\n" \
+    "iterations : int\n" \
+    "    Number of iterations to run the gibbs sampler\n" \
+    "    [default: 50]\n" \
+    "burn_in : int\n" \
+    "    Number of burn-in iterations to discard\n" \
+    "    [default: 20]\n" \
+
+
+static char *crp_gibbs_kwlist[] = {
+    "r",            // pCRP power
+    "alpha",        // CRP new cluster coefficient
+    "thinning",     // Keep 1/thinning gibbs samples
+    "iterations",   // Number of iterations
+    "burn_in",      // Gibbs sampler burn in period
+    NULL};
+
+PyObject *crp_gibbs(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    // Sample from [0, sum_weights)
-    // Saves k flops compared to normalizing first
-    float sum_weights = 0;
-    for(int i = 0; i < size; i++) { sum_weights += weights[i]; }
-    float unif = sum_weights * (float) ((double) rand() / ((double) RAND_MAX));
+    // Input arrays
+    PyArrayObject *data_py;
+    PyArrayObject *assignments_py;
 
-    // Check cumulative sum
-    float acc;
-    for(int i = 0; i < size; i++) {
-        acc += weights[size];
-        if(unif < acc) { return i; }
+    // Hyperparameters
+    float r = 1.0;
+    float alpha = 1.0;
+    int thinning = 1;
+    int iterations = 100;
+    int burn_in = 20;
+
+    // Get args
+    if(!PyArg_ParseTupleAndKeywords(
+            args, kwargs, "O!O!|ffiii", crp_gibbs_kwlist,
+            &PyArray_Type, &data_py,
+            &PyArray_Type, &assignments_py,
+            &r, &alpha, &thinning, &iterations, &burn_in
+        )) { return NULL; }
+
+    // Check sizes
+    int min_hist_size = (iterations - burn_in) / thinning;
+    if(!gibs_crp_dim_check(data, assignments, min_hist_size)) {
+        return NULL;
     }
 
-    // Catch-all in case of rounding error (just in case)
-    return size - 1;
-}
+    // Use internal data structures for subroutines
+    float *data = PyArray_DATA(data);
+    int size = PyArray_DIM(data, 0);
+    int dim = PyArray(data, 1);
 
+    // Get initial assignments
+    int *assignments = PyArray_DATA(assignments);
+    clusters = init_clusters(assignments, size);
 
-/**
- * Gibbs sampling initialization
- * @param data : input data; stored in row-major order
- *      (i.e. idx, x -> idx * dim + x)
- * @param assignments : array of pointers to set objects. Should start as null
- * @param size : data size
- * @param dim : data dimension
- * @param r : pCRP power penalty
- * @param alpha : CRP clustering hyperparameter
- * @param l_cond : conditional likelihood function
- * @param l_uncond : unconditional likelihood function
- */
-std::vector<std::set<int>> crp_init(
-    float *data, std::set<int> *assignments, int size, int dim,
-    float r, float alpha,
-    (float) l_cond(float **, std::set<int>, int, int),
-    (float) l_uncond(float **, int, int))
-{
+    // Assignment vector to iterate on
+    int *assignments_current = new int[size];
+    for(int i = 0; i < size; i++) { assignments_current[i] = assignments[i]; }
 
-    // Initialize clusters
-    std::vector<std::set<int>> clusters = new std::vector<std::set<int>>;
-    int num_clusters = 0;
+    // Run gibbs sampler
+    int history_index = 1;
+    for(int i = 1; i <= iterations; i++) {
 
-    // Apply CRP to data points
-    for(int i = 0; i < size; i++) {
+        gibbs_iteration(
+            data, assignments_current, clusters,
+            size, dim, r, alpha,
+            l_cond, l_uncond);
 
-        // Initialize weight vector
-        float *weights = new float[num_clusters + 1];
-
-        // Iterate over current points in each cluster
-        std::vector<std::set<int>>::iterator it;
-        for(it = clusters.begin(); it != clusters.end(); ++it) {
-            weights[j] = l_cond(data, *it, i, dim) * pow(*it.size(), r);
-        }
-        // Sample new cluster
-        weights[num_clusters + 1] = l_uncond(data, i, dim) * alpha;
-        int assign = sample_proportional(weights, num_clusters);
-
-        // Assign to new cluster
-        if(assign == nm_clusters) {
-            std::set<int> new_cluster = new std::set<int>;
-            new_cluster.insert(i);
-            clusters.push_back(new_cluster);
-            assignments[i] = &new_cluster;
-        }
-        // Assign to existing cluster
-        else {
-            clusters[assign].insert(i);
-            assignments[i] = &clusters[assign];
-        }
-
-        delete weights;
-    }
-
-    return clusters;
-}
-
-
-/**
- * Gibbs sampling step
- */
-gibbs_sampling(
-    float **data,
-    std::set<int> *assignments,
-    std::vector<std::set<int>> clusters,
-    int size, int dim, float r, float alpha,
-    (float) l_cond(float **, std::set<int>, int, int),
-    (float) l_uncond(float **, int, int))
-{
-    // Shuffle data points
-    int *shuffle = new int[size];
-    for(int i = 0; i < size; i++) { shuffle[i] = i; }
-    std::random_shuffle(std::begin(shuffle), std::end(shuffle));
-
-    // Iterate on each point assignment
-    for(int i = 0; i < size; i++) {
-        // Remove from current cluster
-        *(assigments[i]).erase(i);
-
-        // Initialize weight vector
-        float *weights = new float[num_clusters + 1];
-
-        // Iterate over current points in each cluster
-        std::vector<std::set<int>>::iterator it;
-        for(it = clusters.begin(); it != clusters.end(); ++it) {
-            // Make sure cluster is not empty
-            if(*it.size() > 0 && it != ) {
-                weights[j] = l_cond(data, *it, i, dim) * pow(*it.size(), r);
+        // Copy over to history if past burn-in period
+        if((i >= burn_in) && (i % thinning == 0)) {
+            for(int j = 0; j < size; j++) {
+                assignments[history_index * size + j] = assignments_current[j];
             }
+            history_index += 1;
         }
-        // Sample new cluster
-        weights[num_clusters + 1] = l_uncond(data, i, dim) * alpha;
-        int assign = sample_proportional(weights, num_clusters);
-
-        // Assign to new cluster
-        if(assign == nm_clusters) {
-            std::set<int> new_cluster = new std::set<int>;
-            new_cluster.insert(i);
-            clusters.push_back(new_cluster);
-            assignments[i] = &new_cluster;
-        }
-        // Assign to existing cluster
-        else {
-            clusters[assign].insert(i);
-            assignments[i] = &clusters[assign];
-        }
-
-        delete weights;
     }
+
+    // Clean up
+    delete assignments_current;
+    for(int i = 0; i < clusters.size(); i++) { delete clusters[i]; }
+    delete clusters;
+
+    Py_RETURN_NONE;
 }
 
+
+static PyMethodDef ModuleMethods[] = {
+    {"crp_gibbs", (PyCFunction) crp_gibbs, METH_VARARGS, DOCSTRING_CRP_GIBBS},
+    {NULL, NULL, 0, NULL}
+}
+
+
+static struct PyModuleDef ModuleDef = {
+    PyModuleDef_HEAD_INIT,
+    "crp",
+    "docstring...",
+    -1,
+    ModuleMethods
+}
+
+
+PyMODINIT_FUNC PyInit_test() {
+    import_array()
+    return PyModule_Create(&ModuleDef)
+}
