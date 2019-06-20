@@ -193,3 +193,26 @@ def sample_proportional(weights):
         if unif < value:
             return idx
     return -1
+
+
+def select_lstsq(assignments):
+
+    pmatrix = []
+    res = []
+
+    for x in assignments:
+        pmatrix_new = np.zeros((x.shape[0], x.shape[0]))
+        for i, x_i in enumerate(x):
+            for j, x_j in enumerate(x):
+                pmatrix_new[i][j] = 1 if x_i == x_j else 0
+
+        pmatrix.append(pmatrix_new)
+
+    mean = sum(pmatrix) / len(pmatrix)
+
+    for m in pmatrix:
+        res.append(np.linalg.norm(np.reshape(m - mean, -1)))
+
+    min_res = np.argmin(res)
+
+    return pmatrix[min_res], mean, min_res

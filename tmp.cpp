@@ -111,3 +111,79 @@ gibbs_sampling(
     }
 }
 
+
+
+
+
+
+
+
+void gibbs_iteration(
+    float *data,
+    uint16_t *assignments,
+    std::vector<std::set<int>> clusters,
+    int *size, int *dim, float r, float alpha,
+    (float) l_cond(float *, std::set<int>, int, int),
+    (float) l_uncond(float *, int, int))
+{
+    // Shuffle data points
+    int *shuffle = new int[size];
+    for(int i = 0; i < size; i++) { shuffle[i] = i; }
+    std::random_shuffle(std::begin(shuffle), std::end(shuffle));
+
+    // Iterate on point assignment
+    for(int i = 0; i < size; i++) {
+        // Remove from current cluster
+        clusters[assignments[i]].erase(i);
+
+        // Intialize weight vector
+        float *weights = new float[clusters.size() + 1];
+
+        // Track first empty index to reuse empty clusters instead of
+        // expanding (which causes the vector cluster to expand)
+        int empty_idx = -1;
+
+        // Iterate over current points in each cluster
+        for(int i = 0; i < clusters.size(); i++) {
+            // Add to weight vector
+            if(clusters[i].size() > 0) {
+                weights[j] = l_cond(data, *it, i, dim) * pow(*it.size(), r);
+            }
+            // Don't add to weight vector; track empty idx
+            else {
+                empty_idx = i;
+                weights[j] = 0;
+            }
+        }
+
+        // New cluser probability
+        weights[num_clusters + 1] = l_uncond(data, i, dim) * alpha;
+
+        // Sample new assignment
+        int assign = sample_proportional(weights, num_clusters);
+    
+        // Assign to new cluster
+        if(assign == clusters.size()) {
+            // Reuse already-allocated existing
+            if(empty_idx != -1) {
+                clusters[empty_idx].insert(i);
+                assignments[i] = empty_idx;
+            }
+            // Add new
+            else {
+                std::set<int> new_cluster = new std::set<int>;
+                new_cluster.insert(i);
+                assignments[i] = clusters.size();
+                clusters.push_back(new_cluster);
+            }
+        }
+        // Add to existing cluster
+        else {
+            clusters[assign].insert(i);
+            assignments[i] = assign;
+        }
+
+        // Clean up
+        delete weights;
+    }
+}
