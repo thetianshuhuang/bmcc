@@ -195,11 +195,50 @@ def sample_proportional(weights):
     return -1
 
 
+def get_assignments(clusters, data):
+    """Convert list of clusters to assignment vector
+
+    Parameters
+    ----------
+    clusters : set[]
+        List of sets containing point indices
+
+    data : np.array
+        Data array
+
+    Returns
+    -------
+    np.array
+        Assignment vector, with each distinct value corresponding to a cluster
+    """
+    assignments = np.zeros(len(data))
+    for idx, cluster in enumerate(clusters):
+        for point in cluster:
+            assignments[point] = idx
+
+    return assignments
+
+
 def select_lstsq(assignments):
+    """Select final clustering using least-squares strategy
+
+    Parameters
+    ----------
+    assignments : np.array
+        Assignment vector
+
+    Returns
+    -------
+    [np.array, np.array, int]
+        [0] Final clustering
+        [1] Pairwise probability matrix
+        [2] Index of least squares clustering
+    """
 
     pmatrix = []
     res = []
 
+    # Compute probability matrices
     for x in assignments:
         pmatrix_new = np.zeros((x.shape[0], x.shape[0]))
         for i, x_i in enumerate(x):
@@ -208,11 +247,13 @@ def select_lstsq(assignments):
 
         pmatrix.append(pmatrix_new)
 
+    # Compute mean
     mean = sum(pmatrix) / len(pmatrix)
 
+    # Compute squared norm (element-wise)
     for m in pmatrix:
         res.append(np.linalg.norm(np.reshape(m - mean, -1)))
 
+    # Return least squares
     min_res = np.argmin(res)
-
     return pmatrix[min_res], mean, min_res
