@@ -1,5 +1,5 @@
 
-#include <cstdint>
+#include <stdint.h>
 
 // Python includes
 #include <Python.h>

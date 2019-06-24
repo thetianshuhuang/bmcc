@@ -12,7 +12,7 @@
     "data : np.array\n" \
     "    Data matrix. Points are stored along dimension 0 (i.e. data[i]) is " \
         "a single\n" \
-    "point\n" \
+    "    point\n" \
     "assignments : np.array\n"\
     "    Assignment matrix. Should have assignments.shape[1] = data.shape[0] " \
         "and\n" \
