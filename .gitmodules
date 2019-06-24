@@ -1,0 +1,4 @@
+[submodule "mfm/BayesianMixtures.jl"]
+	path = mfm/BayesianMixtures.jl
+	url = https://github.com/jwmi/BayesianMixtures.jl
+	branch = master
