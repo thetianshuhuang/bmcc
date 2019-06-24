@@ -1,3 +1,6 @@
+/**
+ * Create membership matrix
+ */
 
 #include <stdint.h>
 
