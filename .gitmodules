@@ -2,3 +2,11 @@
 	path = mfm/BayesianMixtures.jl
 	url = https://github.com/jwmi/BayesianMixtures.jl
 	branch = master
+[submodule "BayesianMixtures.jl"]
+	path = BayesianMixtures.jl
+	url = git@github.com:thetianshuhuang/BayesianMixtures.jl.git
+	branch = master
+[submodule "mfm/--force"]
+	path = mfm/--force
+	url = https://github.com/jwmi/BayesianMixtures.jl
+	branch = master
