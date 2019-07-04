@@ -16,11 +16,11 @@
 
 /**
  * Remove empty components.
- * @param components : components_t vector to remove from
- * @param comp_methods : CompMethods struct containing dealloc routines
- * @param assignments : assignment vector; indices in assignments greater than
+ * @param components components_t vector to remove from
+ * @param comp_methods CompMethods struct containing dealloc routines
+ * @param assignments assignment vector; indices in assignments greater than
  *      the empty vector index are decremented.
- * @param size : number of data points
+ * @param size number of data points
  * @return true if a empty component was removed.
  */
 bool remove_empty(
@@ -46,14 +46,14 @@ bool remove_empty(
 
 /**
  * Execute gibbs iteration.
- * @param data : data array; row-major
- * @param assignments : assignment vector
- * @param components : vector containing component structs, stored as void *.
+ * @param data data array; row-major
+ * @param assignments assignment vector
+ * @param components vector containing component structs, stored as void *.
  *      Component methods are responsible for casting to the correct type.
- * @param comp_methods : component methods for likelihoods, updates
- * @param model_methods : model methods for coefficients
- * @param comp_params : component parameters
- * @param model_params : model parameters
+ * @param comp_methods component methods for likelihoods, updates
+ * @param model_methods model methods for coefficients
+ * @param comp_params component parameters
+ * @param model_params model parameters
  */
 void gibbs_iter(
     float *data, uint16_t *assignments,
@@ -90,12 +90,13 @@ void gibbs_iter(
             void *c_i = (components->values)[i];
             weights[i] = (
                 comp_methods->loglik_ratio(c_i, params, point) +
-                model_methods->log_coef(params, get_size(c_i)));
+                model_methods->log_coef(
+                    params, get_size(c_i), components->size));
         }
 
         // Get new cluster weight
         weights[components->size] = (
-            model_methods->log_coef_new(params) *
+            model_methods->log_coef_new(params, components->size) *
             comp_methods->loglik_new(params, point));
 
         // Sample new
@@ -133,9 +134,9 @@ static PyObject *gibbs_iter_py(PyObject *args)
     PyObject *clusters_py;
     PyObject *params_py;
     bool success = PyArg_ParseTuple(
-        args, "O!O!OO",
+        args, "O!O!OOO",
         &PyArray_Type, &data, &PyArray_Type, &assignments,
-        &clusters_py, &params_py)
+        &clusters_py, &params_py);
     if(!success) { return NULL; }
 
     // Check types
@@ -176,16 +177,20 @@ static PyObject *gibbs_iter_py(PyObject *args)
     // Unpack capsules
     ComponentMethods *comp_methods = (
         (ComponentMethods *) PyCapsule_GetPointer(
-            PyDict_GetItemString(params_py, "component"),
+            PyDict_GetItemString(params_py, "comp_methods"),
             "bayesian_clustering_c.ComponentMethods"));
     ModelMethods *model_methods = (
         (ModelMethods *) PyCapsule_GetPointer(
-            PyDict_GetItemString(params_py, "model"),
+            PyDict_GetItemString(params_py, "model_methods"),
             "bayesian_clustering_c.ModelMethods"));
     struct components_t *clusters = (
         (struct components_t *clusters) PyCapsule_GetPointer(
             clusters_py,
             "bayseian_clustering_c.Clusters"));
+    void *comp_params = PyCapsule_GetPointer(
+        PyDict_GetItemString(params_py, "comp_params"));
+    void *model_params = PyCapsule_GetPointer(
+        PyDict_GetItemString(params_py, "model_params"));
 
     // GIL free zone ----------------------------------------------------------
     Py_BEGIN_ALLOWED_THEADS
@@ -194,10 +199,8 @@ static PyObject *gibbs_iter_py(PyObject *args)
         (float *) PyArray_DATA(data_py),
         (uint16_t *) PyArray_DATA(assignments_py),
         clusters,
-        comp_methods,
-        model_methods,
-        comp_methods->parameters(params_py),
-        model_methods->parameters(params_py),
+        comp_methods, model_methods,
+        comp_params, model_params,
         PyArray_DIM(data, 0));
 
     Py_END_ALLOW_THREADS

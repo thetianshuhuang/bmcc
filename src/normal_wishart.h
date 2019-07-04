@@ -28,7 +28,6 @@ struct nw_params_t {
     float *s_chol;
 }
 
-
 // Component methods; only the struct is exposed!
 extern struct component_methods_t normal_wishart;
 

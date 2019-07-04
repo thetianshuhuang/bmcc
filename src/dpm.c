@@ -22,7 +22,7 @@ void *dpm_create(PyObject *dict) {
 	struct dpm_params_t *params = (
 		(struct dpm_params_t *) malloc(sizeof(struct dp_params_t)));
 	params->alpha = PyFloat_AsDouble(PyDict_GetItemString(dict, "alpha"));
-	return params;
+	return (void *) params;
 }
 
 
@@ -39,9 +39,10 @@ void dpm_destroy(void *params) {
  * Log coefficients for DPM (simply proportional to cluster size)
  * @param params model hyperparameters (just alpha; unused for this)
  * @param size size of cluster
+ * @param nc number of clusters
  * @return |c_i|
  */
-double (*dpm_log_coef)(void *params, int size) {
+double dpm_log_coef(void *params, int size, int nc) {
 	return log(size);
 }
 
@@ -51,8 +52,8 @@ double (*dpm_log_coef)(void *params, int size) {
  * @param params model hyperparameters (simply returns log(alpha))
  * @return alpha
  */
-double (*dpm_log_coef_new)(void *params) {
-	return log(params->alpha);
+double dpm_log_coef_new(void *params, int nc) {
+	return log(((struct dpm_params_t *) params)->alpha);
 }
 
 
@@ -60,8 +61,8 @@ double (*dpm_log_coef_new)(void *params) {
  * dpm_methods package
  */
 const ModelMethods DPM_METHODS {
-	&dpm_create_params,
-	&dpm_destroy_params,
+	&dpm_create,
+	&dpm_destroy,
 	&dpm_log_coef,
 	&dpm_log_coef_new
 }

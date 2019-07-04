@@ -13,7 +13,7 @@
 /**
  * Create struct nw_params_t from python dictionary
  */
-void *nw_params(PyObject *dict)
+void *nw_params_create(PyObject *dict)
 {
     // Allocate parameters
     struct nw_params_t *params = (
@@ -27,6 +27,17 @@ void *nw_params(PyObject *dict)
     for(int i = 0; i < dim * dim; i++) { s_chol[i] = data[i]; }
 
     return (void *) params;
+}
+
+
+/**
+ * Destroy struct nw_params_t
+ */
+void nw_params_destroy(void *params)
+{
+    struct nw_params_t *params_tc = (struct nw_params_t *) params;
+    free(params_tc->s_chol);
+    free(params_tc);
 }
 
 
@@ -170,6 +181,8 @@ double nw_loglik_new(void *params, float *point)
  * Extern for normal_wishart methods
  */
 const extern ComponentMethods normal_wishart = {
+    &nw_params_create,
+    &nw_params_destroy,
     &nw_create,
     &nw_destroy,
     &nw_add,
