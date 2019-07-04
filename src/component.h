@@ -1,4 +1,8 @@
 
+#ifndef COMPONENT_H
+#define COMPONENT_H
+
+
 #include <stdint.h>
 #include <Python.h>
 
@@ -38,3 +42,5 @@ struct components_t {
     void *values;
 }
 
+
+#endif

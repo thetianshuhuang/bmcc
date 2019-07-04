@@ -32,6 +32,12 @@ void add_component(
 }
 
 
+/**
+ * Remove component from component vector.
+ * @param components : component vector struct
+ * @param methods : routines for components (including dealloc)
+ * @param idx : index to remove
+ */
 void remove_component(
     struct component_t *components,
     struct component_methods_t methods,
@@ -43,3 +49,4 @@ void remove_component(
         components[i] = components[i + 1];
     }
 }
+
