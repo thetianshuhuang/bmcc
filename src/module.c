@@ -23,10 +23,10 @@ static PyMethodDef ModuleMethods[] = {
         DOCSTRING_GIBBS_ITER
     },
     {
-        "init_params",
-        (PyCFunction) model_init_capsules,
+        "init_model",
+        (PyCFunction) init_model_capsules_py,
         METH_VARARGS,
-        DOCSTRING_MODEL_INIT_CAPSULES
+        DOCSTRING_INIT_MODEL_CAPSULES
     },
     {NULL, NULL, 0, NULL}
 }

@@ -16,41 +16,11 @@
 
 
 /**
- * Remove empty components.
- * @param components components_t vector to remove from
- * @param assignments assignment vector; indices in assignments greater than
- *      the empty vector index are decremented.
- * @return true if a empty component was removed.
- */
-bool remove_empty(struct component_t *components, uint16_t *assignments)
-{
-    // Search for empty
-    for(int i = 0; i < components->num_clusters; i++) {
-        if(get_size((components->values)[i]) == 0) {
-            // Deallocate component; remove component from vector
-            remove_component(components, i);
-            // Decrement values
-            for(int j = 0; j < size; j++) {
-                if(assignments[j] > i) { assignments[j] -= 1; }
-            }
-            components->num_clusters -= 1;
-            return true;
-        }
-    }
-    return false;
-}
-
-
-/**
  * Execute gibbs iteration.
  * @param data data array; row-major
  * @param assignments assignment vector
  * @param components vector containing component structs, stored as void *.
  *      Component methods are responsible for casting to the correct type.
- * @param comp_methods component methods for likelihoods, updates
- * @param model_methods model methods for coefficients
- * @param comp_params component parameters
- * @param model_params model parameters
  */
 void gibbs_iter(
     float *data, uint16_t *assignments,
