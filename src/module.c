@@ -6,6 +6,8 @@
 #include <dpm.h>
 #include <mfm.h>
 #include <normal_wishart.h>
+#include <component.h>
+#include <init.h>
 
 
 #include <Python.h>
@@ -19,6 +21,12 @@ static PyMethodDef ModuleMethods[] = {
         (PyCFunction) gibbs_iter_py,
         METH_VARARGS,
         DOCSTRING_GIBBS_ITER
+    },
+    {
+        "init_params",
+        (PyCFunction) model_init_capsules,
+        METH_VARARGS,
+        DOCSTRING_MODEL_INIT_CAPSULES
     },
     {NULL, NULL, 0, NULL}
 }
@@ -41,15 +49,15 @@ PyMODINIT_FUNC PyInit_bayesian_clustering_c()
     // -- Capsules - Models ---------------------------------------------------
     PyModule_AddObject(
         mod, "MODEL_DPM", PyCapsule_New(
-            &dpm_methods, "bayesian_clustering_c.ModelMethods", NULL));
+            &dpm_methods, MODEL_METHODS_API, NULL));
     PyModule_AddObject(
         mod, "MODEL_MFM", PyCapsule_New(
-            &mfm_methods, "bayesian_clustering_c.ModelMethods", NULL));
+            &mfm_methods, MODEL_METHODS_API, NULL));
 
     // -- Capsules - Components -----------------------------------------------    
     PyModule_AddObject(
         mod, "COMPONENT_NORMAL_WISHART", PyCapsule_New(
-            &normal_wishart, "bayesian_clustering_c.ComponentMethods", NULL));
+            &normal_wishart, COMPONENT_METHODS_API, NULL));
 
     return mod;
 }

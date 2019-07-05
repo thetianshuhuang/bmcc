@@ -7,6 +7,10 @@
 #include <Python.h>
 
 
+#define COMPONENT_METHODS_API "bayesian_clustering_c.ComponentMethods"
+#define COMPONENT_PARAMS_API "bayesian_clustering_c.ComponentParams"
+#define COMPONENT_DATA_API "bayseian_clustering_c.Clusters"
+
 typedef struct component_methods_t {
 
     /* Hyperparameters */
@@ -23,11 +27,11 @@ typedef struct component_methods_t {
     // Get size
     void get_size(void *component);
     // Add point
-    void add(void *component, void *params, float *point);
+    void add(void *component, float *point);
 
     /* Component Likelihoods */
     // Remove point
-    void remove(void *component, void *params, float *point);
+    void remove(void *component, float *point);
     // Marginal Log Likelihood Ratio log(m(x_c+j)/m(x_c))
     double loglik_ratio(void *component, void *params, float *point);
     // Unconditional Log Likelihood log(m(x_j))
@@ -36,19 +40,31 @@ typedef struct component_methods_t {
 } ComponentMethods;
 
 
-typedef struct model_methods_t {
-    // Assignment weights for existing clusters
-    double log_coef(void *params, int size, int nc);
-    // Assignment weights for new clusters
-    double log_coef_new(void *params, int nc);
+struct mixture_model_t {
 
-} ModelMethods;
+    /* Component parameters and methods */
+    // Methods
+    ComponentMethods *comp_methods;
+    // Hyperparameters
+    void *comp_params;
 
+    /* Model parameters and methods */
+    // Methods
+    ModelMethods *model_methods;
+    // Hyperparameters
+    void *model_params;
 
-struct components_t {
-    uint32_t mem_size;
+    /* Data */
     uint32_t size;
-    void *values;
+    uint32_t dim;
+
+    /* Clusters */
+    // Cluster vector size
+    uint32_t mem_size;
+    // Number of clusters
+    uint32_t num_clusters;
+    // Clusters
+    void *clusters;
 }
 
 

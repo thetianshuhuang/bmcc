@@ -65,10 +65,9 @@ void *nw_create(void *params)
     component->chol_decomp = malloc(sizeof(float) * dim * dim);
     float *chol_src = params_tc->s_chol;
     for(int i = 0; i < dim * dim; i++) {
-        compoent->chol_decomp[i] = chol_src[i];
+        component->chol_decomp[i] = chol_src[i];
     }
 
-    // Create capsule
     return component;
 }
 
@@ -99,10 +98,9 @@ void get_size(void *component)
 /**
  * Add point to normal wishart object
  * @param component : component to add
- * @param params : hyperparameters (unused)
  * @param point : data point
  */
-void nw_add(void *component, PyObject *params, float *point)
+void nw_add(void *component, float *point)
 {
     struct nw_component_t *comp_inner = (struct nw_component_t *) component;
 
@@ -120,10 +118,9 @@ void nw_add(void *component, PyObject *params, float *point)
 /**
  * Remove point from normal wishart object
  * @param component : component to remove
- * @param params : hyperparameters (unused)
  * @param point : data point
  */
-void nw_remove(void *component, void *params, float *point)
+void nw_remove(void *component, float *point)
 {
     struct nw_component_t *comp_inner = (struct nw_component_t *) component;
 
