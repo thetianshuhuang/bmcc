@@ -1,6 +1,5 @@
 /**
- *
- *
+ * Miscallaneous Math Functions
  */
 
 #ifndef MISC_MATH_H
@@ -10,7 +9,7 @@
 double log_mv_gamma(int p, double x);
 
 // Sample from weighted vector
-int sample_weighted(double *weights, int length);
+int sample_log_weighted(double *weights, int length);
 
 
 #endif

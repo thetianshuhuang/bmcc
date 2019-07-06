@@ -1,9 +1,12 @@
+/**
+ * DPM methods
+ */
 
 #ifndef DPM_H
 #define DPM_H
 
-#include <model.h>
+#include <mixture.h>
 
-const extern ModelMethods DPM_METHODS;
+ModelMethods DPM_METHODS;
 
 #endif

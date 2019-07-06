@@ -2,15 +2,16 @@
  * DPM methods
  */
 
+#include <Python.h>
 #include <math.h>
-
+#include "mixture.h"
 
 /**
  * DPM Parameters
  */
 struct dpm_params_t {
 	double alpha;
-}
+};
 
 
 /**
@@ -20,18 +21,37 @@ struct dpm_params_t {
  */
 void *dpm_create(PyObject *dict) {
 	struct dpm_params_t *params = (
-		(struct dpm_params_t *) malloc(sizeof(struct dp_params_t)));
-	params->alpha = PyFloat_AsDouble(PyDict_GetItemString(dict, "alpha"));
+		(struct dpm_params_t *) malloc(sizeof(struct dpm_params_t)));
+
+	PyObject *alpha_py = PyDict_GetItemString(dict, "alpha");
+	if((alpha_py == NULL) || !PyFloat_Check(alpha_py)) {
+		PyErr_SetString(
+			PyExc_KeyError,
+			"DPM model requires hyperparameter 'alpha' (python float).");
+		return NULL;
+	}
+	params->alpha = PyFloat_AsDouble(alpha_py);
 	return (void *) params;
 }
 
 
 /**
- * Destroy dpm parameters struct
+ * Destroy DPM parameters struct
  * @param params struct to destroy
  */
 void dpm_destroy(void *params) {
 	free(params);
+}
+
+
+/**
+ * Update DPM parameters
+ * @param params parameters to update
+ * @param update python dictionary containing new values
+ */
+void dpm_update(void *params, PyObject *update) {
+	((struct dpm_params_t *) params)->alpha = PyFloat_AsDouble(
+		PyDict_GetItemString(update, "alpha"));
 }
 
 
@@ -60,9 +80,10 @@ double dpm_log_coef_new(void *params, int nc) {
 /**
  * dpm_methods package
  */
-const ModelMethods DPM_METHODS {
+ModelMethods DPM_METHODS = {
 	&dpm_create,
 	&dpm_destroy,
+	&dpm_update,
 	&dpm_log_coef,
 	&dpm_log_coef_new
-}
+};

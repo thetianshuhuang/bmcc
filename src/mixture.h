@@ -5,6 +5,7 @@
 
 
 #include <stdint.h>
+#include <stdbool.h>
 #include <Python.h>
 
 
@@ -26,7 +27,7 @@
  * Component Methods
  * Definitions for within-component prior and posterior
  */
-typedef struct component_methods_t {
+typedef struct {
 
     /* Hyperparameters */
     // Convert python dictionary to hyperparameters struct
@@ -40,17 +41,17 @@ typedef struct component_methods_t {
     // Destroy component capsule
     void (*destroy)(void *component);
     // Get size
-    void get_size(void *component);
+    int (*get_size)(void *component);
     // Add point
-    void add(void *component, float *point);
+    void (*add)(void *component, void *params, double *point);
 
     /* Component Likelihoods */
     // Remove point
-    void remove(void *component, float *point);
+    void (*remove)(void *component, void *params, double *point);
     // Marginal Log Likelihood Ratio log(m(x_c+j)/m(x_c))
-    double loglik_ratio(void *component, void *params, float *point);
+    double (*loglik_ratio)(void *component, void *params, double *point);
     // Unconditional Log Likelihood log(m(x_j))
-    double loglik_new(void *params, float *point);
+    double (*loglik_new)(void *params, double *point);
 
 } ComponentMethods;
 
@@ -65,10 +66,12 @@ typedef struct model_methods_t {
     void* (*create)(PyObject *dict);
     // Destroy hyperparameters
     void (*destroy)(void *parameters);
+    // Update hyperparameters
+    void (*update)(void *parameters, PyObject *dict);
     // Log coefficients for existing clusters
-    double (*log_coef)(void *params, int size);
+    double (*log_coef)(void *params, int size, int nc);
     // Log coefficient for new cluster
-    double (*log_coef_new)(void *params);
+    double (*log_coef_new)(void *params, int nc);
 
 } ModelMethods;
 
@@ -100,8 +103,8 @@ struct mixture_model_t {
     // Number of clusters
     uint32_t num_clusters;
     // Clusters
-    void *clusters;
-}
+    void **clusters;
+};
 
 
 // ----------------------------------------------------------------------------
@@ -111,7 +114,11 @@ struct mixture_model_t {
 // ----------------------------------------------------------------------------
 
 // Create mixture model struct
-struct mixture_model_t *create_components();
+struct mixture_model_t *create_mixture(
+    ComponentMethods *comp_methods,
+    ModelMethods *model_methods,
+    PyObject *params,
+    uint32_t size, uint32_t dim);
 // Destroy mixture model struct
 void destroy_components(void *model);
 // Add component to model
@@ -121,5 +128,47 @@ void remove_component(struct mixture_model_t *model, int idx);
 // Remove empty component
 bool remove_empty(struct mixture_model_t *model, uint16_t *assignments);
 
+
+// ----------------------------------------------------------------------------
+//
+//                               Python Exports
+//
+// ----------------------------------------------------------------------------
+
+#define DOCSTRING_INIT_MODEL_CAPSULES \
+    "Initialize model capsules\n" \
+    "\n" \
+    "Parameters\n" \
+    "----------\n" \
+    "data_py : np.array\n" \
+    "    Data array\n" \
+    "assignments_py : np.array\n" \
+    "    Assignment array\n" \
+    "comp_methods : capsule\n" \
+    "    Capsule containing ComponentMethods struct\n" \
+    "model_methods : capsule\n" \
+    "    Capsule containing ModelMethods struct\n" \
+    "params : dict\n" \
+    "    Dictionary containing hyperparameters.\n" \
+    "\n" \
+    "Returns\n" \
+    "-------\n" \
+    "capsule\n" \
+    "    Capsule containing the created struct mixture_model_t"
+
+PyObject *init_model_capsules_py(PyObject *self, PyObject *args);
+
+
+#define DOCSTRING_UPDATE_PARAMS \
+    "Update model hyperparameters\n" \
+    "\n" \
+    "Parameters\n" \
+    "----------\n" \
+    "mixture : capsule\n" \
+    "    Capsule containing mixture struct to update hyperparameters for\n" \
+    "update : dict\n" \
+    "    Dictionary to update values with"
+
+PyObject *update_params_py(PyObject *self, PyObject *args);
 
 #endif

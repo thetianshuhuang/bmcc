@@ -6,12 +6,14 @@
 #include <dpm.h>
 #include <mfm.h>
 #include <normal_wishart.h>
-#include <component.h>
-#include <init.h>
+#include <mixture.h>
+#include <select.h>
 
 
 #include <Python.h>
+
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
 
@@ -28,8 +30,20 @@ static PyMethodDef ModuleMethods[] = {
         METH_VARARGS,
         DOCSTRING_INIT_MODEL_CAPSULES
     },
+    {
+        "update_hyperparameters",
+        (PyCFunction) update_params_py,
+        METH_VARARGS,
+        DOCSTRING_UPDATE_PARAMS
+    },
+    {
+        "pairwise_probability",
+        (PyCFunction) pairwise_probability_py,
+        METH_VARARGS,
+        DOCSTRING_PAIRWISE_PROBABILITY
+    },
     {NULL, NULL, 0, NULL}
-}
+};
 
 static struct PyModuleDef ModuleDef = {
     PyModuleDef_HEAD_INIT,
@@ -49,15 +63,15 @@ PyMODINIT_FUNC PyInit_bayesian_clustering_c()
     // -- Capsules - Models ---------------------------------------------------
     PyModule_AddObject(
         mod, "MODEL_DPM", PyCapsule_New(
-            &dpm_methods, MODEL_METHODS_API, NULL));
+            &DPM_METHODS, MODEL_METHODS_API, NULL));
     PyModule_AddObject(
         mod, "MODEL_MFM", PyCapsule_New(
-            &mfm_methods, MODEL_METHODS_API, NULL));
+            &MFM_METHODS, MODEL_METHODS_API, NULL));
 
     // -- Capsules - Components -----------------------------------------------    
     PyModule_AddObject(
         mod, "COMPONENT_NORMAL_WISHART", PyCapsule_New(
-            &normal_wishart, COMPONENT_METHODS_API, NULL));
+            &NORMAL_WISHART, COMPONENT_METHODS_API, NULL));
 
     return mod;
 }

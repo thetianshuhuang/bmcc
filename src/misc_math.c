@@ -1,5 +1,10 @@
+/**
+ * Miscallaneous Math Functions
+ */
 
 #include <math.h>
+#include <stdlib.h>
+
 
 /**
  * Helper function for log multivariate gamma
@@ -7,7 +12,6 @@
  * @param p : multivariate gamma dimension
  * @return log(Gamma_p(x))
  */
-const double 
 double log_mv_gamma(int p, double x)
 {
     double res = log(M_PI) * p * (p - 1) / 4;
@@ -34,7 +38,8 @@ int sample_log_weighted(double *weights, int length)
 		if(weights[i] > max) { max = weights[i]; }
 	}
 	for(int i = 0; i < length; i++) {
-		weights[i] = exp(weights[i] - max);
+		if(isnan(weights[i])) { weights[i] = 0; }
+		else { weights[i] = exp(weights[i] - max); }
 	}
 
 	// Normalization constant
@@ -42,15 +47,15 @@ int sample_log_weighted(double *weights, int length)
 	for(int i = 0; i < length; i++) { total += weights[i]; }
 
 	// Generate random number in [0, total]
-	double rand = ((double) rand()) / ((double) RAND_MAX) * total;
+	double x = ((double) rand()) / ((double) RAND_MAX) * total;
 
 	// Sample
 	double acc = 0;
 	for(int i = 0; i < length; i++) {
 		acc += weights[i];
-		if(rand <= acc) { return i; }
+		if(x <= acc) { return i; }
 	}
 	// Catch all for rounding errors
-	return length;
+	return length - 1;
 }
 
