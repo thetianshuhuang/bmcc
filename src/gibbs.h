@@ -17,10 +17,8 @@
     "    Data matrix. Should have type np.float64 (double); row-major order.\n" \
     "assignments : np.array\n" \
     "    Assignment array. Should have type np.uint16.\n" \
-    "clusters : capsule\n" \
-    "    Capsule containing cluster data.\n" \
-    "params : dict\n" \
-    "    Dictionary containing model and component capsules.\n"
+    "model : capsule\n" \
+    "    Capsule containing model data.\n" \
 
 PyObject *gibbs_iter_py(PyObject *self, PyObject *args);
 

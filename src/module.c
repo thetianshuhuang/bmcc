@@ -1,6 +1,15 @@
 /**
- *
+ * Bayesian Clustering Python C API Core Module
  */
+
+#include <Python.h>
+
+/**
+ * Core Numpy Import
+ */
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
+#include <numpy/arrayobject.h>
 
 #include <gibbs.h>
 #include <dpm.h>
@@ -10,13 +19,9 @@
 #include <select.h>
 
 
-#include <Python.h>
-
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
-#include <numpy/arrayobject.h>
-
-
+/**
+ * Module Methods
+ */
 static PyMethodDef ModuleMethods[] = {
     {
         "gibbs_iter",
@@ -45,15 +50,24 @@ static PyMethodDef ModuleMethods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+
+/**
+ * Module Definitions
+ */
 static struct PyModuleDef ModuleDef = {
     PyModuleDef_HEAD_INIT,
-    "bayesian_clustering_c",
+    "core",
     "C accelerator functions for bayesian clustering algorithms",
     -1,
     ModuleMethods
 };
 
-PyMODINIT_FUNC PyInit_bayesian_clustering_c()
+
+/**
+ * Module Initialization
+ * Capsules are loaded separately from function definitions
+ */
+PyMODINIT_FUNC PyInit_core()
 {
     import_array();
 

@@ -110,4 +110,3 @@ PyObject *pairwise_probability_py(PyObject *self, PyObject *args)
 
     return Py_BuildValue("OO", prob_matrix_py, residuals_py);
 }
-

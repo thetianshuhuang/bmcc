@@ -9,13 +9,13 @@
 #include <Python.h>
 
 
-#define COMPONENT_METHODS_API "bayesian_clustering_c.ComponentMethods"
-#define COMPONENT_PARAMS_API "bayesian_clustering_c.ComponentParams"
+#define COMPONENT_METHODS_API "bclust.core.ComponentMethods"
+#define COMPONENT_PARAMS_API "bclust.core.ComponentParams"
 
-#define MODEL_METHODS_API "bayesian_clustering_c.ModelMethods"
-#define MODEL_PARAMS_API "bayesian_clustering_c.ModelParams"
+#define MODEL_METHODS_API "bclust.core.ModelMethods"
+#define MODEL_PARAMS_API "bclust.core.ModelParams"
 
-#define MIXTURE_MODEL_API "bayesian_clustering_c.MixtureModel"
+#define MIXTURE_MODEL_API "bclust.core.MixtureModel"
 
 // ----------------------------------------------------------------------------
 //

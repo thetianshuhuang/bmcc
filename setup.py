@@ -10,7 +10,8 @@ print("C Files:")
 print(cfiles)
 
 setup(
-    name='bayesian_clustering_c', version='0.0.1',
-    ext_modules=[Extension('bayesian_clustering_c', cfiles)],
+    name='bclust', version='0.0.2',
+    packages=['bclust'],
+    ext_modules=[Extension('bclust.core', cfiles)],
     include_dirs=[np.get_include(), './src'])
 
