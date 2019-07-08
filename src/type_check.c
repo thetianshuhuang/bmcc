@@ -79,3 +79,31 @@ bool type_check_square(PyArrayObject *data_py, int dim)
     }
     return true;
 }
+
+
+/**
+ * Run type checks on assignment vectors
+ * @param arr1 : first array
+ * @param arr2 : second array
+ * @return true if arr1, arr2 have same shape, 1 dimension, have type np.uint16
+ */ 
+bool type_check_assignments(PyArrayObject *arr1, PyArrayObject *arr2)
+{
+    if((PyArray_NDIM(arr1) != 1) || (PyArray_NDIM(arr2) != 1)) {
+        PyErr_SetString(
+            PyExc_TypeError, "Vectors must have 1 dimension.");
+        return false;
+    }
+    if(PyArray_DIM(arr1, 0) != PyArray_DIM(arr2, 0)) {
+        PyErr_SetString(
+            PyExc_TypeError, "Vectors have different length.");
+        return false;
+    }
+    if((PyArray_TYPE(arr1) != NPY_UINT16) || (PyArray_TYPE(arr2) != NPY_UINT16)) {
+        PyErr_SetString(
+            PyExc_TypeError, "Vectors must have type uint16.");
+        return false;
+    }
+    return true;
+}
+

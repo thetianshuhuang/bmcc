@@ -17,6 +17,7 @@
 #include <normal_wishart.h>
 #include <mixture.h>
 #include <select.h>
+#include <analysis.h>
 
 
 /**
@@ -46,6 +47,18 @@ static PyMethodDef ModuleMethods[] = {
         (PyCFunction) pairwise_probability_py,
         METH_VARARGS,
         DOCSTRING_PAIRWISE_PROBABILITY
+    },
+    {
+        "aggregation_score",
+        (PyCFunction) aggregation_score_py,
+        METH_VARARGS,
+        DOCSTRING_AGGREGATION_SCORE
+    },
+    {
+        "segregation_score",
+        (PyCFunction) segregation_score_py,
+        METH_VARARGS,
+        DOCSTRING_SEGREGATION_SCORE
     },
     {NULL, NULL, 0, NULL}
 };

@@ -1,5 +1,8 @@
 import numpy as np
-from bclust.core import pairwise_probability
+from bclust.core import (
+    pairwise_probability,
+    aggregation_score,
+    segregation_score)
 from bclust.plot import plot_clusterings
 
 from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score
@@ -70,6 +73,29 @@ class LstsqResult:
         Rand Index of 'best' configuration (as selected above)
     """
 
+    def __init__(self, data, hist, burn_in=0):
+
+        self.data = data
+        self.hist = hist
+        self.burn_in = burn_in
+        self.truth_known = False
+
+        # Check burn in
+        if type(burn_in) != int:
+            raise TypeError("Burn in period must be an integer.")
+        if burn_in >= hist.shape[0]:
+            raise ValueError(
+                "Burn in period larger than the number of saved samples.")
+
+        # Get pairwise probability matrix and run least squares procedure
+        (self.matrix,
+         self.residuals) = pairwise_probability(self.hist, self.burn_in)
+
+        self.best_idx = np.argmin(self.residuals)
+        self.best = self.hist[self.best_idx, :]
+
+        self.num_clusters = np.array([np.max(x) for x in self.hist])
+
     def __score_trace(self, actual, nmi_method):
         """Compute NMI and Rand Index trace.
 
@@ -98,83 +124,141 @@ class LstsqResult:
             for x in self.hist])
         self.rand_best = self.rand[self.best_idx]
 
-    def __init__(self, data, hist, burn_in=0):
+        self.aggregation = np.array([
+            aggregation_score(actual, x) for x in self.hist])
+        self.aggregation_best = self.aggregation[self.best_idx]
+        self.segregation = np.array([
+            segregation_score(actual, x) for x in self.hist])
+        self.segregation_best = self.segregation[self.best_idx]
 
-        self.data = data
-        self.hist = hist
-        self.burn_in = burn_in
-        self.truth_known = False
-
-        # Check burn in
-        if type(burn_in) != int:
-            raise TypeError("Burn in period must be an integer.")
-        if burn_in >= hist.shape[0]:
-            raise ValueError(
-                "Burn in period larger than the number of saved samples.")
-
-        # Get pairwise probability matrix and run least squares procedure
-        (self.matrix,
-         self.residuals) = pairwise_probability(self.hist, self.burn_in)
-
-        self.best_idx = np.argmin(self.residuals)
-        self.best = self.hist[self.best_idx, :]
-
-        self.num_clusters = np.array([np.max(x) for x in self.hist])
-
-    def evaluate(self, actual, nmi_method='arithmetic'):
+    def evaluate(self, actual, oracle=None, nmi_method='arithmetic'):
         """Evaluate clustering against ground truth.
 
         Parameters
         ----------
         actual : np.array
             Actual assignments
+        oracle : np.array
+            Oracle assignments (used as point of comparison instead of
+            'perfect' clustering). Used only if present.
         nmi_method : str
             Normalization method for NMI calculations
         """
 
+        if actual.dtype != np.uint16:
+            print("Assignments cast to np.uint16.")
+            actual = actual.astype(np.uint16)
+
         self.actual = actual
         self.clusters_true = np.max(actual) + 1
+
+        if oracle is not None:
+            self.oracle = oracle
+            self.oracle_nmi = normalized_mutual_info_score(
+                actual, oracle, nmi_method)
+            self.oracle_rand = adjusted_rand_score(actual, oracle)
+            self.oracle_aggregation = aggregation_score(actual, oracle)
+            self.oracle_segregation = segregation_score(actual, oracle)
+
+        else:
+            self.oracle = actual
+            self.oracle_nmi = 1
+            self.oracle_rand = 1
+
         self.truth_known = True
         self.__score_trace(actual, nmi_method)
 
-    def trace(self):
+    DEFAULT_TRACE_PLOTS = {
+        "Metrics (NMI, Rand)": {
+            "Normalized Mutual Information": "nmi",
+            "Adjusted Rand Index": "rand",
+            "Oracle NMI": "oracle_nmi",
+            "Oracle Rand": "oracle_rand"
+        },
+        "Number of Clusters": {
+            "Number of Clusters": "num_clusters",
+            "Actual": "clusters_true"
+        },
+        "Aggregation / Segregation Score": {
+            "Aggregation Score": "aggregation",
+            "Segregation Score": "segregation",
+            "Oracle Aggregation": "oracle_aggregation",
+            "Oracle Segregation": "oracle_segregation"
+        }
+    }
+
+    def trace(self, plots=DEFAULT_TRACE_PLOTS):
         """Plot NMI, Rand Index, and # of clusters as a trace over MCMC
         iterations.
+
+        Parameters
+        ---------
+        plots : dict
+            Dictionary of (key, value) pairs. Each key corresponds to a plot,
+            which is plotted with the attribute corresponding to value. If
+            value is a dict, multiple keys are plotted on the same plot.
+
+        Returns
+        -------
+        plt.figure.Figure
+            Created figure; plot with fig.show().
         """
 
         if not self.truth_known:
             raise ValueError("Ground truth comparison not run.")
 
-        fig, (top, middle, bottom) = plt.subplots(3, 1)
+        if len(plots) > 1:
+            fig, axs = plt.subplots(len(plots), 1)
+        else:
+            fig, axs = plt.subplots(1, 1)
+            axs = [axs]
 
-        top.plot(self.nmi)
-        top.axhline(1)
-        top.set_title("Normalized Mutual Information")
+        for ax, (k, v) in zip(axs, plots.items()):
+            ax.set_title(k)
+            ax.axvline(self.burn_in, color='black', label='Burn In')
+            if type(v) == str:
+                ax.plot(getattr(self, v))
+            elif type(v) == dict:
+                for k_inner, v_inner in v.items():
+                    if np.isscalar(getattr(self, v_inner)):
+                        ax.plot(
+                            [0, self.hist.shape[0]],
+                            [getattr(self, v_inner), getattr(self, v_inner)],
+                            label=k_inner)
+                    else:
+                        ax.plot(getattr(self, v_inner), label=k_inner)
+                ax.legend(loc='lower right')
+            else:
+                raise TypeError(
+                    "Attribute name is not a string or dict.")
 
-        middle.plot(self.rand)
-        middle.axhline(1)
-        middle.set_title("Adjusted Rand Index")
+        return fig
 
-        bottom.plot(self.num_clusters)
-        bottom.axhline(self.clusters_true)
-        bottom.set_title("Number of Clusters")
-
-        plt.show()
-
-    def pairwise(self):
+    def matrices(self):
         """Show pairwise probability matrix and membership matrix of least
         squares configuration.
+
+        Returns
+        -------
+        plt.figure.Figure
+            Created figure; plot with fig.show().
         """
 
-        fig, (left, right) = plt.subplots(1, 2)
+        fig, p = plt.subplots(2, 2)
 
-        left.matshow(self.matrix)
-        left.set_title("Pairwise Probability Matrix")
+        p[0][0].matshow(self.matrix)
+        p[0][0].set_title("Pairwise Probability Matrix")
 
-        right.matshow(membership_matrix(self.best))
-        right.set_title("Membership Matrix of Least Squares Configuration")
+        p[0][1].matshow(membership_matrix(self.best))
+        p[0][1].set_title("Membership Matrix of Least Squares Configuration")
 
-        plt.show()
+        p[1][0].matshow(membership_matrix(self.actual))
+        p[1][0].set_title("Membership Matrix of Actual Clusters")
+
+        p[1][1].matshow(membership_matrix(self.oracle))
+        p[1][1].set_title("Membership Matrix of Oracle Clustering")
+
+        return fig
 
     def clustering(self, bins=20):
         """Show clustering as a multi-dimensional array of scatterplots
@@ -183,6 +267,11 @@ class LstsqResult:
         ----------
         bins : int
             Number of bins
+
+        Returns
+        -------
+        plt.figure.Figure
+            Created figure; plot with fig.show().
         """
 
-        plot_clusterings(self.data, self.best, bins=bins)
+        return plot_clusterings(self.data, self.best, bins=bins)

@@ -126,4 +126,3 @@ def sample_points_wishart(cluster_centers, assignments, d=2, k=3):
             mean=cluster_centers[i], cov=wishart_params[i])
         for i in assignments
     ]
-

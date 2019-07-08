@@ -9,6 +9,7 @@ from bclust.models import MFM, DPM, NormalWishart
 from bclust.mixture import GibbsMixtureModel
 from bclust.analysis import LstsqResult, membership_matrix
 from bclust.plot import plot_clusterings
+from bclust.simulate import GaussianMixture
 
 __all__ = [
     # Capsules
@@ -27,5 +28,7 @@ __all__ = [
     "LstsqResult",
     "membership_matrix",
     # Plots
-    "plot_clusterings"
+    "plot_clusterings",
+    # Simulation
+    "GaussianMixture"
 ]

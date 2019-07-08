@@ -20,6 +20,11 @@ def plot_clusterings(data, assignments, bins=20):
         with no computed assignments.
     bins : int
         Number of bins for each histogram.
+
+    Returns
+    -------
+    plt.figure.Figure
+        Created figure; plot with fig.show().
     """
 
     if type(data) != np.ndarray or len(data.shape) != 2:
@@ -44,4 +49,4 @@ def plot_clusterings(data, assignments, bins=20):
                 plots[x][y].set_xlabel('x_{}'.format(x))
                 plots[x][y].set_ylabel('x_{}'.format(y))
 
-    plt.show()
+    return fig

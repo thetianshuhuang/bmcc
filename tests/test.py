@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.stats import multivariate_normal as mvnorm
 from matplotlib import pyplot as plt
 import time
 from tqdm import tqdm
@@ -11,36 +10,40 @@ faulthandler.enable()
 
 
 SCALE = 100
-ITERATIONS = 100
+ITERATIONS = 5000
 
-data = np.concatenate((
-    mvnorm.rvs(
-        mean=np.array([-3, -3]),
-        cov=np.identity(2), size=5 * SCALE),
-    mvnorm.rvs(
-        mean=np.array([3, 0]),
-        cov=np.identity(2), size=2 * SCALE),
-    mvnorm.rvs(
-        mean=np.array([-3, 3]),
-        cov=np.identity(2), size=3 * SCALE))).astype(np.float64)
-actual = np.concatenate((
-    np.zeros(5 * SCALE),
-    np.ones(2 * SCALE),
-    np.ones(3 * SCALE) * 2))
+
+dataset = bclust.GaussianMixture(
+    n=1000, k=3, d=2, r=0.7, alpha=40, symmetric=False, shuffle=False)
+
+# dataset.plot_actual()
+# plt.show()
+
+dataset.plot_oracle()
+plt.show()
 
 test = bclust.GibbsMixtureModel(
-    data=data,
+    data=dataset.data,
     component_model=bclust.NormalWishart(),
     mixture_model=bclust.DPM(alpha=1),
-    assignments=np.zeros(10 * SCALE))
+    assignments=np.zeros(10 * SCALE).astype(np.uint16),
+    thinning=10)
 
 start = time.time()
 for i in tqdm(range(ITERATIONS)):
     test.iter()
+print("gibbs_iterate: {:.2f} s [{:.2f} ms/iteration]".format(
+    time.time() - start,
+    (time.time() - start) * 1000 / ITERATIONS))
 
-res = test.select_lstsq(burn_in=10)
-res.evaluate(actual)
+start = time.time()
+res = test.select_lstsq(burn_in=100)
+res.evaluate(dataset.assignments, oracle=dataset.oracle)
+print("evaluate_lstsq: {:.2f} s".format(time.time() - start))
 
 res.trace()
-res.pairwise()
+plt.show()
+res.matrices()
+plt.show()
 res.clustering()
+plt.show()

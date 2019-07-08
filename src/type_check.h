@@ -9,5 +9,6 @@
 
 bool type_check(PyArrayObject *data_py, PyArrayObject *assignments_py);
 bool type_check_square(PyArrayObject *data_py, int dim);
+bool type_check_assignments(PyArrayObject *arr1, PyArrayObject *arr2);
 
 #endif
