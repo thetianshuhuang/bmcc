@@ -203,9 +203,9 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
 
 
 /**
- * Update model hyperparameters
+ * Update mixture model hyperparameters
  */
-PyObject *update_params_py(PyObject *self, PyObject *args)
+PyObject *update_mixture_py(PyObject *self, PyObject *args)
 {
     PyObject *mixture;
     PyObject *update;
@@ -215,7 +215,30 @@ PyObject *update_params_py(PyObject *self, PyObject *args)
         (struct mixture_model_t *) PyCapsule_GetPointer(
             mixture, MIXTURE_MODEL_API));
 
-    mixture_tc->model_methods->update(mixture_tc->model_params, update);
+    if(mixture_tc->model_methods->update != NULL) {
+        mixture_tc->model_methods->update(mixture_tc->model_params, update);
+    }
+
+    Py_RETURN_NONE;
+}
+
+
+/**
+ * Update component hyperparameters
+ */
+PyObject *update_components_py(PyObject *self, PyObject *args)
+{
+    PyObject *mixture;
+    PyObject *update;
+    if(!PyArg_ParseTuple(args, "OO", &mixture, &update)) { return NULL; }
+
+    struct mixture_model_t *mixture_tc = (
+        (struct mixture_model_t *) PyCapsule_GetPointer(
+            mixture, MIXTURE_MODEL_API));
+
+    if(mixture_tc->comp_methods->update != NULL) {
+        mixture_tc->comp_methods->update(mixture_tc->comp_params, update);
+    }
 
     Py_RETURN_NONE;
 }

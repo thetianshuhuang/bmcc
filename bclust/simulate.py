@@ -83,3 +83,12 @@ class GaussianMixture:
     def plot_oracle(self):
         """Plot oracle clusterings (binding to bclust.plot_oracle)"""
         return plot_clusterings(self.data, self.oracle)
+
+    def __str__(self):
+        return (
+            "Simulated Gaussian Mixture [n={}, k={}, d={}, r={}, alpha={}, "
+            "symmetric={}]".format(
+                self.n, self.k, self.d, self.r, self.alpha, self.symmetric))
+
+    def __repr__(self):
+        return self.__str__()

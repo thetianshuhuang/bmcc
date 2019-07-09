@@ -94,7 +94,7 @@ class LstsqResult:
         self.best_idx = np.argmin(self.residuals)
         self.best = self.hist[self.best_idx, :]
 
-        self.num_clusters = np.array([np.max(x) for x in self.hist])
+        self.num_clusters = np.array([np.max(x) + 1 for x in self.hist])
 
     def __score_trace(self, actual, nmi_method):
         """Compute NMI and Rand Index trace.

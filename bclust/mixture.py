@@ -3,7 +3,10 @@
 
 import numpy as np
 
-from bclust.core import init_model, gibbs_iter, update_hyperparameters
+from bclust.core import (
+    init_model, gibbs_iter,
+    update_mixture,
+    update_components)
 from bclust.analysis import LstsqResult
 from bclust.models import NormalWishart, DPM
 
@@ -108,6 +111,10 @@ class GibbsMixtureModel:
                 "same cluster at initialization.")
             assignments = np.zeros(data.shape[0], dtype=np.uint16)
 
+        # Save models
+        self.component_model = component_model
+        self.mixture_model = mixture_model
+
         # Check assignments now that we have data dimensions
         self.assignments = self.__check_assignments(assignments, data.shape[0])
 
@@ -159,6 +166,15 @@ class GibbsMixtureModel:
         for _ in range(iterations):
 
             gibbs_iter(self.data, self.assignments, self.__model)
+
+            comp_update = self.component_model.update(self)
+            if comp_update is not None:
+                update_components(self.__model, comp_update)
+
+            mix_update = self.mixture_model.update(self)
+            if mix_update is not None:
+                update_mixture(self.__model, mix_update)
+
             self.iterations += 1
 
             # Save?

@@ -37,10 +37,16 @@ static PyMethodDef ModuleMethods[] = {
         DOCSTRING_INIT_MODEL_CAPSULES
     },
     {
-        "update_hyperparameters",
-        (PyCFunction) update_params_py,
+        "update_mixture",
+        (PyCFunction) update_mixture_py,
         METH_VARARGS,
-        DOCSTRING_UPDATE_PARAMS
+        DOCSTRING_UPDATE_MIXTURE
+    },
+    {
+        "update_components",
+        (PyCFunction) update_components_py,
+        METH_VARARGS,
+        DOCSTRING_UPDATE_COMPONENTS
     },
     {
         "pairwise_probability",

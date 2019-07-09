@@ -34,6 +34,8 @@ typedef struct {
     void* (*params_create)(PyObject *dict);
     // Destroy hyperparameters struct
     void (*params_destroy)(void *params);
+    // Update hyperparameters
+    void (*update)(void *params, PyObject *dict);
 
     /* Component management */
     // Allocate component capsule
@@ -68,6 +70,7 @@ typedef struct model_methods_t {
     void (*destroy)(void *parameters);
     // Update hyperparameters
     void (*update)(void *parameters, PyObject *dict);
+
     // Log coefficients for existing clusters
     double (*log_coef)(void *params, int size, int nc);
     // Log coefficient for new cluster
@@ -159,8 +162,8 @@ bool remove_empty(struct mixture_model_t *model, uint16_t *assignments);
 PyObject *init_model_capsules_py(PyObject *self, PyObject *args);
 
 
-#define DOCSTRING_UPDATE_PARAMS \
-    "Update model hyperparameters\n" \
+#define DOCSTRING_UPDATE_MIXTURE \
+    "Update mixture model hyperparameters\n" \
     "\n" \
     "Parameters\n" \
     "----------\n" \
@@ -169,6 +172,20 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args);
     "update : dict\n" \
     "    Dictionary to update values with"
 
-PyObject *update_params_py(PyObject *self, PyObject *args);
+PyObject *update_mixture_py(PyObject *self, PyObject *args);
+
+
+#define DOCSTRING_UPDATE_COMPONENTS \
+    "Update component hyperparameters\n" \
+    "\n" \
+    "Parameters\n" \
+    "----------\n" \
+    "mixture : capsule\n" \
+    "    Capsule containing mixture struct to update hyperparameters for\n" \
+    "update : dict\n" \
+    "    Dictionary to update values with"
+
+PyObject *update_components_py(PyObject *self, PyObject *args);
+
 
 #endif

@@ -117,15 +117,19 @@ PyObject *gibbs_iter_py(PyObject *self, PyObject *args)
         (struct mixture_model_t *) PyCapsule_GetPointer(
             model_py, MIXTURE_MODEL_API));
 
-    // GIL free zone ----------------------------------------------------------
-    // Py_BEGIN_ALLOW_THREADS;
+    // GIL free zone ----------------------------------------------------------    
+    Py_INCREF(data_py);
+    Py_INCREF(assignments_py);
+    Py_BEGIN_ALLOW_THREADS;
 
     gibbs_iter(
         (double *) PyArray_DATA(data_py),
         (uint16_t *) PyArray_DATA(assignments_py),
         model);
 
-    // Py_END_ALLOW_THREADS;
+    Py_END_ALLOW_THREADS;
+    Py_DECREF(data_py);
+    Py_DECREF(assignments_py);
     // ------------------------------------------------------------------------
 
     Py_RETURN_NONE;

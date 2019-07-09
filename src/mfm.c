@@ -73,7 +73,7 @@ void *mfm_create(PyObject *dict) {
  * @param params struct to destroy
  */
 void mfm_destroy(void *params) {
-	free(((struct mfm_params_t *) params)->v_n);
+	Py_DECREF(((struct mfm_params_t *) params)->v_n_py);
 	free(params);
 }
 

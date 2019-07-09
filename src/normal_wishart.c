@@ -270,6 +270,7 @@ double nw_loglik_new(void *params, double *point)
 ComponentMethods NORMAL_WISHART = {
     &nw_params_create,
     &nw_params_destroy,
+    NULL,  // No update
     &nw_create,
     &nw_destroy,
     &nw_get_size,
