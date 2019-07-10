@@ -1,5 +1,5 @@
 /**
- *
+ * Gibbs Sampler
  */
 
 #include <Python.h>

@@ -1,4 +1,35 @@
-"""Mixture Model
+"""Gibbs Sampler for Abstract Mixture Model
+
+Implements a generalized form of Algorithm 3 [1], with support for traditional
+DPM and MFM [2].
+
+Notes
+-----
+Use by providing a abstract Mixture model and a Component Model.
+
+Both should have:
+- a 'get_args' method, which takes in the data matrix and returns a dictionary
+  containing hyperparameters, which will be used later
+- a 'update' method, which takes in a MixtureModel object
+  (like GibbsMixtureModel below) and returns either an updated hyperparameter
+  dictionary (like the 'get_args' method), or None (no update).
+- a 'CAPSULE' attribute, containing the C methods.
+
+The capsule should contain either a 'ModelMethods' or a 'ComponentMethods'
+struct. See the header files for more details. These types can be accessed
+by copying mixture.h and #including it.
+- Make sure that the capsules are created with the names
+  'bclust.core.ModelMethods' (defined by MODEL_METHODS_API) and
+  'bclust.core.ComponentMethods' (COMPONENT_METHODS_API), respectively.
+
+References
+----------
+[1] Radford M. Neal (2000), "Markov Chain Sampling Methods for Dirichlet
+    Process Mixture Models". Journal of Computational and Graphical Statistics,
+    Vol. 9, No. 2.
+[2] Jeffrey W. Miller, Matthew T. Harrison (2018),
+    "Mixture Models with a Prior on the Number of Components".
+    Journal of the American Statistical Association, Vol. 113, Issue 521.
 """
 
 import numpy as np
@@ -25,7 +56,8 @@ class GibbsMixtureModel:
     assignments : np.array
         Assignment vector. If None (not passed), is initialized at all 0s.
     thinning : int
-        Thinning factor (only saves one sample every <thinning> iterations)
+        Thinning factor (only saves one sample every <thinning> iterations).
+        Use thinning=1 for no thinning.
     """
 
     __BASE_HIST_SIZE = 32
@@ -72,6 +104,7 @@ class GibbsMixtureModel:
         return assignments
 
     def __check_capsules(self, cmodel, mmodel):
+        """Check for correct capsule types."""
 
         # Check for capsule
         if not hasattr(cmodel, "CAPSULE"):

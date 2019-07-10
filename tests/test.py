@@ -15,7 +15,7 @@ ITERATIONS = 2500
 
 
 dataset = bclust.GaussianMixture(
-    n=1000, k=4, d=3, r=0.7, alpha=100, symmetric=False, shuffle=False)
+    n=1000, k=4, d=3, r=0.7, alpha=100, df=3, symmetric=False, shuffle=False)
 
 # dataset.plot_actual()
 # plt.show()
@@ -25,7 +25,7 @@ dataset = bclust.GaussianMixture(
 
 test = bclust.GibbsMixtureModel(
     data=dataset.data,
-    component_model=bclust.NormalWishart(),
+    component_model=bclust.NormalWishart(df=3),
     # mixture_model=bclust.DPM(alpha=1, use_eb=True),
     mixture_model=bclust.MFM(gamma=1, prior=lambda k: k * math.log(1 / 4)),
     assignments=np.zeros(10 * SCALE).astype(np.uint16),

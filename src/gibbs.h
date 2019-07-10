@@ -1,7 +1,6 @@
 /**
- *
+ * Gibbs Sampler
  */
-
 
 #ifndef GIBBS_H
 #define GIBBS_H

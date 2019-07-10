@@ -1,3 +1,20 @@
+"""Simulate Gaussian Mixture
+
+Based on scheme described by Miller, Harrison [1] with normal-wishart
+components.
+Some modifications are made: mixing weights are fixed as a
+geometric progression instead of sampled from a dirichlet or gamma distribution
+in order to simpilify comparison, and means are sampled from a symmetric
+multivariate normal instead of being fixed.
+
+References
+----------
+[1] Jeffrey W. Miller, Matthew T. Harrison (2018),
+    "Mixture Models with a Prior on the Number of Components".
+    Journal of the American Statistical Association, Vol. 113, Issue 521.
+"""
+
+
 import numpy as np
 from scipy import stats
 
@@ -20,6 +37,8 @@ class GaussianMixture:
     alpha : float
         Density parameter; larger alpha results in more separation between
         cluster centers.
+    df : float
+        Degrees of freedom for wishart distribution
     symmetric : bool
         If False, sample cluster covariances from a normal-wishart with df=n.
         Else, set each cluster covariance as the identity.
@@ -29,8 +48,11 @@ class GaussianMixture:
     """
 
     def __init__(
-            self, n=1000, k=3, d=2, r=1, alpha=40,
+            self, n=1000, k=3, d=2, r=1, alpha=40, df=None,
             symmetric=False, shuffle=True):
+
+        if df is None:
+            df = d
 
         # Save params
         self.n = n
@@ -39,6 +61,7 @@ class GaussianMixture:
         self.r = r
         self.alpha = alpha
         self.symmetric = symmetric
+        self.df = df
 
         # Compute weights
         self.weights = np.array([r**i for i in range(k)])
@@ -59,7 +82,9 @@ class GaussianMixture:
         if symmetric:
             self.cov = [np.identity(d) for _ in range(k)]
         else:
-            self.cov = [stats.wishart.rvs(d, np.identity(d)) for _ in range(k)]
+            self.cov = [
+                stats.wishart.rvs(df, np.identity(d)) for _ in range(k)
+            ]
 
         # Points
         self.data = np.zeros((n, d), dtype=np.float64)
@@ -87,8 +112,9 @@ class GaussianMixture:
     def __str__(self):
         return (
             "Simulated Gaussian Mixture [n={}, k={}, d={}, r={}, alpha={}, "
-            "symmetric={}]".format(
-                self.n, self.k, self.d, self.r, self.alpha, self.symmetric))
+            "df={}, symmetric={}]".format(
+                self.n, self.k, self.d, self.r, self.alpha,
+                self.df, self.symmetric))
 
     def __repr__(self):
         return self.__str__()

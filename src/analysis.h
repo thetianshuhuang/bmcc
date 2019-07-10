@@ -1,6 +1,9 @@
+/** 
+ * MCMC Output Analysis
+ */
+
 #ifndef ANALYSIS_H
 #define ANALYSIS_H
-
 
 #include <Python.h>
 

@@ -1,5 +1,5 @@
-/**
- *
+/** 
+ * MCMC Output Analysis
  */
 
 #include <Python.h>

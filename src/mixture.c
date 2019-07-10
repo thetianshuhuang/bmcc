@@ -1,4 +1,6 @@
-
+/**
+ * Core Mixture Structs and Routines
+ */
 
 #include <Python.h>
 
@@ -14,9 +16,9 @@
 #define BASE_VEC_SIZE 32
 #endif
 
-
 #include <stdio.h>
 #include <normal_wishart.h>
+
 
 /**
  * Create components struct

@@ -1,4 +1,13 @@
-
+/**
+ * Routines to check Numpy Array types.
+ *  - Assignment arrays are uint16.
+ *    (It's assumed that there will be <<65536 clusters)
+ *  - Data arrays are float64 (double).
+ *  - Data arrays must be C-style contiguous (arr[y][x] = y * xdim + x)
+ *  - PyArray_FLAGS (not documented in numpy C api) -- each flag set is a
+ *    single bit. Presence of the bit indicates pass (flags & NPY_ARRAY_...)
+ *  - Data array should have the same first dimension as the assignment array
+ */
 
 #include <stdbool.h>
 
@@ -129,4 +138,3 @@ bool type_check_assignments(PyArrayObject *arr1, PyArrayObject *arr2)
     }
     return true;
 }
-

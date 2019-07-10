@@ -1,3 +1,15 @@
+"""Analysis Routines
+
+Implements Least Squares configuration selection [1].
+
+References
+----------
+[1] David B. Dahl (2006), "Model-Based Clustering for Expression Data via a
+    Dirichlet Process Mixture Model". Bayesian Inference for Gene Expression
+    and Proteomics.
+"""
+
+
 import numpy as np
 from bclust.core import (
     pairwise_probability,
@@ -16,12 +28,13 @@ def membership_matrix(asn):
     Parameters
     ----------
     asn : array-like
-        Cluster assignment vector
+        Cluster assignment vector a
 
     Returns
     -------
     np.array
-        Membership matrix of asn.
+        Membership matrix M(a):
+        M_{i,j}(a) = 1_{a[i] = a[j]}
     """
 
     res = np.zeros((len(asn), len(asn)))
@@ -55,22 +68,40 @@ class LstsqResult:
     burn_in : int
         Burn in duration used in analysis
     matrix : np.array
-        Pairwise Probability Matrix
+        Pairwise Probability Matrix [1]
     residuals : np.array
         Squared residuals between membership matrix of each iteration and
-        pairwise probability matrix
+        pairwise probability matrix [1]
     best_idx : int
-        Index of 'best' clustering configuration according to squared residuals
+        Index of 'best' clustering configuration according to residuals [1]
     best : np.array
-        Best clustering configuration
+        Best clustering configuration [1]
+    num_clusters : np.array
+        Trace of number of clusters
     nmi : np.array
         Normalized Mutual Information trace.
-    nmi_best : np.array
+    nmi_best : float
         NMI of 'best' configuration (as selected above)
     rand : np.array
         Rand index trace.
-    rand_best : np.array
+    rand_best : float
         Rand Index of 'best' configuration (as selected above)
+    aggregation : np.array
+        Aggregation score trace: for selected assignment vector a, true
+        assignment vector A,
+        P[a[i] = a[j] | A[i] = A[j]]
+    aggregation_best : float
+        Aggregation score of 'best' configuration (as selected above)
+    segregation : np.array
+        Segregation score trace:
+        P[a[i] != a[j] | A[i] != A[j]]
+    segregation_best : float
+        Segregation score of 'best' configuration (as selected above)
+    oracle : np.array
+        Oracle clustering assignments
+    oracle_nmi, oracle_rand, oracle_segregation, oracle_aggregation : float
+        Scores for oracle clustering
+
     """
 
     def __init__(self, data, hist, burn_in=0):
@@ -205,7 +236,8 @@ class LstsqResult:
         """
 
         if not self.truth_known:
-            raise ValueError("Ground truth comparison not run.")
+            raise ValueError(
+                "Cannot show scores: ground truth not known.")
 
         if len(plots) > 1:
             fig, axs = plt.subplots(len(plots), 1)
@@ -243,6 +275,10 @@ class LstsqResult:
         plt.figure.Figure
             Created figure; plot with fig.show().
         """
+
+        if not self.truth_known:
+            raise ValueError(
+                "Cannot show scores: ground truth not known.")
 
         fig, p = plt.subplots(2, 2)
 

@@ -1,4 +1,6 @@
-
+/**
+ * Core Mixture Structs and Routines
+ */
 
 #ifndef MIXTURE_H
 #define MIXTURE_H
