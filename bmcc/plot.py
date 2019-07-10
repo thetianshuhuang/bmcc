@@ -5,7 +5,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
-def plot_clusterings(data, assignments, bins=20):
+def plot_clusterings(
+        data, assignments, bins=20,
+        kwargs_scatter={}, kwargs_hist={}):
     """Plot N-dimensional clustering.
 
     Creates a NxN grid of plots; the [i, j] plot shows the [x_i, x_j]
@@ -22,6 +24,10 @@ def plot_clusterings(data, assignments, bins=20):
         with no computed assignments.
     bins : int
         Number of bins for each histogram.
+    kwargs_scatter : dict
+        Arguments to be passed on to plt.scatter
+    kwargs_hist : dict
+        Arguments to be passed on to plt.hist
 
     Returns
     -------

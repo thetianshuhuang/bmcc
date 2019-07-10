@@ -42,6 +42,34 @@ from bmcc.analysis import LstsqResult
 from bmcc.models import NormalWishart, DPM
 
 
+WARNING_FLOAT64_CAST = """
+Data array cast to np.float64. To suppress this message, copy data to a float64
+array:
+    Python:
+        data = data.astype(float64)
+    R/Reticulate:
+        data_py = np_array(data, dtype="float64", order="C"
+"""
+
+WARNING_CONTIGUOUS_CAST = """
+Data array copied onto contiguous C array. To suppress this message, copy to a
+contiguous C-style array:
+    Python:
+        data = data.ascontiguousarray(data, dtype=np.float64)
+    R/Reticulate:
+        data_py = np_array(data, dtype="float64", order="C")
+"""
+
+WARNING_UINT16_CAST = """
+Assignment vector cast to np.uint16. To suppress this message, copy data to a
+uint16 array:
+    Python:
+        assignments = assignments.astype(np.uint16)
+    R/Reticulate:
+        assignments_py = np_array(assignments, dtype="uint16", order="C")
+"""
+
+
 class GibbsMixtureModel:
     """Gibbs Sampler for a Mixture Model
 
@@ -78,10 +106,10 @@ class GibbsMixtureModel:
                 "Data must have 2 dimensions. The points should be stored in "
                 "row-major order (each data point is a row).")
         if data.dtype != np.float64:
-            print("Data array cast to np.float64.")
+            print(WARNING_FLOAT64_CAST)
             data = data.astype(np.float64)
         if not data.flags['C_CONTIGUOUS']:
-            print("Data array copied onto contiguous C array.")
+            print(WARNING_CONTIGUOUS_CAST)
             data = np.ascontiguousarray(data, dtype=np.float64)
         return data
 
@@ -98,7 +126,7 @@ class GibbsMixtureModel:
                 "Assignments must have the same dimensionality as the number "
                 "of data points.")
         if assignments.dtype != np.uint16:
-            print("Assignment vector cast to np.uint16.")
+            print()
             assignments = assignments.astype(np.uint16)
 
         return assignments
