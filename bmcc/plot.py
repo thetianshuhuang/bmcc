@@ -49,11 +49,13 @@ def plot_clusterings(
         for y in range(data.shape[1]):
             # Histogram
             if x == y:
-                plots[x][y].hist(data[:, x], bins=bins)
+                plots[x][y].hist(
+                    data[:, x], bins=bins, **kwargs_hist)
                 plots[x][y].set_xlabel('x_{}'.format(x))
             # Scatterplot
             else:
-                plots[x][y].scatter(data[:, x], data[:, y], c=assignments)
+                plots[x][y].scatter(
+                    data[:, x], data[:, y], c=assignments, **kwargs_scatter)
                 plots[x][y].set_xlabel('x_{}'.format(x))
                 plots[x][y].set_ylabel('x_{}'.format(y))
 
