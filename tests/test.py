@@ -4,7 +4,7 @@ import time
 from tqdm import tqdm
 import math
 
-import bclust
+import bmcc
 
 import faulthandler
 faulthandler.enable()
@@ -14,7 +14,7 @@ SCALE = 100
 ITERATIONS = 2500
 
 
-dataset = bclust.GaussianMixture(
+dataset = bmcc.GaussianMixture(
     n=1000, k=4, d=3, r=0.7, alpha=100, df=3, symmetric=False, shuffle=False)
 
 # dataset.plot_actual()
@@ -23,11 +23,11 @@ dataset = bclust.GaussianMixture(
 # dataset.plot_oracle()
 # plt.show()
 
-test = bclust.GibbsMixtureModel(
+test = bmcc.GibbsMixtureModel(
     data=dataset.data,
-    component_model=bclust.NormalWishart(df=3),
-    # mixture_model=bclust.DPM(alpha=1, use_eb=True),
-    mixture_model=bclust.MFM(gamma=1, prior=lambda k: k * math.log(1 / 4)),
+    component_model=bmcc.NormalWishart(df=3),
+    # mixture_model=bmcc.DPM(alpha=1, use_eb=True),
+    mixture_model=bmcc.MFM(gamma=1, prior=lambda k: k * math.log(1 / 4)),
     assignments=np.zeros(10 * SCALE).astype(np.uint16),
     thinning=5)
 

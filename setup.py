@@ -10,8 +10,8 @@ print("C Files:")
 print(cfiles)
 
 setup(
-    name='bclust', version='0.0.2',
-    packages=['bclust'],
-    ext_modules=[Extension('bclust.core', cfiles)],
+    name='bmcc', version='0.1.0',
+    packages=['bmcc', 'bmcc.models'],
+    ext_modules=[Extension('bmcc.core', cfiles)],
     include_dirs=[np.get_include(), './src'])
 

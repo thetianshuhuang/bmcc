@@ -18,7 +18,7 @@ References
 import numpy as np
 from scipy import stats
 
-from bclust.plot import plot_clusterings
+from bmcc.plot import plot_clusterings
 
 
 class GaussianMixture:
@@ -102,11 +102,11 @@ class GaussianMixture:
                 in zip(self.weights, self.means, self.cov)])
 
     def plot_actual(self):
-        """Plot actual clusterings (binding to bclust.plot_clusterings)"""
+        """Plot actual clusterings (binding to bmcc.plot_clusterings)"""
         return plot_clusterings(self.data, self.assignments)
 
     def plot_oracle(self):
-        """Plot oracle clusterings (binding to bclust.plot_oracle)"""
+        """Plot oracle clusterings (binding to bmcc.plot_oracle)"""
         return plot_clusterings(self.data, self.oracle)
 
     def __str__(self):

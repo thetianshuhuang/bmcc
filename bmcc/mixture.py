@@ -19,8 +19,8 @@ The capsule should contain either a 'ModelMethods' or a 'ComponentMethods'
 struct. See the header files for more details. These types can be accessed
 by copying mixture.h and #including it.
 - Make sure that the capsules are created with the names
-  'bclust.core.ModelMethods' (defined by MODEL_METHODS_API) and
-  'bclust.core.ComponentMethods' (COMPONENT_METHODS_API), respectively.
+  'bmcc.core.ModelMethods' (defined by MODEL_METHODS_API) and
+  'bmcc.core.ComponentMethods' (COMPONENT_METHODS_API), respectively.
 
 References
 ----------
@@ -34,12 +34,12 @@ References
 
 import numpy as np
 
-from bclust.core import (
+from bmcc.core import (
     init_model, gibbs_iter,
     update_mixture,
     update_components)
-from bclust.analysis import LstsqResult
-from bclust.models import NormalWishart, DPM
+from bmcc.analysis import LstsqResult
+from bmcc.models import NormalWishart, DPM
 
 
 class GibbsMixtureModel:

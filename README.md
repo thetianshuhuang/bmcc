@@ -1,6 +1,6 @@
-# Bayesian Clustering
+# Bayesian Markov Chain Clustering
 
-Implementation of Bayesian Clustering with DPM (Dirichlet Process Mixture Models [1]) and MFM (Mixture of Finite Mixtures [2]) mixture models, and an abstract Mixture Model and Component Model API.
+Implementation of Markov Chain Bayesian Clustering techniques, including DPM (Dirichlet Process Mixture Models [1]) and MFM (Mixture of Finite Mixtures [2]) mixture models, with an abstract Mixture Model and Component Model API.
 
 Hyperparameter updates for DPM are implemented using an Empirical Bayes update procedure [3].
 

@@ -11,11 +11,11 @@ References
 
 
 import numpy as np
-from bclust.core import (
+from bmcc.core import (
     pairwise_probability,
     aggregation_score,
     segregation_score)
-from bclust.plot import plot_clusterings
+from bmcc.plot import plot_clusterings
 
 from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score
 

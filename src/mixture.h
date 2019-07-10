@@ -11,13 +11,13 @@
 #include <Python.h>
 
 
-#define COMPONENT_METHODS_API "bclust.core.ComponentMethods"
-#define COMPONENT_PARAMS_API "bclust.core.ComponentParams"
+#define COMPONENT_METHODS_API "bmcc.core.ComponentMethods"
+#define COMPONENT_PARAMS_API "bmcc.core.ComponentParams"
 
-#define MODEL_METHODS_API "bclust.core.ModelMethods"
-#define MODEL_PARAMS_API "bclust.core.ModelParams"
+#define MODEL_METHODS_API "bmcc.core.ModelMethods"
+#define MODEL_PARAMS_API "bmcc.core.ModelParams"
 
-#define MIXTURE_MODEL_API "bclust.core.MixtureModel"
+#define MIXTURE_MODEL_API "bmcc.core.MixtureModel"
 
 // ----------------------------------------------------------------------------
 //

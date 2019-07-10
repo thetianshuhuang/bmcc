@@ -11,7 +11,7 @@ References
 import numpy as np
 from scipy import optimize
 
-from bclust.core import MODEL_DPM
+from bmcc.core import MODEL_DPM
 
 
 class DPM:

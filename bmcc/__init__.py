@@ -1,15 +1,15 @@
 
-from bclust.core import (
+from bmcc.core import (
     MODEL_DPM,
     MODEL_MFM,
     COMPONENT_NORMAL_WISHART,
     pairwise_probability
 )
-from bclust.models import MFM, DPM, NormalWishart
-from bclust.mixture import GibbsMixtureModel
-from bclust.analysis import LstsqResult, membership_matrix
-from bclust.plot import plot_clusterings
-from bclust.simulate import GaussianMixture
+from bmcc.models import MFM, DPM, NormalWishart
+from bmcc.mixture import GibbsMixtureModel
+from bmcc.analysis import LstsqResult, membership_matrix
+from bmcc.plot import plot_clusterings
+from bmcc.simulate import GaussianMixture
 
 __all__ = [
     # Capsules

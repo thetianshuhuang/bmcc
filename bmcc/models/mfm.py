@@ -10,7 +10,7 @@ References
 import numpy as np
 import math
 
-from bclust.core import MODEL_MFM
+from bmcc.core import MODEL_MFM
 
 
 class MFM:

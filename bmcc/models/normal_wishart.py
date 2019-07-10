@@ -10,7 +10,7 @@ References
 
 import numpy as np
 
-from bclust.core import COMPONENT_NORMAL_WISHART
+from bmcc.core import COMPONENT_NORMAL_WISHART
 
 
 class NormalWishart:
