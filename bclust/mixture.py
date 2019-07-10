@@ -48,7 +48,9 @@ class GibbsMixtureModel:
         if data.dtype != np.float64:
             print("Data array cast to np.float64.")
             data = data.astype(np.float64)
-
+        if not data.flags['C_CONTIGUOUS']:
+            print("Data array copied onto contiguous C array.")
+            data = np.ascontiguousarray(data, dtype=np.float64)
         return data
 
     def __check_assignments(self, assignments, size):

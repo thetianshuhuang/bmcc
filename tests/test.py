@@ -15,7 +15,7 @@ ITERATIONS = 2500
 
 
 dataset = bclust.GaussianMixture(
-    n=1000, k=4, d=3, r=0.7, alpha=1000, symmetric=False, shuffle=False)
+    n=1000, k=4, d=3, r=0.7, alpha=100, symmetric=False, shuffle=False)
 
 # dataset.plot_actual()
 # plt.show()

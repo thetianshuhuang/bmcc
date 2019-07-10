@@ -30,6 +30,21 @@ bool type_check(PyArrayObject *data_py, PyArrayObject *assignments_py)
         return false;
     }
 
+    // Check contiguous
+    if(!(PyArray_FLAGS(data_py) & NPY_ARRAY_C_CONTIGUOUS)) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Data must be a contiguous C-style array (np.ascontiguousarray)");
+        return false;
+    }
+    if(!(PyArray_FLAGS(assignments_py) & NPY_ARRAY_C_CONTIGUOUS)) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Assignmnets must be a contiguous C-style array "
+            "(np.ascontiguousarray)");
+        return false;
+    }
+
     // Check dimensions
     if(PyArray_NDIM(data_py) != 2) {
         PyErr_SetString(
@@ -58,6 +73,14 @@ bool type_check_square(PyArrayObject *data_py, int dim)
     if(PyArray_TYPE(data_py) != NPY_FLOAT64) {
         PyErr_SetString(
             PyExc_TypeError, "Array must have type float64 (double).");
+        return false;
+    }
+
+    // Check contiguous
+    if(!(PyArray_FLAGS(data_py) & NPY_ARRAY_C_CONTIGUOUS)) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Array must be a contiguous C-style array (np.ascontiguousarray)");
         return false;
     }
 
