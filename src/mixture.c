@@ -11,9 +11,9 @@
 
 #include <stdbool.h>
 
-#include "type_check.h"
-#include "mixture.h"
-#include "normal_wishart.h"
+#include "../include/type_check.h"
+#include "../include/mixture.h"
+#include "../include/normal_wishart.h"
 
 
 /**

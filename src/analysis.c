@@ -11,7 +11,7 @@
 
 #include <stdbool.h>
 
-#include "type_check.h"
+#include "../include/type_check.h"
 
 
 /**

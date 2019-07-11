@@ -8,20 +8,28 @@ library(reticulate)
 IMPORT_ERROR_MSG = "
 'bmcc' python module could not be imported.
 
-bmcc requires Python to be installed, and 
+bmcc requires Python and the python module 'bmcc' to be installed. Install with
+$ pip install bmcc
+
+on the linux / windows terminal.
 "
 
 
-bmcc_installed <- FALSE;
+# Check for installation
+__bmcc_installed <- FALSE;
 
 _bmcc_src = tryCatch({
-	import("bmcc", import=FALSE)
-	bmcc_installed <- TRUE
+    import("bmcc", import=FALSE)
+    __bmcc_installed <<- TRUE
 }, error=funtion(e) {
-	bmcc_installed <- FALSE
+    __bmcc_installed <<- FALSE
 }
+if(!__bmcc_installed) {
+    print(IMPORT_ERROR_MSG)
+}
+else {
 
-if(!bmcc_installed) {
-	print(IMPORT_ERROR_MSG)
+
+
 
 }

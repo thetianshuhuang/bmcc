@@ -5,7 +5,7 @@
 #include <Python.h>
 #include <math.h>
 
-#include "mixture.h"
+#include "../include/mixture.h"
 
 
 /**

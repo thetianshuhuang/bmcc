@@ -17,6 +17,7 @@ References
 
 import numpy as np
 from scipy import stats
+from matplotlib import pyplot as plt
 
 from bmcc.plot import plot_clusterings
 
@@ -119,13 +120,25 @@ class GaussianMixture:
                     for pk_i, pk_j
                     in zip(self.likelihoods[i], self.likelihoods[j]))
 
-    def plot_actual(self):
+    def plot_actual(self, plot=False, **kwargs):
         """Plot actual clusterings (binding to bmcc.plot_clusterings)"""
-        return plot_clusterings(self.data, self.assignments)
+        fig = plot_clusterings(self.data, self.assignments, **kwargs)
 
-    def plot_oracle(self):
+        if plot:
+            plt.show()
+            return None
+        else:
+            return fig
+
+    def plot_oracle(self, plot=False, **kwargs):
         """Plot oracle clusterings (binding to bmcc.plot_oracle)"""
-        return plot_clusterings(self.data, self.oracle)
+        fig = plot_clusterings(self.data, self.oracle, **kwargs)
+
+        if plot:
+            plt.show()
+            return None
+        else:
+            return fig
 
     def __str__(self):
         return (

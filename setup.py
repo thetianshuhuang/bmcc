@@ -23,15 +23,17 @@ Requires
 - matplotlib: plots
 """
 
-from distutils.core import setup, Extension
+from setuptools import setup
+from distutils.core import Extension
 import numpy as np
 import os
 
 
 C_EXTENSION = Extension(
     "bmcc.core",
-    ['./src/' + s for s in os.listdir('./src')],
-    define_macros=[("BASE_VEC_SIZE", 1024)]
+    sources=['./src/' + s for s in os.listdir('./src')],
+    include_dirs=[np.get_include(), './include'],
+    define_macros=[("BASE_VEC_SIZE", 1024)],
 )
 
 
@@ -39,17 +41,14 @@ MODULE_SHORT_DESC = (
     "Implementation of Markov Chain Bayesian Clustering techniques, including "
     "DPM and MFM, with an abstract Mixture Model and Component Model API.")
 
-try:
-    with open("README.md", "r") as f:
-        MODULE_LONG_DESC = f.read()
-except FileNotFoundError:
-    MODULE_LONG_DESC = ""
+with open("README.md", "r") as f:
+    MODULE_LONG_DESC = f.read()
 
 
 setup(
     # About
     name='bmcc',
-    version='0.2.3',
+    version='0.2.7',
     author='Tianshu Huang',
     author_email='thetianshuhuang@gmail.com',
 
@@ -60,6 +59,7 @@ setup(
     url="https://github.com/thetianshuhuang/bmcc",
 
     # Requirements
+    python_requires='>=3, <4',
     install_requires=[
         "numpy",
         "scipy",
@@ -68,16 +68,20 @@ setup(
     ],
 
     # Python Core
-    packages=['bmcc', 'bmcc.models'],
+    packages=["bmcc", "bmcc.models"],
 
     # C Extension
     ext_modules=[C_EXTENSION],
-    include_dirs=[np.get_include(), './src'],
+    include_package_data=True,
 
-    # Metadata
+    # Classifiers (https://pypi.org/classifiers/)
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Intended Audience :: Science/Research",
+        "Natural Language :: English",
+        "Topic :: Scientific/Engineering :: Mathematics",
+        "Topic :: Scientific/Engineering :: Information Analysis"
     ]
 )

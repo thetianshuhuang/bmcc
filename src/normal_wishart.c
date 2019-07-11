@@ -12,11 +12,11 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "cholesky.h"
-#include "misc_math.h"
-#include "normal_wishart.h"
-#include "mixture.h"
-#include "type_check.h"
+#include "../include/cholesky.h"
+#include "../include/misc_math.h"
+#include "../include/normal_wishart.h"
+#include "../include/mixture.h"
+#include "../include/type_check.h"
 
 
 // ----------------------------------------------------------------------------

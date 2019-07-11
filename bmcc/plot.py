@@ -34,7 +34,6 @@ def plot_clusterings(
     plt.figure.Figure
         Created figure; plot with fig.show().
     """
-
     if type(data) != np.ndarray or len(data.shape) != 2:
         raise TypeError("data must be a 2-dimensional numpy array.")
     if type(assignments) != np.ndarray or len(assignments.shape) != 1:

@@ -191,7 +191,7 @@ class BaseResult:
 
     DEFAULT_TRACE_PLOTS = {}
 
-    def trace(self, plots=None, plot=True):
+    def trace(self, plots=None, plot=False):
         """Plot NMI, Rand Index, and # of clusters as a trace over MCMC
         iterations.
 
@@ -248,7 +248,9 @@ class BaseResult:
         else:
             return fig
 
-    def clustering(self, bins=20, plot=True):
+    def clustering(
+            self, bins=20, plot=False,
+            kwargs_hist={}, kwargs_scatter={}):
         """Show clustering as a multi-dimensional array of scatterplots
 
         Parameters
@@ -257,6 +259,10 @@ class BaseResult:
             Number of bins
         plot : bool
             If True, calls plt.show(). Otherwise, returns the generated figure.
+        kwargs_hist : dict
+            Keyword args to pass onto plt.hist
+        kwargs_scatter : dict
+            Keyword args to pass onto plt.scatter
 
         Returns
         -------
@@ -264,7 +270,10 @@ class BaseResult:
             Created figure; plot with fig.show().
         """
 
-        fig = plot_clusterings(self.data, self.best, bins=bins)
+        fig = plot_clusterings(
+            self.data, self.best, bins=bins,
+            kwargs_hist=kwargs_hist,
+            kwargs_scatter=kwargs_scatter)
 
         if plot:
             plt.show()

@@ -78,6 +78,7 @@ __author__ = "Tianshu Huang"
 __license__ = "MIT"
 __maintainer__ = "Tianshu Huang"
 __email__ = "thetianshuhuang@gmail.com"
+__version__ = "0.2.7a"
 
 __all__ = [
 

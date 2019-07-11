@@ -12,10 +12,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "mixture.h"
-#include "misc_math.h"
-#include "type_check.h"
-#include "normal_wishart.h"
+#include "../include/mixture.h"
+#include "../include/misc_math.h"
+#include "../include/type_check.h"
+#include "../include/normal_wishart.h"
 
 /**
  * Execute gibbs iteration.

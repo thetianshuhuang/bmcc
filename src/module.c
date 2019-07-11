@@ -15,13 +15,13 @@
 #define BASE_VEC_SIZE 32
 #endif
 
-#include "gibbs.h"
-#include "dpm.h"
-#include "mfm.h"
-#include "normal_wishart.h"
-#include "mixture.h"
-#include "select.h"
-#include "analysis.h"
+#include "../include/gibbs.h"
+#include "../include/dpm.h"
+#include "../include/mfm.h"
+#include "../include/normal_wishart.h"
+#include "../include/mixture.h"
+#include "../include/select.h"
+#include "../include/analysis.h"
 
 
 /**

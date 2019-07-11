@@ -1,0 +1,3 @@
+include *.md
+recursive-include src *.c
+recursive-include include *.h
