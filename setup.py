@@ -6,7 +6,7 @@ Capsule APIs therefore start with bmcc.core (i.e. bmcc.core.ModelMethods, etc).
 Usage
 -----
 Local install:
-    python3 setup.py install
+    pip3 install .
 Build:
     python3 setup.py sdist
 
@@ -23,7 +23,7 @@ Requires
 - matplotlib: plots
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from distutils.core import Extension
 import numpy as np
 import os
@@ -68,7 +68,7 @@ setup(
     ],
 
     # Python Core
-    packages=["bmcc", "bmcc.models"],
+    packages=find_packages("."),
 
     # C Extension
     ext_modules=[C_EXTENSION],
