@@ -100,13 +100,18 @@ class LstsqResult(BaseResult):
         }
     }
 
-    def matrices(self):
+    def matrices(self, plot=True):
         """Show pairwise probability matrix and membership matrix of least
         squares configuration.
 
+        Parameters
+        ----------
+        plot : bool
+            If True, calls plt.show(). Otherwise, returns the generated figure.
+
         Returns
         -------
-        plt.figure.Figure
+        plt.figure.Figure or None
             Created figure; plot with fig.show().
         """
 
@@ -128,4 +133,8 @@ class LstsqResult(BaseResult):
         p[1][1].matshow(membership_matrix(self.oracle))
         p[1][1].set_title("Membership Matrix of Oracle Clustering")
 
-        return fig
+        if plot:
+            plt.show()
+            return None
+        else:
+            return fig

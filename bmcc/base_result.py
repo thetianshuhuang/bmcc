@@ -5,6 +5,7 @@ from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score
 
 from bmcc.core import aggregation_score, segregation_score
 from bmcc.plot import plot_clusterings
+from bmcc.errors import WARNING_UINT16_CAST
 
 
 class BaseResult:
@@ -160,13 +161,18 @@ class BaseResult:
         """
 
         if actual.dtype != np.uint16:
-            print("Assignments cast to np.uint16.")
+            print(WARNING_UINT16_CAST)
             actual = actual.astype(np.uint16)
 
         self.actual = actual
         self.clusters_true = np.max(actual) + 1
 
         if oracle is not None:
+
+            if oracle.dtype != np.uint16:
+                print(WARNING_UINT16_CAST)
+                oracle = oracle.astype(np.uint16)
+
             self.oracle = oracle
             self.oracle_nmi = normalized_mutual_info_score(
                 actual, oracle, nmi_method)
@@ -185,7 +191,7 @@ class BaseResult:
 
     DEFAULT_TRACE_PLOTS = {}
 
-    def trace(self, plots=None):
+    def trace(self, plots=None, plot=True):
         """Plot NMI, Rand Index, and # of clusters as a trace over MCMC
         iterations.
 
@@ -195,10 +201,12 @@ class BaseResult:
             Dictionary of (key, value) pairs. Each key corresponds to a plot,
             which is plotted with the attribute corresponding to value. If
             value is a dict, multiple keys are plotted on the same plot.
+        plot : bool
+            If True, calls plt.show(). Otherwise, returns the generated figure.
 
         Returns
         -------
-        plt.figure.Figure
+        plt.figure.Figure or None
             Created figure; plot with fig.show().
         """
 
@@ -234,15 +242,21 @@ class BaseResult:
                 raise TypeError(
                     "Attribute name is not a string or dict.")
 
-        return fig
+        if plot:
+            plt.show()
+            return None
+        else:
+            return fig
 
-    def clustering(self, bins=20):
+    def clustering(self, bins=20, plot=True):
         """Show clustering as a multi-dimensional array of scatterplots
 
         Parameters
         ----------
         bins : int
             Number of bins
+        plot : bool
+            If True, calls plt.show(). Otherwise, returns the generated figure.
 
         Returns
         -------
@@ -250,4 +264,10 @@ class BaseResult:
             Created figure; plot with fig.show().
         """
 
-        return plot_clusterings(self.data, self.best, bins=bins)
+        fig = plot_clusterings(self.data, self.best, bins=bins)
+
+        if plot:
+            plt.show()
+            return None
+        else:
+            return fig

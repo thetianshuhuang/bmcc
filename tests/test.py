@@ -23,7 +23,7 @@ dataset = bmcc.GaussianMixture(
 # dataset.plot_oracle()
 # plt.show()
 
-test = bmcc.GibbsMixtureModel(
+model = bmcc.GibbsMixtureModel(
     data=dataset.data,
     component_model=bmcc.NormalWishart(df=3),
     # mixture_model=bmcc.DPM(alpha=1, use_eb=False),
@@ -33,13 +33,13 @@ test = bmcc.GibbsMixtureModel(
 
 start = time.time()
 for i in tqdm(range(ITERATIONS)):
-    test.iter()
+    model.iter()
 print("gibbs_iterate: {:.2f} s [{:.2f} ms/iteration]".format(
     time.time() - start,
     (time.time() - start) * 1000 / ITERATIONS))
 
 start = time.time()
-res = test.select_lstsq(burn_in=100)
+res = model.select_lstsq(burn_in=100)
 res.evaluate(
     dataset.assignments,
     oracle=dataset.oracle,

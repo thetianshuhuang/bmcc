@@ -40,34 +40,11 @@ from bmcc.core import (
     update_components)
 from bmcc.least_squares import LstsqResult
 from bmcc.models import NormalWishart, DPM
-
-
-WARNING_FLOAT64_CAST = """
-Data array cast to np.float64. To suppress this message, copy data to a float64
-array:
-    Python:
-        data = data.astype(float64)
-    R/Reticulate:
-        data_py = np_array(data, dtype="float64", order="C"
-"""
-
-WARNING_CONTIGUOUS_CAST = """
-Data array copied onto contiguous C array. To suppress this message, copy to a
-contiguous C-style array:
-    Python:
-        data = data.ascontiguousarray(data, dtype=np.float64)
-    R/Reticulate:
-        data_py = np_array(data, dtype="float64", order="C")
-"""
-
-WARNING_UINT16_CAST = """
-Assignment vector cast to np.uint16. To suppress this message, copy data to a
-uint16 array:
-    Python:
-        assignments = assignments.astype(np.uint16)
-    R/Reticulate:
-        assignments_py = np_array(assignments, dtype="uint16", order="C")
-"""
+from bmcc.errors import (
+    WARNING_CONTIGUOUS_CAST,
+    WARNING_FLOAT64_CAST,
+    WARNING_UINT16_CAST
+)
 
 
 class GibbsMixtureModel:
@@ -126,7 +103,7 @@ class GibbsMixtureModel:
                 "Assignments must have the same dimensionality as the number "
                 "of data points.")
         if assignments.dtype != np.uint16:
-            print()
+            print(WARNING_UINT16_CAST)
             assignments = assignments.astype(np.uint16)
 
         return assignments
@@ -248,7 +225,8 @@ class GibbsMixtureModel:
             # Resize -- exponential over-allocation
             if self.__hist_idx >= self.__hist_size:
                 self.__hist_size *= 2
-                self.__history.resize((self.__hist_size, self.data.shape[0]))
+                self.__history.resize(
+                    (self.__hist_size, self.data.shape[0]), refcheck=False)
 
     @property
     def hist(self):
