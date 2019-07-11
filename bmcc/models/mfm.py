@@ -68,8 +68,10 @@ class MFM:
                 prev = current
                 term = (
                     self.prior(k) +
-                    math.lgamma(k + 1) + math.lgamma(self.gamma * k) -
-                    math.lgamma(k - t + 1) - math.lgamma(self.gamma * k + N)
+                    math.lgamma(t + 1) +
+                    math.lgamma(self.gamma * k) -
+                    math.lgamma(k - t + 1) -
+                    math.lgamma(self.gamma * k + N)
                 )
                 current = np.logaddexp(current, term)
                 if current - prev < self.error:

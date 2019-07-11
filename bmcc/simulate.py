@@ -76,7 +76,7 @@ class GaussianMixture:
         # Means: normal, with radius proportional to clusters
         self.means = [stats.multivariate_normal.rvs(
             mean=np.zeros(d),
-            cov=np.identity(d) * pow(alpha * k, 1 / d)) for _ in range(k)]
+            cov=np.identity(d) * alpha * k) for _ in range(k)]
 
         # Covariances: normal wishart (if not symmetric), else normal
         if symmetric:
@@ -93,13 +93,31 @@ class GaussianMixture:
                 mean=self.means[self.assignments[idx]],
                 cov=self.cov[self.assignments[idx]])
 
+        # Likelihood table
+        self.likelihoods = np.zeros((n, k))
+        for idx, x in enumerate(self.data):
+            __iter = enumerate(zip(self.weights, self.means, self.cov))
+            # Calculate likelihoods
+            for k, (weight, mu, cov) in __iter:
+                self.likelihoods[idx, k] = (
+                    weight *
+                    stats.multivariate_normal.pdf(x, mean=mu, cov=cov))
+            # Normalize
+            self.likelihoods[idx] /= sum(self.likelihoods[idx])
+
         # Compute oracle clustering (maximum likelihood given all parameters)
         self.oracle = np.zeros(n, dtype=np.uint16)
-        for idx, x in enumerate(self.data):
-            self.oracle[idx] = np.argmax([
-                weight * stats.multivariate_normal.pdf(x, mean=mu, cov=cov)
-                for weight, mu, cov
-                in zip(self.weights, self.means, self.cov)])
+        for idx in range(n):
+            self.oracle[idx] = np.argmax(self.likelihoods[idx])
+
+        # Compute pairwise probability matrix from likelihood table
+        self.oracle_matrix = np.zeros((n, n))
+        for i in range(n):
+            for j in range(n):
+                self.oracle_matrix[i, j] = sum(
+                    pk_i * pk_j
+                    for pk_i, pk_j
+                    in zip(self.likelihoods[i], self.likelihoods[j]))
 
     def plot_actual(self):
         """Plot actual clusterings (binding to bmcc.plot_clusterings)"""

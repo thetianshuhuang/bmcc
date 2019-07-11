@@ -22,6 +22,7 @@
 
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "normal_wishart.h"
 
 /**
@@ -30,8 +31,9 @@
  * @param assignments assignment vector
  * @param components vector containing component structs, stored as void *.
  *      Component methods are responsible for casting to the correct type.
+ * @return true if returned without error
  */
-void gibbs_iter(
+bool gibbs_iter(
     double *data, uint16_t *assignments,
     struct mixture_model_t *model)
 {
@@ -45,6 +47,14 @@ void gibbs_iter(
 
         double *point = &data[idx * model->dim];
 
+        // Check assignments vector for error
+        if(assignments[idx] >= model->num_clusters) {
+            PyErr_SetString(
+                PyExc_IndexError,
+                "Assignment index greater than the number of clusters.");
+            return false;
+        }
+
         // Remove from currently assigned cluster
         model->comp_methods->remove(
             model->clusters[assignments[idx]], model->comp_params, point);
@@ -53,10 +63,20 @@ void gibbs_iter(
         remove_empty(model, assignments);
 
         // Handle vector resizing
-        if(model->num_clusters + 1 > vec_size) {
+        if(model->num_clusters + 1 >= vec_size) {
             free(weights);
             vec_size *= 2;
-            weights = (double *) malloc(sizeof(double) * vec_size);
+            double *weights_new = (double *) malloc(sizeof(double) * vec_size);
+
+            // Check for error
+            if(weights_new == NULL) {
+                free(weights);
+                PyErr_SetString(
+                    PyExc_MemoryError,
+                    "Could not allocate weight vector in memory.");
+                return false;
+            }
+            else { weights = weights_new; }
         }
 
         // Get assignment weights
@@ -67,7 +87,7 @@ void gibbs_iter(
                     c_i, model->comp_params, point) +
                 model->model_methods->log_coef(
                     model->model_params,
-                    model->comp_methods->get_size((void *) c_i),
+                    model->comp_methods->get_size(c_i),
                     model->num_clusters));
         }
 
@@ -82,7 +102,14 @@ void gibbs_iter(
         int new = sample_log_weighted(weights, model->num_clusters + 1);
 
         // New cluster?
-        if(new == model->num_clusters) { add_component(model); }
+        if(new == model->num_clusters) {
+            bool success_new = add_component(model);
+            // Check for allocation failure
+            if(!success_new) {
+                free(weights);
+                return NULL;
+            }
+        }
 
         // Update component
         model->comp_methods->add(
@@ -91,6 +118,8 @@ void gibbs_iter(
     }
 
     free(weights);
+
+    return true;
 }
 
 
@@ -120,17 +149,21 @@ PyObject *gibbs_iter_py(PyObject *self, PyObject *args)
     // GIL free zone ----------------------------------------------------------    
     Py_INCREF(data_py);
     Py_INCREF(assignments_py);
-    Py_BEGIN_ALLOW_THREADS;
+    Py_INCREF(model_py);
+    // Py_BEGIN_ALLOW_THREADS;
 
-    gibbs_iter(
+    bool gibbs_success = gibbs_iter(
         (double *) PyArray_DATA(data_py),
         (uint16_t *) PyArray_DATA(assignments_py),
         model);
 
-    Py_END_ALLOW_THREADS;
+    // Py_END_ALLOW_THREADS;
     Py_DECREF(data_py);
     Py_DECREF(assignments_py);
+    Py_DECREF(model_py);
     // ------------------------------------------------------------------------
 
-    Py_RETURN_NONE;
+    // Check for exception
+    if(!gibbs_success) { return NULL; }
+    else { Py_RETURN_NONE; }
 }

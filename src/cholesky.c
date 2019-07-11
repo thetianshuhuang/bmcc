@@ -32,6 +32,7 @@ double cholesky_logdet(double *mat, int dim)
 void cholesky_update(double *mat, double *pt, double scale, int dim)
 {
 	double *pt_cpy = (double *) malloc(sizeof(double) * dim);
+
 	for(int i = 0; i < dim; i++) { pt_cpy[i] = scale * pt[i]; }
 
 	for(int i = 0; i < dim; i++) {

@@ -1,52 +1,14 @@
-"""Analysis Routines
-
-Implements Least Squares configuration selection [1].
-
-References
-----------
-[1] David B. Dahl (2006), "Model-Based Clustering for Expression Data via a
-    Dirichlet Process Mixture Model". Bayesian Inference for Gene Expression
-    and Proteomics.
-"""
-
 
 import numpy as np
-from bmcc.core import (
-    pairwise_probability,
-    aggregation_score,
-    segregation_score)
-from bmcc.plot import plot_clusterings
-
+from matplotlib import pyplot as plt
 from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score
 
-from matplotlib import pyplot as plt
+from bmcc.core import aggregation_score, segregation_score
+from bmcc.plot import plot_clusterings
 
 
-def membership_matrix(asn):
-    """Get membership matrix of an assignment vector.
-
-    Parameters
-    ----------
-    asn : array-like
-        Cluster assignment vector a
-
-    Returns
-    -------
-    np.array
-        Membership matrix M(a):
-        M_{i,j}(a) = 1_{a[i] = a[j]}
-    """
-
-    res = np.zeros((len(asn), len(asn)))
-    for i in range(len(asn)):
-        for j in range(len(asn)):
-            if asn[i] == asn[j]:
-                res[i, j] = 1
-    return res
-
-
-class LstsqResult:
-    """Least squares analysis on MCMC results
+class BaseResult:
+    """Base Results Class
 
     Parameters
     ----------
@@ -63,21 +25,25 @@ class LstsqResult:
 
     Attributes
     ----------
+    data : np.array
+        Source data array
     hist : np.array
         History array (same as the input)
     burn_in : int
         Burn in duration used in analysis
-    matrix : np.array
-        Pairwise Probability Matrix [1]
-    residuals : np.array
-        Squared residuals between membership matrix of each iteration and
-        pairwise probability matrix [1]
     best_idx : int
-        Index of 'best' clustering configuration according to residuals [1]
+        Index of 'best' clustering configuration. This class is a template
+        class that does not select a clustering configuration; it is up to
+        extending classes to provide a 'cluster' method that creates this
+        attribute.
     best : np.array
-        Best clustering configuration [1]
+        Best clustering configuration
     num_clusters : np.array
         Trace of number of clusters
+
+    Attributes
+    ----------
+    [After 'evaluate' is called]
     nmi : np.array
         Normalized Mutual Information trace.
     nmi_best : float
@@ -101,15 +67,8 @@ class LstsqResult:
         Oracle clustering assignments
     oracle_nmi, oracle_rand, oracle_segregation, oracle_aggregation : float
         Scores for oracle clustering
-
     """
-
     def __init__(self, data, hist, burn_in=0):
-
-        self.data = data
-        self.hist = hist
-        self.burn_in = burn_in
-        self.truth_known = False
 
         # Check burn in
         if type(burn_in) != int:
@@ -118,14 +77,33 @@ class LstsqResult:
             raise ValueError(
                 "Burn in period larger than the number of saved samples.")
 
-        # Get pairwise probability matrix and run least squares procedure
-        (self.matrix,
-         self.residuals) = pairwise_probability(self.hist, self.burn_in)
+        # Bind arguments
+        self.data = data
+        self.hist = hist
+        self.burn_in = burn_in
+        self.truth_known = False
 
-        self.best_idx = np.argmin(self.residuals)
-        self.best = self.hist[self.best_idx, :]
-
+        # Metadata Trace
         self.num_clusters = np.array([np.max(x) + 1 for x in self.hist])
+
+        # Run selection
+        self.cluster()
+
+        # Make sure selection has a 'best' attribute set
+        if not hasattr(self, 'best'):
+            raise Exception(
+                "'cluster' method of class extending BaseResult did not set "
+                "a valid 'best' clustering.")
+
+    def cluster(self):
+        """Select clustering configuration from MCMC samples.
+
+        This method is a placeholder, and will raise an error of called. This
+        method should be overwritten by analysis types.
+        """
+
+        raise Exception(
+            "Class extending BaseResult did not supply a 'cluster' method.")
 
     def __score_trace(self, actual, nmi_method):
         """Compute NMI and Rand Index trace.
@@ -162,7 +140,10 @@ class LstsqResult:
             segregation_score(actual, x) for x in self.hist])
         self.segregation_best = self.segregation[self.best_idx]
 
-    def evaluate(self, actual, oracle=None, nmi_method='arithmetic'):
+    def evaluate(
+            self, actual,
+            oracle=None, oracle_matrix=None,
+            nmi_method='arithmetic'):
         """Evaluate clustering against ground truth.
 
         Parameters
@@ -172,6 +153,8 @@ class LstsqResult:
         oracle : np.array
             Oracle assignments (used as point of comparison instead of
             'perfect' clustering). Used only if present.
+        oracle_matrix : np.array
+            Oracle pairwise probability matrix.
         nmi_method : str
             Normalization method for NMI calculations
         """
@@ -190,6 +173,7 @@ class LstsqResult:
             self.oracle_rand = adjusted_rand_score(actual, oracle)
             self.oracle_aggregation = aggregation_score(actual, oracle)
             self.oracle_segregation = segregation_score(actual, oracle)
+            self.oracle_matrix = oracle_matrix
 
         else:
             self.oracle = actual
@@ -199,26 +183,9 @@ class LstsqResult:
         self.truth_known = True
         self.__score_trace(actual, nmi_method)
 
-    DEFAULT_TRACE_PLOTS = {
-        "Metrics (NMI, Rand)": {
-            "Normalized Mutual Information": "nmi",
-            "Adjusted Rand Index": "rand",
-            "Oracle NMI": "oracle_nmi",
-            "Oracle Rand": "oracle_rand"
-        },
-        "Number of Clusters": {
-            "Number of Clusters": "num_clusters",
-            "Actual": "clusters_true"
-        },
-        "Aggregation / Segregation Score": {
-            "Aggregation Score": "aggregation",
-            "Segregation Score": "segregation",
-            "Oracle Aggregation": "oracle_aggregation",
-            "Oracle Segregation": "oracle_segregation"
-        }
-    }
+    DEFAULT_TRACE_PLOTS = {}
 
-    def trace(self, plots=DEFAULT_TRACE_PLOTS):
+    def trace(self, plots=None):
         """Plot NMI, Rand Index, and # of clusters as a trace over MCMC
         iterations.
 
@@ -234,6 +201,9 @@ class LstsqResult:
         plt.figure.Figure
             Created figure; plot with fig.show().
         """
+
+        if plots is None:
+            plots = self.DEFAULT_TRACE_PLOTS
 
         if not self.truth_known:
             raise ValueError(
@@ -263,36 +233,6 @@ class LstsqResult:
             else:
                 raise TypeError(
                     "Attribute name is not a string or dict.")
-
-        return fig
-
-    def matrices(self):
-        """Show pairwise probability matrix and membership matrix of least
-        squares configuration.
-
-        Returns
-        -------
-        plt.figure.Figure
-            Created figure; plot with fig.show().
-        """
-
-        if not self.truth_known:
-            raise ValueError(
-                "Cannot show scores: ground truth not known.")
-
-        fig, p = plt.subplots(2, 2)
-
-        p[0][0].matshow(self.matrix)
-        p[0][0].set_title("Pairwise Probability Matrix")
-
-        p[0][1].matshow(membership_matrix(self.best))
-        p[0][1].set_title("Membership Matrix of Least Squares Configuration")
-
-        p[1][0].matshow(membership_matrix(self.actual))
-        p[1][0].set_title("Membership Matrix of Actual Clusters")
-
-        p[1][1].matshow(membership_matrix(self.oracle))
-        p[1][1].set_title("Membership Matrix of Oracle Clustering")
 
         return fig
 

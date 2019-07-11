@@ -7,7 +7,8 @@ from bmcc.core import (
 )
 from bmcc.models import MFM, DPM, NormalWishart
 from bmcc.mixture import GibbsMixtureModel
-from bmcc.analysis import LstsqResult, membership_matrix
+from bmcc.base_result import BaseResult
+from bmcc.least_squares import LstsqResult, membership_matrix
 from bmcc.plot import plot_clusterings
 from bmcc.simulate import GaussianMixture
 
@@ -25,6 +26,7 @@ __all__ = [
     # Core
     "GibbsMixtureModel",
     # Analysis
+    "BaseResult",
     "LstsqResult",
     "membership_matrix",
     # Plots

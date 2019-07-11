@@ -4,6 +4,7 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
 /**
@@ -45,9 +46,10 @@ int sample_log_weighted(double *weights, int length)
 	// Normalization constant
 	double total = 0;
 	for(int i = 0; i < length; i++) { total += weights[i]; }
+	for(int i = 0; i < length; i++) { weights[i] /= total; }
 
 	// Generate random number in [0, total]
-	double x = ((double) rand()) / ((double) RAND_MAX) * total;
+	double x = ((double) rand()) / ((double) RAND_MAX);
 
 	// Sample
 	double acc = 0;

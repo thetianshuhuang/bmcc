@@ -17,6 +17,7 @@
 #endif
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <normal_wishart.h>
 
 
@@ -86,20 +87,30 @@ void destroy_mixture(PyObject *model_py)
 /**
  * Add Component: allocates new component, and appends to components capsule
  * @param components: components_t struct containing components
+ * @return true if addition successful
  */
-void add_component(struct mixture_model_t *model)
+bool add_component(struct mixture_model_t *model)
 {
     // Handle exponential over-allocation
     if(model->mem_size <= model->num_clusters) {
-        model->clusters = (void *) realloc(
-            model->clusters, sizeof(void *) * model->mem_size * 2);
         model->mem_size *= 2;
+        void **clusters_new = (void *) realloc(
+            model->clusters, sizeof(void *) * model->mem_size);
+
+        if(clusters_new == NULL) {
+            PyErr_SetString(
+                PyExc_MemoryError, "Failed to allocate new component");
+            return false;
+        }
+        else { model->clusters = clusters_new; }
     }
 
     // Allocate new
     model->clusters[model->num_clusters] = (
         model->comp_methods->create(model->comp_params));
     model->num_clusters += 1;
+
+    return true;
 }
 
 
@@ -190,7 +201,19 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
     }
 
     // Allocate enough components
-    for(int i = 0; i <= max; i++) { add_component(mixture); }
+    for(int i = 0; i <= max; i++) {
+        bool success_add = add_component(mixture);
+
+        // Check for error
+        if(!success_add) {
+            for(int j = 0; j < i; j++) {
+                comp_methods->destroy(mixture->clusters[j]);
+            }
+            free(mixture->clusters);
+            free(mixture);
+            return NULL;
+        }
+    }
 
     // Add points
     for(int i = 0; i < size; i++) {

@@ -127,7 +127,7 @@ struct mixture_model_t *create_mixture(
 // Destroy mixture model struct
 void destroy_components(void *model);
 // Add component to model
-void add_component(struct mixture_model_t *model);
+bool add_component(struct mixture_model_t *model);
 // Remove component from model
 void remove_component(struct mixture_model_t *model, int idx);
 // Remove empty component

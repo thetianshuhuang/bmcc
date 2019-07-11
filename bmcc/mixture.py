@@ -38,7 +38,7 @@ from bmcc.core import (
     init_model, gibbs_iter,
     update_mixture,
     update_components)
-from bmcc.analysis import LstsqResult
+from bmcc.least_squares import LstsqResult
 from bmcc.models import NormalWishart, DPM
 
 
