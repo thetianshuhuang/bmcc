@@ -50,7 +50,7 @@ class GaussianMixture:
     """
 
     def __init__(
-            self, n=1000, k=3, d=2, r=1, alpha=40, df=None,
+            self, n=1000, k=3, d=2, r=1, alpha=10, df=None,
             symmetric=False, shuffle=True):
 
         if df is None:
