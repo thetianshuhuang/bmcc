@@ -70,6 +70,12 @@ static PyMethodDef ModuleMethods[] = {
         METH_VARARGS,
         DOCSTRING_SEGREGATION_SCORE
     },
+    {
+        "oracle_matrix",
+        (PyCFunction) oracle_matrix_py,
+        METH_VARARGS,
+        DOCSTRING_ORACLE_MATRIX
+    },
     {NULL, NULL, 0, NULL}
 };
 

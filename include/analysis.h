@@ -37,4 +37,23 @@ PyObject *aggregation_score_py(PyObject *self, PyObject *args);
 
 PyObject *segregation_score_py(PyObject *self, PyObject *args);
 
+
+#define DOCSTRING_ORACLE_MATRIX \
+	"Get Oracle Pairwise Probability Matrix:\n" \
+	"A[i, j] = P[x_i, x_j assigned to same cluster| Oracle Information]\n" \
+	"\n" \
+	"Parameters\n" \
+	"----------\n" \
+	"likelihoods : np.array\n" \
+	"    Numpy array containing assignment likelihoods for each point. each " \
+		"row must have\n" \
+	"    likelihoods normalized to 1.\n" \
+	"\n" \
+	"Returns\n" \
+	"-------\n" \
+	"np.array\n" \
+	"    Pairwise probability matrix"
+
+PyObject *oracle_matrix_py(PyObject *self, PyObject *args);
+
 #endif

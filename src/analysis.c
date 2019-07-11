@@ -80,3 +80,42 @@ PyObject *segregation_score_py(PyObject *self, PyObject *args)
 	}
 	return Py_BuildValue("f", score / total);
 }
+
+
+/** 
+ * Mixture of Gaussian Oracle Pairwise Probability Matrix
+ */
+PyObject *oracle_matrix_py(PyObject *self, PyObject *args)
+{
+	PyArrayObject *likelihoods_py;
+
+	bool success = PyArg_ParseTuple(
+		args, "O!", &PyArray_Type, &likelihoods_py);
+	if(!success) { return NULL; }
+
+	int size = PyArray_DIM(likelihoods_py, 0);
+	int clusters = PyArray_DIM(likelihoods_py, 1);
+	double *likelihoods = PyArray_DATA(likelihoods_py);
+
+	npy_intp dims[2] = {size, size};
+	PyArrayObject *prob_matrix_py = (
+		(PyArrayObject *) PyArray_SimpleNew(2, dims, NPY_FLOAT64));
+	double *prob_matrix = (double *) PyArray_DATA(prob_matrix_py);
+
+	// For assignment likelihoods L_k(i) of assigning point i to cluster k:
+	// Pairwise Probability [i, j] = Sum_k (L_k(i) * L_k(j))
+	for(int i = 0; i < size; i++) {
+		for(int j = 0; j < size; j++) {
+			double pairwise = 0;
+			for(int k = 0; k < clusters; k++) {
+				pairwise += (
+					likelihoods[i * clusters + k] *
+					likelihoods[j * clusters + k]);
+			}
+			prob_matrix[i * size + j] = pairwise;
+		}
+	}	
+
+	return (PyObject *) prob_matrix_py;
+}
+

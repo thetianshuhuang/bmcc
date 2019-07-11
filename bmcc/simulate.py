@@ -20,6 +20,7 @@ from scipy import stats
 from matplotlib import pyplot as plt
 
 from bmcc.plot import plot_clusterings
+from bmcc.core import oracle_matrix
 
 
 class GaussianMixture:
@@ -112,13 +113,7 @@ class GaussianMixture:
             self.oracle[idx] = np.argmax(self.likelihoods[idx])
 
         # Compute pairwise probability matrix from likelihood table
-        self.oracle_matrix = np.zeros((n, n))
-        for i in range(n):
-            for j in range(n):
-                self.oracle_matrix[i, j] = sum(
-                    pk_i * pk_j
-                    for pk_i, pk_j
-                    in zip(self.likelihoods[i], self.likelihoods[j]))
+        self.oracle_matrix = oracle_matrix(self.likelihoods)
 
     def plot_actual(self, plot=False, **kwargs):
         """Plot actual clusterings (binding to bmcc.plot_clusterings)"""

@@ -10,10 +10,11 @@ SIZE = 1000
 ITERATIONS = 5000
 
 
+start = time.time()
 dataset = bmcc.GaussianMixture(
     n=1000, k=4, d=3, r=0.7, alpha=10, df=3, symmetric=False, shuffle=False)
+print("simulate: {:.2f}s".format(time.time() - start))
 
-dataset.plot_actual(plot=True)
 
 model = bmcc.GibbsMixtureModel(
     data=dataset.data,
@@ -26,7 +27,7 @@ model = bmcc.GibbsMixtureModel(
 start = time.time()
 for i in tqdm(range(ITERATIONS)):
     model.iter()
-print("gibbs_iterate: {:.2f} s [{:.2f} ms/iteration]".format(
+print("gibbs_iterate: {:.2f}s [{:.2f} ms/iteration]".format(
     time.time() - start,
     (time.time() - start) * 1000 / ITERATIONS))
 
@@ -36,7 +37,7 @@ res.evaluate(
     dataset.assignments,
     oracle=dataset.oracle,
     oracle_matrix=dataset.oracle_matrix)
-print("evaluate_lstsq: {:.2f} s".format(time.time() - start))
+print("evaluate_lstsq: {:.2f}s".format(time.time() - start))
 
 print("num_clusters: {}".format(res.num_clusters[res.best_idx]))
 
