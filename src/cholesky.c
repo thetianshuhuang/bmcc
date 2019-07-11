@@ -4,7 +4,7 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <stdio.h>
+
 
 /**
  * Helper function for log(det|LL^T|) using the cholesy decomposition

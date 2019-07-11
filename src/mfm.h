@@ -5,7 +5,7 @@
 #ifndef MFM_H
 #define MFM_H
 
-#include <mixture.h>
+#include "mixture.h"
 
 ModelMethods MFM_METHODS;
 

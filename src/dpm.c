@@ -4,7 +4,9 @@
 
 #include <Python.h>
 #include <math.h>
+
 #include "mixture.h"
+
 
 /**
  * DPM Parameters

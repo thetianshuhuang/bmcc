@@ -12,17 +12,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include <mixture.h>
-#include <misc_math.h>
-#include <type_check.h>
-
-#ifndef BASE_VEC_SIZE
-#define BASE_VEC_SIZE 32
-#endif
-
-
-#include <stdio.h>
-#include <stdbool.h>
+#include "mixture.h"
+#include "misc_math.h"
+#include "type_check.h"
 #include "normal_wishart.h"
 
 /**

@@ -6,7 +6,9 @@
 #define NORMAL_WISHART_H
 
 #include <Python.h>
+
 #include "mixture.h"
+
 
 // Normal Wishart struct (goes inside capsules)
 struct nw_component_t {

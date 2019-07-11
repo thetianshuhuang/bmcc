@@ -11,13 +11,17 @@
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
-#include <gibbs.h>
-#include <dpm.h>
-#include <mfm.h>
-#include <normal_wishart.h>
-#include <mixture.h>
-#include <select.h>
-#include <analysis.h>
+#ifndef BASE_VEC_SIZE
+#define BASE_VEC_SIZE 32
+#endif
+
+#include "gibbs.h"
+#include "dpm.h"
+#include "mfm.h"
+#include "normal_wishart.h"
+#include "mixture.h"
+#include "select.h"
+#include "analysis.h"
 
 
 /**
@@ -105,6 +109,20 @@ PyMODINIT_FUNC PyInit_core()
     PyModule_AddObject(
         mod, "COMPONENT_NORMAL_WISHART", PyCapsule_New(
             &NORMAL_WISHART, COMPONENT_METHODS_API, NULL));
+
+    // -- Module Constants ----------------------------------------------------
+    PyModule_AddIntConstant(
+        mod, "BASE_VEC_SIZE", BASE_VEC_SIZE);
+    PyModule_AddStringConstant(
+        mod, "COMPONENT_METHODS_API", COMPONENT_METHODS_API);
+    PyModule_AddStringConstant(
+        mod, "COMPONENT_PARAMS_API", COMPONENT_PARAMS_API);
+    PyModule_AddStringConstant(
+        mod, "MODEL_METHODS_API", MODEL_METHODS_API);
+    PyModule_AddStringConstant(
+        mod, "MODEL_PARAMS_API", MODEL_PARAMS_API);
+    PyModule_AddStringConstant(
+        mod, "MIXTURE_MODEL_API", MIXTURE_MODEL_API);
 
     return mod;
 }

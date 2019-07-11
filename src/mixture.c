@@ -9,16 +9,11 @@
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
+#include <stdbool.h>
+
 #include "type_check.h"
 #include "mixture.h"
-
-#ifndef BASE_VEC_SIZE
-#define BASE_VEC_SIZE 32
-#endif
-
-#include <stdio.h>
-#include <stdbool.h>
-#include <normal_wishart.h>
+#include "normal_wishart.h"
 
 
 /**

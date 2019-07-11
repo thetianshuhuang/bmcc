@@ -5,7 +5,7 @@
 #ifndef DPM_H
 #define DPM_H
 
-#include <mixture.h>
+#include "mixture.h"
 
 ModelMethods DPM_METHODS;
 

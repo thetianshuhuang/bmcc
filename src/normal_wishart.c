@@ -12,8 +12,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <stdio.h>
-
 #include "cholesky.h"
 #include "misc_math.h"
 #include "normal_wishart.h"
