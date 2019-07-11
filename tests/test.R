@@ -1,14 +1,12 @@
-library(reticulate)
-bmcc <- import("bmcc", convert=FALSE)
-plt <- import("matplotlib.pyplot")
+source("../r/bmcc/R/main.R")
 
-dataset <- bmcc$GaussianMixture(
+dataset <- GaussianMixture(
     n=1000L, k=3L, d=2L, r=0.7, alpha=10, df=2, symmetric=FALSE, shuffle=FALSE)
 
-model <- bmcc$GibbsMixtureModel(
+model <- GibbsMixtureModel(
     data=dataset$data,
-    component_model=bmcc$NormalWishart(df=2),
-    mixture_model=bmcc$DPM(alpha=1, use_eb=TRUE),
+    component_model=NormalWishart(df=2),
+    mixture_model=DPM(alpha=1, use_eb=TRUE),
     assignments=np_array(rep(0, 1000), dtype="uint16"),
     thinning=1L
 )
@@ -24,6 +22,6 @@ res$evaluate(
     oracle_matrix=dataset$oracle_matrix
 )
 
-res$trace()
-res$matrices()
-res$clustering()
+res$trace(plot=TRUE)
+res$matrices(plot=TRUE)
+res$clustering(plot=TRUE)

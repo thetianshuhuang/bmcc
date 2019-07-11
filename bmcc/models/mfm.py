@@ -34,12 +34,13 @@ class MFM:
 
     CAPSULE = MODEL_MFM
 
-    def __init__(
-            self, gamma=1,
-            prior=lambda k: k * math.log(0.1), error=0.001):
+    def __init__(self, gamma=1, prior=None, error=0.001):
 
         self.gamma = gamma
         self.error = error
+        if prior is None:
+            def prior(k):
+                return k * math.log(0.1)
         self.prior = prior
 
     def log_v_n(self, N):

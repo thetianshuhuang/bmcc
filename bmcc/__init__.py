@@ -54,7 +54,12 @@ from bmcc.core import (
     MODEL_PARAMS_API,
     MIXTURE_MODEL_API
 )
-
+from bmcc.r_helpers import (
+    is_uint16,
+    is_float64,
+    is_contiguous,
+    is_np_array,
+)
 from bmcc.models import MFM, DPM, NormalWishart
 from bmcc.mixture import GibbsMixtureModel
 from bmcc.base_result import BaseResult
@@ -80,7 +85,13 @@ __maintainer__ = "Tianshu Huang"
 __email__ = "thetianshuhuang@gmail.com"
 __version__ = "0.2.7c"
 
+
 __all__ = [
+    # Helpers
+    "is_np_array",
+    "is_uint16",
+    "is_float64",
+    "is_contiguous",
 
     # Capsules
     "MODEL_DPM",

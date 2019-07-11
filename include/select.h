@@ -17,6 +17,8 @@
 	"----------\n" \
 	"hist : np.array\n" \
 	"    Assignment history array; row-major, uint16.\n" \
+	"burn_in : int\n" \
+	"    Burn in duration; must be larger than the number of samples.\n" \
 	"\n" \
 	"Returns\n" \
 	"-------\n" \
