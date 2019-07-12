@@ -52,7 +52,8 @@ class NormalWishart:
 
         return {
             "df": float(self.df),
-            "s_chol": np.linalg.cholesky(1 / self.df * np.cov(data.T))
+            "s_chol": np.linalg.cholesky(
+                1 / self.df * np.linalg.inv(np.cov(data.T)))
         }
 
     def update(self, mixture):

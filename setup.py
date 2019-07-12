@@ -77,7 +77,7 @@ with open("README.md", "r") as f:
 setup(
     # About
     name='bmcc',
-    version='0.2.7c',
+    version='1.0.0',
     author='Tianshu Huang',
     author_email='thetianshuhuang@gmail.com',
 

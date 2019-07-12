@@ -8,20 +8,21 @@ Gibbs Sampling is then run with a MFM prior.
 
 
 import numpy as np
+from scipy.stats import poisson
 import time
 from tqdm import tqdm
 import bmcc
 
 # Create dataset
 dataset = bmcc.GaussianMixture(
-    n=1000, k=4, d=3, r=0.7, alpha=8, df=3, symmetric=False, shuffle=False)
+    n=1000, k=4, d=3, r=0.7, alpha=5, df=3, symmetric=False, shuffle=False)
 
 # Create mixture model
 model = bmcc.GibbsMixtureModel(
     data=dataset.data,
     component_model=bmcc.NormalWishart(df=3),
     mixture_model=bmcc.MFM(
-        gamma=1, prior=lambda k: (k - 1) * np.log(0.75) * 0.25),
+        gamma=1, prior=lambda k: poisson.logpmf(k, 4)),
     assignments=np.zeros(1000).astype(np.uint16),
     thinning=5)
 
@@ -46,3 +47,4 @@ print("num_clusters: {}".format(res.num_clusters[res.best_idx]))
 res.trace(plot=True)
 res.matrices(plot=True)
 res.clustering(kwargs_scatter={"marker": "."}, plot=True)
+dataset.plot_oracle(kwargs_scatter={"marker": "."}, plot=True)

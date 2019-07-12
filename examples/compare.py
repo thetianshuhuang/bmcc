@@ -9,20 +9,21 @@ plots.
 
 
 import numpy as np
+from scipy.stats import poisson
 from tqdm import tqdm
 import bmcc
 
 
 # Create dataset
 dataset = bmcc.GaussianMixture(
-    n=1000, k=4, d=3, r=0.7, alpha=6, df=3, symmetric=False, shuffle=False)
+    n=1000, k=4, d=3, r=0.7, alpha=1000, df=3, symmetric=False, shuffle=False)
 
 # Create mixture models
 model_mfm = bmcc.GibbsMixtureModel(
     data=dataset.data,
     component_model=bmcc.NormalWishart(df=3),
     mixture_model=bmcc.MFM(
-        gamma=1, prior=lambda k: (k - 1) * np.log(0.75) + np.log(0.25)),
+        gamma=1, prior=lambda k: poisson.logpmf(k, 4)),
     assignments=np.zeros(1000).astype(np.uint16),
     thinning=5)
 model_dpm = bmcc.GibbsMixtureModel(

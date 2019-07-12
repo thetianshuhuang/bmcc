@@ -50,7 +50,7 @@ class GaussianMixture:
     """
 
     def __init__(
-            self, n=1000, k=3, d=2, r=1, alpha=10, df=None,
+            self, n=1000, k=3, d=2, r=1, alpha=5, df=None,
             symmetric=False, shuffle=True):
 
         if df is None:
@@ -76,9 +76,12 @@ class GaussianMixture:
             self.assignments.sort()
 
         # Means: normal, with radius proportional to clusters
-        self.means = [stats.multivariate_normal.rvs(
-            mean=np.zeros(d),
-            cov=np.identity(d) * alpha * k) for _ in range(k)]
+        self.means = [
+            stats.multivariate_normal.rvs(
+                mean=np.zeros(d),
+                cov=np.identity(d) * alpha * k
+            ) for _ in range(k)
+        ]
 
         # Covariances: normal wishart (if not symmetric), else normal
         if symmetric:
