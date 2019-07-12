@@ -10,6 +10,7 @@
 #include <numpy/arrayobject.h>
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 
 #include "../include/mixture.h"
@@ -31,8 +32,12 @@ bool gibbs_iter(
 {
 
     // Assignment weight vector: exponentially-overallocated
-    double *weights = (double *) malloc(sizeof(double) * BASE_VEC_SIZE);
+    // Make sure to check for number of clusters >> BASE_VEC_SIZE!
     int vec_size = BASE_VEC_SIZE;
+    if(model->num_clusters > vec_size) {
+        vec_size = model->num_clusters + 1;
+    }
+    double *weights = (double *) malloc(sizeof(double) * vec_size);
 
     // For each sample:
     for(int idx = 0; idx < model->size; idx++) {
@@ -56,6 +61,7 @@ bool gibbs_iter(
 
         // Handle vector resizing
         if(model->num_clusters + 1 >= vec_size) {
+
             free(weights);
             vec_size *= 2;
             double *weights_new = (double *) malloc(sizeof(double) * vec_size);

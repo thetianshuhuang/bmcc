@@ -16,6 +16,8 @@
 #include "../include/normal_wishart.h"
 
 
+#include <stdio.h>
+
 /**
  * Create components struct
  * @return allocated components_t; initialized empty
@@ -31,8 +33,7 @@ struct mixture_model_t *create_mixture(
         (struct mixture_model_t *) malloc(sizeof(struct mixture_model_t)));
     mixture->mem_size = BASE_VEC_SIZE;
     mixture->num_clusters = 0;
-    mixture->clusters = (void **) malloc(
-        sizeof(struct mixture_model_t) * mixture->mem_size);
+    mixture->clusters = (void **) malloc(sizeof(void *) * mixture->mem_size);
 
     // Bind methods, params, dim
     mixture->comp_methods = comp_methods;
@@ -89,7 +90,7 @@ bool add_component(struct mixture_model_t *model)
     // Handle exponential over-allocation
     if(model->mem_size <= model->num_clusters) {
         model->mem_size *= 2;
-        void **clusters_new = (void *) realloc(
+        void **clusters_new = (void **) realloc(
             model->clusters, sizeof(void *) * model->mem_size);
 
         if(clusters_new == NULL) {
@@ -121,6 +122,7 @@ void remove_component(struct mixture_model_t *model, int idx)
     for(int i = idx; i < (model->num_clusters - 1); i++) {
         model->clusters[i] = model->clusters[i + 1];
     }
+    model->num_clusters -= 1;
 }
 
 
@@ -142,7 +144,6 @@ bool remove_empty(struct mixture_model_t *model, uint16_t *assignments)
             for(int j = 0; j < model->size; j++) {
                 if(assignments[j] > i) { assignments[j] -= 1; }
             }
-            model->num_clusters -= 1;
             return true;
         }
     }

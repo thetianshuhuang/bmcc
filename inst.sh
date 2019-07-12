@@ -2,4 +2,11 @@
 pip3 install .
 
 # Check version
-python3 tests/version.py
+echo "System time:"
+now=$(date)
+echo "$now"
+echo "Build time: should match"
+cd examples
+python3 -c "import bmcc; print(bmcc.CONFIG['BUILD_DATETIME'])"
+cd ..
+echo ""

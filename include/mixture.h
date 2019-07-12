@@ -11,14 +11,6 @@
 #include <Python.h>
 
 
-#define COMPONENT_METHODS_API "bmcc.core.ComponentMethods"
-#define COMPONENT_PARAMS_API "bmcc.core.ComponentParams"
-
-#define MODEL_METHODS_API "bmcc.core.ModelMethods"
-#define MODEL_PARAMS_API "bmcc.core.ModelParams"
-
-#define MIXTURE_MODEL_API "bmcc.core.MixtureModel"
-
 // ----------------------------------------------------------------------------
 //
 //                             Struct Definitions

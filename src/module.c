@@ -4,16 +4,53 @@
 
 #include <Python.h>
 
-/**
- * Core Numpy Import
- */
+
+// ----------------------------------------------------------------------------
+//
+//                              Core Numpy Import
+//
+// ----------------------------------------------------------------------------
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
+
+// ----------------------------------------------------------------------------
+//
+//                            Configurable Defines
+//
+// ----------------------------------------------------------------------------
 #ifndef BASE_VEC_SIZE
 #define BASE_VEC_SIZE 32
 #endif
+
+#ifndef BUILD_DATETIME
+#define BUILD_DATETIME "NOT AVAILABLE"
+#endif
+
+
+// ----------------------------------------------------------------------------
+//
+//                           Capsule API Definitions
+//
+// ----------------------------------------------------------------------------
+#if \
+    !defined(COMPONENT_METHODS_API) || \
+    !defined(COMPONENT_PARAMS_API) || \
+    !defined(MODEL_METHODS_API) || \
+    !defined(MODEL_PARAMS_API) || \
+    !defined(MIXTURE_MODEL_API)
+#error \
+    API Names (COMPONENT_METHODS_API, COMPONENT_PARAMS_API, MODEL_METHODS_API, \
+    MODEL_PARAMS_API, MIXTURE_MODEL_API) must be #defined on compilation.
+#endif
+
+
+// ----------------------------------------------------------------------------
+//
+//                               Module Methods
+//
+// ----------------------------------------------------------------------------
 
 #include "../include/gibbs.h"
 #include "../include/dpm.h"
@@ -23,10 +60,6 @@
 #include "../include/select.h"
 #include "../include/analysis.h"
 
-
-/**
- * Module Methods
- */
 static PyMethodDef ModuleMethods[] = {
     {
         "gibbs_iter",
@@ -80,9 +113,6 @@ static PyMethodDef ModuleMethods[] = {
 };
 
 
-/**
- * Module Definitions
- */
 static struct PyModuleDef ModuleDef = {
     PyModuleDef_HEAD_INIT,
     "core",
@@ -92,10 +122,12 @@ static struct PyModuleDef ModuleDef = {
 };
 
 
-/**
- * Module Initialization
- * Capsules are loaded separately from function definitions
- */
+// ----------------------------------------------------------------------------
+//
+//                           Module Initialization
+//
+// ----------------------------------------------------------------------------
+
 PyMODINIT_FUNC PyInit_core()
 {
     import_array();
@@ -129,6 +161,8 @@ PyMODINIT_FUNC PyInit_core()
         mod, "MODEL_PARAMS_API", MODEL_PARAMS_API);
     PyModule_AddStringConstant(
         mod, "MIXTURE_MODEL_API", MIXTURE_MODEL_API);
+    PyModule_AddStringConstant(
+        mod, "BUILD_DATETIME", BUILD_DATETIME);
 
     return mod;
 }

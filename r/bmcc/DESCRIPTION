@@ -1,11 +1,15 @@
 Package: bmcc
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Markov Chain Bayesian Clustering
+Version: 0.2.8
+Authors@R: person("Tianshu", "Huang", email = "thetianshuhuang@gmail.com",
+				  role=c("aut", "cre")
+Description: Implementation of Markov Chain Bayesian Clustering techniques,
+	including DPM (Dirichlet Process Mixture Models) and MFM (Mixture of Finite Mixtures) mixture models, with an abstract Mixture Model and Component Model API.
+	Hyperparameter updates for DPM are implemented using an Empirical Bayes update procedure.
+	Final configuration selection is implemented using Least Squares clustering.
+Imports:
+	reticulate
+License: MIT
 Encoding: UTF-8
 LazyData: true

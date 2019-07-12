@@ -52,7 +52,8 @@ from bmcc.core import (
     COMPONENT_PARAMS_API,
     MODEL_METHODS_API,
     MODEL_PARAMS_API,
-    MIXTURE_MODEL_API
+    MIXTURE_MODEL_API,
+    BUILD_DATETIME
 )
 from bmcc.r_helpers import (
     is_uint16,
@@ -71,6 +72,7 @@ from bmcc.simulate import GaussianMixture
 # Configuration Variables
 CONFIG = {
     "BASE_VEC_SIZE": BASE_VEC_SIZE,
+    "BUILD_DATETIME": BUILD_DATETIME,
     "COMPONENT_METHODS_API": COMPONENT_METHODS_API,
     "COMPONENT_PARAMS_API": COMPONENT_PARAMS_API,
     "MODEL_METHODS_API": MODEL_METHODS_API,
@@ -83,7 +85,6 @@ __author__ = "Tianshu Huang"
 __license__ = "MIT"
 __maintainer__ = "Tianshu Huang"
 __email__ = "thetianshuhuang@gmail.com"
-__version__ = "0.2.7c"
 
 
 __all__ = [

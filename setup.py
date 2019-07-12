@@ -26,14 +26,43 @@ Requires
 from setuptools import setup, find_packages
 from distutils.core import Extension
 import numpy as np
+
+import datetime
 import os
+
+
+BUILD_DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 C_EXTENSION = Extension(
     "bmcc.core",
-    sources=['./src/' + s for s in os.listdir('./src')],
+
+    # List module.c first
+    sources=[
+        './src/module.c'
+    ] + [
+        './src/' + s for s in os.listdir('./src') if s != 'module.c'
+    ],
+
+    # Headers; must be in a separate directory from sources since include_dirs
+    # only takes directories as an argument
     include_dirs=[np.get_include(), './include'],
-    define_macros=[("BASE_VEC_SIZE", 1024)],
+
+    # Configuration
+    define_macros=[
+        # Base size for dynamically sized vectors
+        ("BASE_VEC_SIZE", 32),
+        # Build Datetime -- used for debug purposes
+        # Bound to bmcc.CONFIG["BUILD_DATETIME"]
+        ("BUILD_DATETIME", '"' + BUILD_DATETIME + '"'),
+        # API Descriptions; needed to create other extensions that modify
+        # core capsules
+        ("COMPONENT_METHODS_API", "\"bmcc.core.ComponentMethods\""),
+        ("COMPONENT_PARAMS_API", "\"bmcc.core.ComponentParams\""),
+        ("MODEL_METHODS_API", "\"bmcc.core.ModelMethods\""),
+        ("MODEL_PARAMS_API", "\"bmcc.core.ModelParams\""),
+        ("MIXTURE_MODEL_API", "\"bmcc.core.MixtureModel\"")
+    ],
 )
 
 
