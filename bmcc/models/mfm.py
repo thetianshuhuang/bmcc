@@ -22,7 +22,7 @@ class MFM:
         Dirichlet parameter (model 2, [1])
     prior : function(int) -> float
         Prior likelihood on the number of clusters; p_K in model 2[1].
-        Defaults to geometric(0.1).
+        Defaults to geometric(0.5).
     error : float
         Margin for computation of V_n coefficients (equation 3.2 [1])
 
@@ -40,7 +40,7 @@ class MFM:
         self.error = error
         if prior is None:
             def prior(k):
-                return k * math.log(0.1)
+                return k * np.log(0.5)
         self.prior = prior
 
     def log_v_n(self, N):

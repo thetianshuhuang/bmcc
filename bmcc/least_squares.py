@@ -100,7 +100,7 @@ class LstsqResult(BaseResult):
         }
     }
 
-    def matrices(self, plot=True):
+    def matrices(self, plot=False):
         """Show pairwise probability matrix and membership matrix of least
         squares configuration.
 
