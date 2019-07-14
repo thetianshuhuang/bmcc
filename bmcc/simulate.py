@@ -28,6 +28,9 @@ class GaussianMixture:
 
     Parameters
     ----------
+    load : bool
+        If True, instead takes a single string argument, which should be a file
+        containing a saved GaussianMixture object. Defaults to False.
     n : int
         Number of data points
     k : int
@@ -47,11 +50,53 @@ class GaussianMixture:
     shuffle : bool
         If False, sorts the assignments. Use this to keep the pairwise matrices
         clean.
+
+    Attributes
+    ----------
+    API_NAME : str
+        String identifier for npz objects saved by this class. This class will
+        only save to and load from npz files with the attribute
+        f[API_NAME] = True.
     """
 
-    def __init__(
+    __INT_KEYS = ['n', 'k', 'd']
+    __FLOAT_KEYS = ['r', 'alpha', 'df']
+    __BOOL_KEYS = ['symmetric', 'shuffle']
+    __ARRAY_KEYS = [
+        'oracle_matrix', 'oracle', 'likelihoods',
+        'cov', 'means', 'weights',
+        'assignments', 'data']
+
+    API_NAME = "bmcc_GaussianMixture"
+
+    def __init__(self, *args, load=False, **kwargs):
+        if load:
+            self.__init_load(*args, **kwargs)
+        else:
+            self.__init_new(*args, **kwargs)
+
+    def __init_load(self, src):
+        """Load from file"""
+
+        fz = np.load(src)
+
+        if self.API_NAME not in fz:
+            raise Exception(
+                "Target file is not a valid GaussianMixture save file.")
+
+        for attr in self.__INT_KEYS:
+            setattr(self, attr, int(fz[attr]))
+        for attr in self.__FLOAT_KEYS:
+            setattr(self, attr, float(fz[attr]))
+        for attr in self.__BOOL_KEYS:
+            setattr(self, attr, bool(fz[attr]))
+        for attr in self.__ARRAY_KEYS:
+            setattr(self, attr, fz[attr])
+
+    def __init_new(
             self, n=1000, k=3, d=2, r=1, alpha=5, df=None,
             symmetric=False, shuffle=True):
+        """Initialize New Gaussian Mixture Simulation"""
 
         if df is None:
             df = d
@@ -62,8 +107,9 @@ class GaussianMixture:
         self.d = d
         self.r = r
         self.alpha = alpha
-        self.symmetric = symmetric
         self.df = df
+        self.symmetric = symmetric
+        self.shuffle = shuffle
 
         # Compute weights
         self.weights = np.array([r**i for i in range(k)])
@@ -137,6 +183,20 @@ class GaussianMixture:
             return None
         else:
             return fig
+
+    def save(self, dst):
+        """Save simulated dataset to a file."""
+
+        save_params = {
+            attr: getattr(self, attr)
+            for attr in (
+                self.__INT_KEYS + self.__BOOL_KEYS +
+                self.__FLOAT_KEYS + self.__ARRAY_KEYS
+            )
+        }
+        save_params[self.API_NAME] = True
+
+        np.savez(dst, **save_params)
 
     def __str__(self):
         return (

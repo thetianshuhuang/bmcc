@@ -16,7 +16,7 @@ import bmcc
 
 # Create dataset
 dataset = bmcc.GaussianMixture(
-    n=1000, k=4, d=3, r=0.7, alpha=1000, df=3, symmetric=False, shuffle=False)
+    n=1000, k=4, d=3, r=0.7, alpha=5, df=3, symmetric=False, shuffle=False)
 
 # Create mixture models
 model_mfm = bmcc.GibbsMixtureModel(

@@ -12,10 +12,10 @@ Final configuration selection is implemented using Least Squares clustering [4].
 ### Installation and Setup
 Python:
 First, install with ```pip install bmcc``` (or ```pip3```, depending on your version). Then, simply ```import bmcc```.
-**NOTE**: Only python3 is officially supported.
+**NOTE**: Only Python 3 is officially supported.
 
 R:
-First, make sure python is installed, and install bmcc with ```pip install bmcc```. Then, install the R package with
+First, make sure Python 3 is installed, and install bmcc with ```pip install bmcc```. Then, install the R package with
 ```R
 library(devtools)
 install_github("https://github.com/thetianshuhuang/bmcc_r")

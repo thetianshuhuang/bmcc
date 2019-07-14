@@ -13,16 +13,12 @@ class BaseResult:
 
     Parameters
     ----------
+    data : np.array
+        Array containing source data points
     hist : np.array
         Array containing MCMC results; each assignment is a row.
     burn_in : int
         Burn in duration
-    actual : np.array
-        Array containing ground truth clusterings. If None, then it is assumed
-        that no ground truth is available.
-    nmi_method : str
-        NMI method for mutual information calculations
-        (see sklearn.metrics.normalized_mutual_info_score.html)
 
     Attributes
     ----------
@@ -69,6 +65,7 @@ class BaseResult:
     oracle_nmi, oracle_rand, oracle_segregation, oracle_aggregation : float
         Scores for oracle clustering
     """
+
     def __init__(self, data, hist, burn_in=0):
 
         # Check burn in
