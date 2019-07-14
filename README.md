@@ -15,8 +15,14 @@ First, install with ```pip install bmcc``` (or ```pip3```, depending on your ver
 **NOTE**: Only python3 is officially supported.
 
 R:
-First, make sure python is installed, and install bmcc with ```pip install bmcc```. Then, install the R package (not yet available). To use, load the package ```bmcc```. You will also need to load ```reticulate```.
+First, make sure python is installed, and install bmcc with ```pip install bmcc```. Then, install the R package with
+```R
+library(devtools)
+install_github("https://github.com/thetianshuhuang/bmcc_r")
 ```
+
+To use, load the package ```bmcc```. You will also need to load ```reticulate``` in order to deal with type conversions.
+```R
 library(bmcc)
 library(reticulate)
 ```
