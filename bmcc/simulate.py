@@ -63,7 +63,6 @@ class GaussianMixture:
     __FLOAT_KEYS = ['r', 'alpha', 'df']
     __BOOL_KEYS = ['symmetric', 'shuffle']
     __ARRAY_KEYS = [
-        'oracle_matrix', 'oracle', 'likelihoods',
         'cov', 'means', 'weights',
         'assignments', 'data']
 
@@ -94,7 +93,7 @@ class GaussianMixture:
             setattr(self, attr, fz[attr])
 
     def __init_new(
-            self, n=1000, k=3, d=2, r=1, alpha=5, df=None,
+            self, n=1000, k=3, d=2, r=1, alpha=40, df=None,
             symmetric=False, shuffle=True):
         """Initialize New Gaussian Mixture Simulation"""
 
@@ -125,7 +124,7 @@ class GaussianMixture:
         self.means = [
             stats.multivariate_normal.rvs(
                 mean=np.zeros(d),
-                cov=np.identity(d) * alpha * k
+                cov=np.identity(d) * (alpha * k) ** (1 / d)
             ) for _ in range(k)
         ]
 
@@ -144,25 +143,47 @@ class GaussianMixture:
                 mean=self.means[self.assignments[idx]],
                 cov=self.cov[self.assignments[idx]])
 
-        # Likelihood table
-        self.likelihoods = np.zeros((n, k))
-        for idx, x in enumerate(self.data):
-            __iter = enumerate(zip(self.weights, self.means, self.cov))
-            # Calculate likelihoods
-            for k, (weight, mu, cov) in __iter:
-                self.likelihoods[idx, k] = (
-                    weight *
-                    stats.multivariate_normal.pdf(x, mean=mu, cov=cov))
-            # Normalize
-            self.likelihoods[idx] /= sum(self.likelihoods[idx])
+    @property
+    def likelihoods(self):
+        """Likelihood table"""
 
-        # Compute oracle clustering (maximum likelihood given all parameters)
-        self.oracle = np.zeros(n, dtype=np.uint16)
-        for idx in range(n):
-            self.oracle[idx] = np.argmax(self.likelihoods[idx])
+        if not hasattr(self, "__likelihoods"):
+            self.__likelihoods = np.zeros((self.n, self.k))
+            for idx, x in enumerate(self.data):
+                __iter = enumerate(zip(self.weights, self.means, self.cov))
+                # Calculate likelihoods
+                for k, (weight, mu, cov) in __iter:
+                    self.__likelihoods[idx, k] = (
+                        weight *
+                        stats.multivariate_normal.pdf(x, mean=mu, cov=cov))
+                # Normalize
+                self.__likelihoods[idx] /= sum(self.__likelihoods[idx])
 
-        # Compute pairwise probability matrix from likelihood table
-        self.oracle_matrix = oracle_matrix(self.likelihoods)
+        return self.__likelihoods
+
+    @property
+    def oracle(self):
+        """Oracle assignments"""
+
+        lk = self.likelihoods
+
+        if not hasattr(self, "__oracle"):
+            # Compute oracle clustering (maximum likelihood given all
+            # parameters)
+            self.__oracle = np.zeros(self.n, dtype=np.uint16)
+            for idx in range(self.n):
+                self.__oracle[idx] = np.argmax(lk[idx])
+
+        return self.__oracle
+
+    @property
+    def oracle_matrix(self):
+        """Oracle Pairwise Probability Matrix"""
+
+        if not hasattr(self, "__oracle_matrix"):
+            self.__oracle_matrix = oracle_matrix(self.likelihoods)
+
+        return self.__oracle_matrix
 
     def plot_actual(self, plot=False, **kwargs):
         """Plot actual clusterings (binding to bmcc.plot_clusterings)"""
