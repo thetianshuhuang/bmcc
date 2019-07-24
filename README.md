@@ -8,6 +8,8 @@ Final configuration selection is implemented using Least Squares clustering [4].
 
 [[References]](https://github.com/thetianshuhuang/bmcc/wiki/References)
 
+![](https://github.com/thetianshuhuang/bmcc/blob/master/preview/scatter.png)
+
 ## Installation
 
 ### Python
