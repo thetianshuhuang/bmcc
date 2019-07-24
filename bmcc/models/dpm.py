@@ -42,7 +42,7 @@ class DPM:
 
     def __init__(
             self, alpha=1,
-            use_eb=True, eb_threshold=100, convergence=0.01):
+            use_eb=False, eb_threshold=100, convergence=0.01):
 
         self.alpha = alpha
         self.use_eb = use_eb

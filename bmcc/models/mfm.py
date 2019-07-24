@@ -9,6 +9,7 @@ References
 
 import numpy as np
 import math
+from scipy.stats import poisson
 
 from bmcc.core import MODEL_MFM
 
@@ -40,7 +41,7 @@ class MFM:
         self.error = error
         if prior is None:
             def prior(k):
-                return k * np.log(0.5)
+                return poisson.logpmf(k, 4)
         self.prior = prior
 
     def log_v_n(self, N):

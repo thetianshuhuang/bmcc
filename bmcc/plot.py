@@ -6,7 +6,7 @@ import numpy as np
 
 
 def plot_clusterings(
-        data, assignments, bins=20,
+        data, assignments, bins=50,
         kwargs_scatter={}, kwargs_hist={}):
     """Plot N-dimensional clustering.
 

@@ -1,8 +1,10 @@
 """Hybrid Model combining DPM and MFM.
 
-Since DPM tends to over-cluster, but converges very quickly, the idea is to use
-DPM at the start, then transition (possibly softly) to MFM, which takes much
-longer to converge, but greatly reduces over-clustering.
+DPM tends to over-cluster, but converges very quickly; on the other hand, MFM
+greatly reduces over-clustering, at the cost of tending to take much longer to
+converge. Therefore, this method combines DPM and MFM by using DPM at the
+start, while gradually transitioning to MFM using some assignment function
+```beta``` which may or may not be stochastic.
 """
 
 from bmcc.core import MODEL_HYBRID
@@ -33,7 +35,7 @@ class Hybrid:
 
         if beta is None:
             def beta(n):
-                return (n > 1000)
+                return (n > 100)
 
         self.MFM = MFM
         self.DPM = DPM
