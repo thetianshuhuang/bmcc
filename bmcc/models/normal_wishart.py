@@ -39,7 +39,7 @@ class NormalWishart:
         Parameters
         ----------
         data : np.array
-            Dataset; used for scale matrix S = 1/df * Cov(data) [1]
+            Dataset; used for scale matrix S = 1/df * Cov^-1(data) [1]
 
         Returns
         -------
