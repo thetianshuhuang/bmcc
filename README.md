@@ -65,7 +65,7 @@ component_model = bmcc.NormalWishart(df=3)
 
 - R/reticulate:
 ```R
-component_model = NormalWishart(df = 3)
+component_model <- NormalWishart(df = 3)
 ```
 
 #### MFM (Mixture of Finite Mixtures)
@@ -80,7 +80,7 @@ mixture_model = bmcc.MFM(gamma=1, prior=lambda k: poisson.logpmf(k, 4))
 - R/reticulate:
 ```R
 prior <- function(k) { dpois(k, 4, log = TRUE) }
-mixture_model <- MFM(gamma=1, prior=py_func(prior))
+mixture_model <- MFM(gamma = 1, prior = py_func(prior))
 ```
 
 #### DPM (Dirichlet Process Mixture Model)
@@ -95,7 +95,7 @@ mixture_model = bmcc.DPM(
 - R:
 ```R
 mixture_model <- DPM(
-    alpha=1, use_eb=True, convergence=0.01, eb_threshold=100L)
+    alpha = 1, use_eb = True, convergence = 0.01, eb_threshold = 100L)
 ```
 
 
@@ -117,12 +117,12 @@ sampler = bmcc.GibbsMixtureModel(
 
 - R:
 ```R
-sampler = GibbsMixtureModel(
-    data=data,
-    component_model=component_model,
-    mixture_model=mixture_model,
-    assignments=np_array(rep(0, 1000), dtype="uint16"),
-    thinning=1L)
+sampler <- GibbsMixtureModel(
+    data = data,
+    component_model = component_model,
+    mixture_model = mixture_model,
+    assignments = np_array(rep(0, 1000), dtype="uint16"),
+    thinning = 1L)
 ```
 
 Finally, simply call the ```iter``` method once for every iteration:
@@ -170,7 +170,7 @@ res = sampler.select_lstsq(burn_in=100)
 
 - R:
 ```R
-res <- sampler$select_lstsq(burn_in=100L)
+res <- sampler$select_lstsq(burn_in = 100L)
 ```
 
 If ground truths are available, call the ```evaluate``` method of the resulting ```LstsqResult``` object to run evaluation statistics. If oracle information is available, the ```oracle``` (oracle assignments) and ```oracle_matrix``` (oracle pairwise probability) arguments can optionally be passed to allow comparison.
@@ -193,14 +193,14 @@ res.clustering(plot=True)
 ```R
 res$evaluate(
     dataset$assignments,
-    oracle=dataset$oracle,
-    oracle_matrix=dataset$oracle_matrix)
+    oracle = dataset$oracle,
+    oracle_matrix = dataset$oracle_matrix)
 # Plot traces
-res$trace(plot=TRUE)
+res$trace(plot = TRUE)
 # Plot pairwise membership and probability matrices
-res$matrices(plot=TRUE)
+res$matrices(plot = TRUE)
 # Plot clustering
-res$clustering(plot=TRUE)
+res$clustering(plot = TRUE)
 ```
 
 ## References
