@@ -7,6 +7,6 @@
 
 #include "mixture.h"
 
-ModelMethods HYBRID_METHODS
+ModelMethods HYBRID_METHODS;
 
 #endif

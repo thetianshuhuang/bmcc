@@ -23,6 +23,9 @@ procedure [3].
 Final configuration selection is implemented using Least Squares clustering
 [4].
 
+For more information, see the Github repository:
+https://github.com/thetianshuhuang/bmcc
+
 References
 ----------
 [1] Radford M. Neal (2000), "Markov Chain Sampling Methods for Dirichlet
@@ -42,15 +45,29 @@ References
     and Proteomics.
 """
 
+
+# -----------------------------------------------------------------------------
+#
+#                                   Imports
+#
+# -----------------------------------------------------------------------------
+
+# -- C API --------------------------------------------------------------------
+
 from bmcc.core import (
+    # Model Capsules
     MODEL_DPM,
     MODEL_MFM,
     MODEL_HYBRID,
     COMPONENT_NORMAL_WISHART,
     COMPONENT_SYMMETRIC_NORMAL,
+
+    # Functions
     pairwise_probability,
     aggregation_score,
     segregation_score,
+
+    # Build Configuration
     BASE_VEC_SIZE,
     COMPONENT_METHODS_API,
     COMPONENT_PARAMS_API,
@@ -59,13 +76,21 @@ from bmcc.core import (
     MIXTURE_MODEL_API,
     BUILD_DATETIME
 )
+
+
+# -- R Extension Utils --------------------------------------------------------
+
 from bmcc.r_helpers import (
     is_uint16,
     is_float64,
     is_contiguous,
     is_np_array,
 )
-from bmcc.models import MFM, DPM, NormalWishart
+
+
+# -- Python Utilities ---------------------------------------------------------
+
+from bmcc.models import MFM, DPM, Hybrid, NormalWishart, SymmetricNormal
 from bmcc.mixture import GibbsMixtureModel
 from bmcc.base_result import BaseResult
 from bmcc.least_squares import LstsqResult, membership_matrix
@@ -73,7 +98,8 @@ from bmcc.plot import plot_clusterings
 from bmcc.simulate import GaussianMixture
 
 
-# Configuration Variables
+# -- Build Constants, API Constants, and Build Metadata -----------------------
+
 CONFIG = {
     "BASE_VEC_SIZE": BASE_VEC_SIZE,
     "BUILD_DATETIME": BUILD_DATETIME,
@@ -84,12 +110,20 @@ CONFIG = {
     "MIXTURE_MODEL_API": MIXTURE_MODEL_API
 }
 
-# Package Metadata
+
+# -- Package Metadata ---------------------------------------------------------
+
 __author__ = "Tianshu Huang"
 __license__ = "MIT"
 __maintainer__ = "Tianshu Huang"
 __email__ = "thetianshuhuang@gmail.com"
 
+
+# -----------------------------------------------------------------------------
+#
+#                                   Exports
+#
+# -----------------------------------------------------------------------------
 
 __all__ = [
     # Helpers
@@ -116,7 +150,9 @@ __all__ = [
     # Models
     "MFM",
     "DPM",
+    "Hybrid",
     "NormalWishart",
+    "SymmetricNormal",
 
     # Core
     "GibbsMixtureModel",

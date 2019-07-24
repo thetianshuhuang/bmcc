@@ -15,7 +15,7 @@ struct sn_component_t {
 	double *total;
 	// Number of points
 	uint32_t n;
-}
+};
 
 
 // Hyperparameters struct
@@ -26,6 +26,9 @@ struct sn_params_t {
 	double scale;
 	// Scale of all points
 	double scale_all;
-}
+};
+
+// Component methods
+ComponentMethods SYMMETRIC_NORMAL;
 
 #endif

@@ -171,22 +171,15 @@ PyMODINIT_FUNC PyInit_core()
             &SYMMETRIC_NORMAL, COMPONENT_METHODS_API, NULL));
 
     // -- Build Constants & Metadata ------------------------------------------
-    PyModule_AddIntConstant(
-        mod, "BASE_VEC_SIZE", BASE_VEC_SIZE);
-    PyModule_AddStringConstant(
-        mod, "BUILD_DATETIME", BUILD_DATETIME);
+    PyModule_AddIntMacro(mod, BASE_VEC_SIZE);
+    PyModule_AddStringMacro(mod, BUILD_DATETIME);
 
     // -- Module Python C Capsule API Identifiers -----------------------------
-    PyModule_AddStringConstant(
-        mod, "COMPONENT_METHODS_API", COMPONENT_METHODS_API);
-    PyModule_AddStringConstant(
-        mod, "COMPONENT_PARAMS_API", COMPONENT_PARAMS_API);
-    PyModule_AddStringConstant(
-        mod, "MODEL_METHODS_API", MODEL_METHODS_API);
-    PyModule_AddStringConstant(
-        mod, "MODEL_PARAMS_API", MODEL_PARAMS_API);
-    PyModule_AddStringConstant(
-        mod, "MIXTURE_MODEL_API", MIXTURE_MODEL_API);
+    PyModule_AddStringMacro(mod, COMPONENT_METHODS_API);
+    PyModule_AddStringMacro(mod, COMPONENT_PARAMS_API);
+    PyModule_AddStringMacro(mod, MODEL_METHODS_API);
+    PyModule_AddStringMacro(mod, MODEL_PARAMS_API);
+    PyModule_AddStringMacro(mod, MIXTURE_MODEL_API);
 
     return mod;
 }

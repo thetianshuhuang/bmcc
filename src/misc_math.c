@@ -4,6 +4,10 @@
 
 #include <math.h>
 #include <stdlib.h>
+#include <stdint.h>
+
+#define RAND_MASK 0x7FFF
+#define RAND_MAX_45 0x200000000000
 
 
 /**
@@ -19,6 +23,21 @@ double log_mv_gamma(int p, double x)
         res += lgamma(x + (1 - j) / 2);
     }
     return res;
+}
+
+
+/**
+ * Sample 45-bit integer, since RAND_MASK only has 15 bits of precision
+ * @return Sampled 45-bit integer
+ */
+uint64_t rand_45_bit()
+{
+	uint64_t res = 0;
+	for(int i = 0; i < 3; i++) {
+		res = res << 15;
+		res |= rand() & RAND_MASK;
+	}
+	return res;
 }
 
 
@@ -48,7 +67,7 @@ int sample_log_weighted(double *weights, int length)
 	for(int i = 0; i < length; i++) { weights[i] /= total; }
 
 	// Generate random number in [0, total]
-	double x = ((double) rand()) / ((double) RAND_MAX);
+	double x = ((double) rand_45_bit()) / ((double) RAND_MAX_45);
 
 	// Sample
 	double acc = 0;

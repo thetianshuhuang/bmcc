@@ -47,7 +47,6 @@ class NormalWishart:
             Argument dictionary to be passed to core.init_model, with keys:
             "df": Wishart degrees of freedom
             "s_chol": Cholesky decomposition of scale matrix
-
         """
 
         return {

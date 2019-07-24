@@ -5,6 +5,9 @@
 #include <Python.h>
 #include <math.h>
 
+#include "../include/symmetric_normal.h"
+#include "../include/mixture.h"
+
 
 // ----------------------------------------------------------------------------
 //
@@ -32,7 +35,7 @@ void *sn_create(void *params)
 	// # points = 0
 	component->n = 0;
 
-	return component
+	return component;
 }
 
 
@@ -42,7 +45,7 @@ void *sn_create(void *params)
 void sn_destroy(void *component)
 {
 	// Free array
-	free(component->total);
+	free(((struct sn_component_t *) component)->total);
 }
 
 
@@ -62,21 +65,21 @@ void *sn_params_create(PyObject *dict)
 	PyObject *scale_py = PyDict_GetItemString(dict, "scale");
 	PyObject *scale_all_py = PyDict_GetItemString(dict, "scale_all");
 	if((dim_py == NULL) || (scale_py == NULL) || (scale_all_py == NULL) ||
-			(!PyFloatCheck(scale_py)) ||
+			(!PyFloat_Check(scale_py)) ||
 			(!PyLong_Check(dim_py)) ||
-			(!PyLong_Check(scale_all_py))) {
+			(!PyFloat_Check(scale_all_py))) {
 		PyErr_SetString(
 			PyExc_KeyError,
-			"Symmetric normal requires 'scale' (symmetric normal scale), "
-			"'scale_all' (aggregate scale for all points), and " \
-			"'dim' (data dimennsions) arguments.");
+			"Symmetric normal requires 'scale' (symmetric normal scale; "
+			"float), 'scale_all' (aggregate scale for all points; float), "
+			"and 'dim' (data dimennsions; int) arguments.");
 		return NULL;
 	}
 
 	// Unpack dict
 	int dim = (int) PyLong_AsLong(dim_py);
 	double scale = PyFloat_AsDouble(scale_py);
-	double scale_all = PyFloat_AsDoulbe(scale_all_py);
+	double scale_all = PyFloat_AsDouble(scale_all_py);
 
 	// Allocate parameters
 	struct sn_params_t *params = (
@@ -164,7 +167,7 @@ double sn_loglik_ratio(void *component, void *params, double *point)
 	// (x-mu)^T(x-mu)
 	double acc = 0;
 	for(int i = 0; i < dim; i++) {
-		double centered = point[i] - (cpt->total[i] / n);
+		double centered = point[i] - (cpt->total[i] / cpt->n);
 		acc += centered * centered;
 	}
 
@@ -197,7 +200,7 @@ double sn_loglik_new(void *params, double *point)
 	return (
 		- log(2 * M_PI) * (dim / 2)
 		- 0.5 * dim * log(scale_all)
-		- 0.5 * acc / scale);
+		- 0.5 * acc / scale_all);
 }
 
 
@@ -215,5 +218,4 @@ ComponentMethods SYMMETRIC_NORMAL = {
 	&sn_remove,
 	&sn_loglik_ratio,
 	&sn_loglik_new
-}
-
+};
