@@ -10,11 +10,14 @@ Final configuration selection is implemented using Least Squares clustering [4].
 ## Usage
 
 ### Installation and Setup
-Python:
+
+- Python:
+
 First, install with ```pip install bmcc``` (or ```pip3```, depending on your version). Then, simply ```import bmcc```.
 **NOTE**: Only Python 3 is officially supported.
 
-R:
+- R/reticulate:
+
 First, make sure Python 3 is installed, and install bmcc with ```pip install bmcc```. Then, install the R package with
 ```R
 library(devtools)
@@ -56,12 +59,12 @@ The model has two parts: the mixture model, and the component model. Currently, 
 The normal wishart model assumes each component is drawn from a wishart distribution with degrees of freedom specified in the initializer, and scale matrix proportional to C^-1/df, where C is the covariance matrix of the observed points.
 
 - Python:
-```
+```python
 component_model = bmcc.NormalWishart(df=3)
 ```
 
 - R/reticulate:
-```
+```R
 component_model = NormalWishart(df = 3)
 ```
 
@@ -77,8 +80,24 @@ mixture_model = bmcc.MFM(gamma=1, prior=lambda k: poisson.logpmf(k, 4))
 - R/reticulate:
 ```R
 prior <- function(k) { dpois(k, 4, log = TRUE) }
-mixture_model = MFM(gamma=1, prior=py_func(prior))
+mixture_model <- MFM(gamma=1, prior=py_func(prior))
 ```
+
+#### DPM (Dirichlet Process Mixture Model)
+See [1]. Takes four arguments: the initial dirichlet parameter alpha, a boolean indicating whether empirical bayes updates should be used, and a start threshold and convergence threshold for empirical bayes updates (these values ignored if use_eb=False).
+
+- Python:
+```python
+mixture_model = bmcc.DPM(
+    alpha=1, use_eb=True, convergence=0.01, eb_threshold=100)
+```
+
+- R:
+```R
+mixture_model <- DPM(
+    alpha=1, use_eb=True, convergence=0.01, eb_threshold=100L)
+```
+
 
 ### Running the Gibbs Sampler
 
