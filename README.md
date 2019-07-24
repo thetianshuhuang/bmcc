@@ -1,11 +1,12 @@
 # Bayesian Markov Chain Monte Carlo Clustering
 
-Implementation of Markov Chain Monte Carlo Bayesian Clustering techniques, including DPM (Dirichlet Process Mixture Models [1]) and MFM (Mixture of Finite Mixtures [2]) mixture models, with an abstract Mixture Model and Component Model API.
+Implementation of Markov Chain Monte Carlo Bayesian Clustering techniques, including DPM (Dirichlet Process Mixture Models; [Neal, 2000](https://github.com/thetianshuhuang/bmcc/wiki/References#1-neal-2000)) and MFM (Mixture of Finite Mixtures; [Miller & Harrison, 2018](References#2-miller--harrison-2018))) mixture models, with an abstract Mixture Model and Component Model API.
 
-Hyperparameter updates for DPM are implemented using an Empirical Bayes update procedure [3].
+Hyperparameter updates for DPM are (optionally) implemented using an Empirical Bayes update procedure [(McAuliffe et. al., 2006)](References#3-mcauliffe-et-al-2006).
 
-Final configuration selection is implemented using Least Squares clustering [4].
+Final configuration selection is implemented using Least Squares clustering [(Dahl, 2006)](References#4-dahl-2006).
 
+[[Wiki / Documentation]](https://github.com/thetianshuhuang/bmcc/wiki)
 [[References]](https://github.com/thetianshuhuang/bmcc/wiki/References)
 
 ![](https://github.com/thetianshuhuang/bmcc/blob/master/preview/scatter.png)
