@@ -45,8 +45,12 @@ References
 from bmcc.core import (
     MODEL_DPM,
     MODEL_MFM,
+    MODEL_HYBRID,
     COMPONENT_NORMAL_WISHART,
+    COMPONENT_SYMMETRIC_NORMAL,
     pairwise_probability,
+    aggregation_score,
+    segregation_score,
     BASE_VEC_SIZE,
     COMPONENT_METHODS_API,
     COMPONENT_PARAMS_API,
@@ -97,13 +101,17 @@ __all__ = [
     # Capsules
     "MODEL_DPM",
     "MODEL_MFM",
+    "MODEL_HYBRID",
     "COMPONENT_NORMAL_WISHART",
+    "COMPONENT_SYMMETRIC_NORMAL",
 
     # Constants
     "CONFIG",
 
     # Utility
     "pairwise_probability",
+    "aggregation_score",
+    "segregation_score",
 
     # Models
     "MFM",

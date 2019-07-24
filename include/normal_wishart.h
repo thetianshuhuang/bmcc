@@ -6,11 +6,10 @@
 #define NORMAL_WISHART_H
 
 #include <Python.h>
-
 #include "mixture.h"
 
 
-// Normal Wishart struct (goes inside capsules)
+// Normal Wishart struct
 struct nw_component_t {
     // Total vector; dimensions [dim]
     double *total;

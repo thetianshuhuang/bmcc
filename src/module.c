@@ -48,17 +48,33 @@
 
 // ----------------------------------------------------------------------------
 //
-//                               Module Methods
+//                               Module Includes
 //
 // ----------------------------------------------------------------------------
 
+// Core
 #include "../include/gibbs.h"
-#include "../include/dpm.h"
-#include "../include/mfm.h"
-#include "../include/normal_wishart.h"
 #include "../include/mixture.h"
+
+// Analysis and other non-sampler helpers
 #include "../include/select.h"
 #include "../include/analysis.h"
+
+// Mixture Models
+#include "../include/dpm.h"
+#include "../include/mfm.h"
+#include "../include/hybrid.h"
+
+// Component Models
+#include "../include/normal_wishart.h"
+#include "../include/symmetric_normal.h"
+
+
+// ----------------------------------------------------------------------------
+//
+//                               Module Methods
+//
+// ----------------------------------------------------------------------------
 
 static PyMethodDef ModuleMethods[] = {
     {
@@ -142,15 +158,25 @@ PyMODINIT_FUNC PyInit_core()
     PyModule_AddObject(
         mod, "MODEL_MFM", PyCapsule_New(
             &MFM_METHODS, MODEL_METHODS_API, NULL));
+    PyModule_AddObject(
+        mod, "MODEL_HYBRID", PyCapsule_New(
+            &HYBRID_METHODS, MODEL_METHODS_API, NULL));
 
     // -- Capsules - Components -----------------------------------------------    
     PyModule_AddObject(
         mod, "COMPONENT_NORMAL_WISHART", PyCapsule_New(
             &NORMAL_WISHART, COMPONENT_METHODS_API, NULL));
+    PyModule_AddObject(
+        mod, "COMPONENT_SYMMETRIC_NORMAL", PyCapsule_New(
+            &SYMMETRIC_NORMAL, COMPONENT_METHODS_API, NULL));
 
-    // -- Module Constants ----------------------------------------------------
+    // -- Build Constants & Metadata ------------------------------------------
     PyModule_AddIntConstant(
         mod, "BASE_VEC_SIZE", BASE_VEC_SIZE);
+    PyModule_AddStringConstant(
+        mod, "BUILD_DATETIME", BUILD_DATETIME);
+
+    // -- Module Python C Capsule API Identifiers -----------------------------
     PyModule_AddStringConstant(
         mod, "COMPONENT_METHODS_API", COMPONENT_METHODS_API);
     PyModule_AddStringConstant(
@@ -161,9 +187,6 @@ PyMODINIT_FUNC PyInit_core()
         mod, "MODEL_PARAMS_API", MODEL_PARAMS_API);
     PyModule_AddStringConstant(
         mod, "MIXTURE_MODEL_API", MIXTURE_MODEL_API);
-    PyModule_AddStringConstant(
-        mod, "BUILD_DATETIME", BUILD_DATETIME);
 
     return mod;
 }
-

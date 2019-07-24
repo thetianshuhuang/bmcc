@@ -21,7 +21,8 @@ struct dpm_params_t {
  * @param dict Python dictionary containing hyperparameter alpha
  * @return allocated dpm_params_t struct
  */
-void *dpm_create(PyObject *dict) {
+void *dpm_create(PyObject *dict)
+{
 	struct dpm_params_t *params = (
 		(struct dpm_params_t *) malloc(sizeof(struct dpm_params_t)));
 
@@ -41,7 +42,8 @@ void *dpm_create(PyObject *dict) {
  * Destroy DPM parameters struct
  * @param params struct to destroy
  */
-void dpm_destroy(void *params) {
+void dpm_destroy(void *params)
+{
 	free(params);
 }
 
@@ -51,7 +53,8 @@ void dpm_destroy(void *params) {
  * @param params parameters to update
  * @param update python dictionary containing new values
  */
-void dpm_update(void *params, PyObject *update) {
+void dpm_update(void *params, PyObject *update)
+{
 	((struct dpm_params_t *) params)->alpha = PyFloat_AsDouble(
 		PyDict_GetItemString(update, "alpha"));
 }
@@ -64,7 +67,8 @@ void dpm_update(void *params, PyObject *update) {
  * @param nc number of clusters
  * @return |c_i|
  */
-double dpm_log_coef(void *params, int size, int nc) {
+double dpm_log_coef(void *params, int size, int nc)
+{
 	return log(size);
 }
 
@@ -74,7 +78,8 @@ double dpm_log_coef(void *params, int size, int nc) {
  * @param params model hyperparameters (simply returns log(alpha))
  * @return alpha
  */
-double dpm_log_coef_new(void *params, int nc) {
+double dpm_log_coef_new(void *params, int nc)
+{
 	return log(((struct dpm_params_t *) params)->alpha);
 }
 

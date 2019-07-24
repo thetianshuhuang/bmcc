@@ -98,15 +98,16 @@ void *nw_params_create(PyObject *dict)
     int dim = (int) PyLong_AsLong(dim_py);
     // Check cholesky size
     PyObject *data_py = PyDict_GetItemString(dict, "s_chol");
-    if((data_py == NULL) || !PyArray_Check(data_py)) {
+    if((data_py == NULL) || !PyArray_Check(data_py) ||
+            !type_check_square((PyArrayObject *) data_py, dim)) {
         PyErr_SetString(
             PyExc_KeyError,
             "Normal Wishart requires 's_chol' (cholesky decomposition of " \
             "scale matrix) to be passed as a numpy array with type float64 " \
-            "(double).");
+            "(double). s_chol should be square, and have dimensions dim x " \
+            "dim.");
         return NULL;
     }
-    if(!type_check_square((PyArrayObject *) data_py, dim)) { return NULL; }
 
     // Allocate parameters
     struct nw_params_t *params = (

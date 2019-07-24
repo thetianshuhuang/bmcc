@@ -31,7 +31,8 @@ struct mfm_params_t {
  *		passing the result into C.
  * @return allocated mfm_params_t struct.
  */
-void *mfm_create(PyObject *dict) {
+void *mfm_create(PyObject *dict)
+{
 
 	// Unpack dictionary; fetch V_n numpy array
 	PyArrayObject *log_vn_py = (
@@ -71,7 +72,8 @@ void *mfm_create(PyObject *dict) {
  * Destroy MFM parameters
  * @param params struct to destroy
  */
-void mfm_destroy(void *params) {
+void mfm_destroy(void *params)
+{
 	Py_DECREF(((struct mfm_params_t *) params)->v_n_py);
 	free(params);
 }
@@ -82,7 +84,8 @@ void mfm_destroy(void *params) {
  * @param params parameters to update
  * @param update python dictionary containing new values
  */
-void mfm_update(void *params, PyObject *update) {
+void mfm_update(void *params, PyObject *update)
+{
 	struct mfm_params_t *params_tc = (struct mfm_params_t *) params;
 	params_tc->gamma = PyFloat_AsDouble(PyDict_GetItemString(update, "gamma"));
 
@@ -101,7 +104,8 @@ void mfm_update(void *params, PyObject *update) {
  * @param nc number of clusters
  * @return log(|c_i| + gamma)
  */
-double mfm_log_coef(void *params, int size, int nc) {
+double mfm_log_coef(void *params, int size, int nc)
+{
 	return log(size + ((struct mfm_params_t *) params)->gamma);
 }
 
@@ -112,7 +116,8 @@ double mfm_log_coef(void *params, int size, int nc) {
  * @param nc number of clusters
  * @return log(gamma) + log(V_n(t + 1)) - log(V_n(t))
  */
-double mfm_log_coef_new(void *params, int nc) {
+double mfm_log_coef_new(void *params, int nc) 
+{
 	struct mfm_params_t *params_tc = (struct mfm_params_t *) params;
 	return log(params_tc->gamma) + params_tc->v_n[nc + 1] - params_tc->v_n[nc];
 }
