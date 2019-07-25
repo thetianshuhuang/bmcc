@@ -58,9 +58,7 @@ C_EXTENSION = Extension(
         # API Descriptions; needed to create other extensions that modify
         # core capsules
         ("COMPONENT_METHODS_API", "\"bmcc.core.ComponentMethods\""),
-        ("COMPONENT_PARAMS_API", "\"bmcc.core.ComponentParams\""),
         ("MODEL_METHODS_API", "\"bmcc.core.ModelMethods\""),
-        ("MODEL_PARAMS_API", "\"bmcc.core.ModelParams\""),
         ("MIXTURE_MODEL_API", "\"bmcc.core.MixtureModel\"")
     ],
 )

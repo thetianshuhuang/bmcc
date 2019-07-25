@@ -20,7 +20,8 @@ Final configuration selection is implemented using Least Squares clustering [(Da
 ```shell
 pip install bmcc
 ```
-(or ```pip3 install bmcc```, depending on your environment.
+(or ```pip3 install bmcc```, depending on your environment.)
+
 **NOTE**: Only Python 3 is supported. Python 2 may not work.
 
 ### R

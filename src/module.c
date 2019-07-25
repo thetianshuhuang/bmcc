@@ -36,13 +36,11 @@
 // ----------------------------------------------------------------------------
 #if \
     !defined(COMPONENT_METHODS_API) || \
-    !defined(COMPONENT_PARAMS_API) || \
     !defined(MODEL_METHODS_API) || \
-    !defined(MODEL_PARAMS_API) || \
     !defined(MIXTURE_MODEL_API)
 #error \
-    API Names (COMPONENT_METHODS_API, COMPONENT_PARAMS_API, MODEL_METHODS_API, \
-    MODEL_PARAMS_API, MIXTURE_MODEL_API) must be #defined on compilation.
+    API Names (COMPONENT_METHODS_API, MODEL_METHODS_API, MIXTURE_MODEL_API) \
+    must be #defined on compilation.
 #endif
 
 
@@ -176,9 +174,7 @@ PyMODINIT_FUNC PyInit_core()
 
     // -- Module Python C Capsule API Identifiers -----------------------------
     PyModule_AddStringMacro(mod, COMPONENT_METHODS_API);
-    PyModule_AddStringMacro(mod, COMPONENT_PARAMS_API);
     PyModule_AddStringMacro(mod, MODEL_METHODS_API);
-    PyModule_AddStringMacro(mod, MODEL_PARAMS_API);
     PyModule_AddStringMacro(mod, MIXTURE_MODEL_API);
 
     return mod;

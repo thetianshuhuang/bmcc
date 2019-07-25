@@ -144,18 +144,30 @@ PyObject *gibbs_iter_py(PyObject *self, PyObject *args)
         (struct mixture_model_t *) PyCapsule_GetPointer(
             model_py, MIXTURE_MODEL_API));
 
+    // Check that model supports gibbs
+    bool is_gibbs = (
+        (model->model_methods->log_coef != NULL) &&
+        (model->model_methods->log_coef_new != NULL));
+    if(!is_gibbs) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Selected model does not support gibbs sampling (log_coef and"
+            "log_coef_new methods must not be NULL)");
+        return NULL;
+    }
+
     // GIL free zone ----------------------------------------------------------    
     Py_INCREF(data_py);
     Py_INCREF(assignments_py);
     Py_INCREF(model_py);
-    // Py_BEGIN_ALLOW_THREADS;
+    Py_BEGIN_ALLOW_THREADS;
 
     bool gibbs_success = gibbs_iter(
         (double *) PyArray_DATA(data_py),
         (uint16_t *) PyArray_DATA(assignments_py),
         model);
 
-    // Py_END_ALLOW_THREADS;
+    Py_END_ALLOW_THREADS;
     Py_DECREF(data_py);
     Py_DECREF(assignments_py);
     Py_DECREF(model_py);
