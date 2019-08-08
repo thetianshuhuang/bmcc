@@ -1,5 +1,5 @@
 /**
- * Routines to check Numpy Array types.
+ * Routines to check Numpy Array types and model support
  *  - Assignment arrays are uint16.
  *    (It's assumed that there will be <<65536 clusters)
  *  - Data arrays are float64 (double).
@@ -25,5 +25,10 @@ bool type_check(PyArrayObject *data_py, PyArrayObject *assignments_py);
 bool type_check_square(PyArrayObject *data_py, int dim);
 // Type check two different assignment arrays
 bool type_check_assignments(PyArrayObject *arr1, PyArrayObject *arr2);
+// Check for gibbs support
+bool supports_gibbs(struct mixture_model_t *model);
+// Check for split merge support
+bool supports_split_merge(struct mixture_model_t *model);
+
 
 #endif

@@ -4,11 +4,6 @@
 
 #include <Python.h>
 
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-#define NO_IMPORT_ARRAY
-#define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
-#include <numpy/arrayobject.h>
-
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -16,7 +11,7 @@
 #include "../include/mixture.h"
 #include "../include/misc_math.h"
 #include "../include/type_check.h"
-#include "../include/normal_wishart.h"
+#include "../include/base_iter.h"
 
 /**
  * Execute gibbs iteration.
@@ -27,8 +22,7 @@
  * @return true if returned without error
  */
 bool gibbs_iter(
-    double *data, uint16_t *assignments,
-    struct mixture_model_t *model)
+    double *data, uint16_t *assignments, struct mixture_model_t *model)
 {
 
     // Assignment weight vector: exponentially-overallocated
@@ -101,11 +95,11 @@ bool gibbs_iter(
 
         // New cluster?
         if(new == model->num_clusters) {
-            bool success_new = add_component(model);
+            bool success_new = add_component(model, NULL);
             // Check for allocation failure
             if(!success_new) {
                 free(weights);
-                return NULL;
+                return false;
             }
         }
 
@@ -127,53 +121,5 @@ bool gibbs_iter(
  */
 PyObject *gibbs_iter_py(PyObject *self, PyObject *args)
 {
-    // Get args
-    PyArrayObject *data_py;
-    PyArrayObject *assignments_py;
-    PyObject *model_py;
-    bool success = PyArg_ParseTuple(
-        args, "O!O!O",
-        &PyArray_Type, &data_py,
-        &PyArray_Type, &assignments_py,
-        &model_py);
-    if(!success) { return NULL; }
-    if(!type_check(data_py, assignments_py)) { return NULL; }
-
-    // Unpack capsules
-    struct mixture_model_t *model = (
-        (struct mixture_model_t *) PyCapsule_GetPointer(
-            model_py, MIXTURE_MODEL_API));
-
-    // Check that model supports gibbs
-    bool is_gibbs = (
-        (model->model_methods->log_coef != NULL) &&
-        (model->model_methods->log_coef_new != NULL));
-    if(!is_gibbs) {
-        PyErr_SetString(
-            PyExc_TypeError,
-            "Selected model does not support gibbs sampling (log_coef and"
-            "log_coef_new methods must not be NULL)");
-        return NULL;
-    }
-
-    // GIL free zone ----------------------------------------------------------    
-    Py_INCREF(data_py);
-    Py_INCREF(assignments_py);
-    Py_INCREF(model_py);
-    Py_BEGIN_ALLOW_THREADS;
-
-    bool gibbs_success = gibbs_iter(
-        (double *) PyArray_DATA(data_py),
-        (uint16_t *) PyArray_DATA(assignments_py),
-        model);
-
-    Py_END_ALLOW_THREADS;
-    Py_DECREF(data_py);
-    Py_DECREF(assignments_py);
-    Py_DECREF(model_py);
-    // ------------------------------------------------------------------------
-
-    // Check for exception
-    if(!gibbs_success) { return NULL; }
-    else { Py_RETURN_NONE; }
+    return base_iter(self, args, &supports_gibbs, &gibbs_iter);
 }

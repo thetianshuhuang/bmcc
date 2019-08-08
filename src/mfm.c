@@ -13,7 +13,6 @@
 
 #include "../include/mixture.h"
 
-
 /**
  * MFM parameters
  */
@@ -124,6 +123,48 @@ double mfm_log_coef_new(void *params, int nc)
 
 
 /**
+ * Log coefficients for split procedure
+ * @param params model hyperparameters
+ * @param nc Number of clusters
+ * @param n1 Number of points in first proposed split cluster
+ * @param n2 Number of points in second proposed split cluster
+ * @return P(c_split) / P(c_nosplit)
+ */
+double mfm_log_split(void *params, int nc, int n1, int n2)
+{
+	struct mfm_params_t *params_tc = (struct mfm_params_t *) params;
+	return (
+		+ params_tc->v_n[nc + 1] - params_tc->v_n[nc]
+		+ lgamma(params_tc->gamma + n1)
+		+ lgamma(params_tc->gamma + n2)
+		- lgamma(params_tc->gamma + n1 + n2)
+		- lgamma(params_tc->gamma)
+	);
+}
+
+
+/**
+ * Log coefficients for merge procedure
+ * @param params model hyperparameters
+ * @param nc Number of clusters
+ * @param n1 Number of points in first proposed split cluster
+ * @param n2 Number of points in second proposed split cluster
+ * @return P(c_merge) / P(c_nomerge)
+ */
+double mfm_log_merge(void *params, int nc, int n1, int n2)
+{
+	struct mfm_params_t *params_tc = (struct mfm_params_t *) params;
+	return (
+		+ params_tc->v_n[nc - 1] - params_tc->v_n[nc]
+		+ lgamma(params_tc->gamma + n1 + n2)
+		- lgamma(params_tc->gamma + n1)
+		- lgamma(params_tc->gamma + n2)
+		+ lgamma(params_tc->gamma)
+	);
+}
+
+
+/**
  * mfm_methods package
  */
 ModelMethods MFM_METHODS = {
@@ -131,5 +172,7 @@ ModelMethods MFM_METHODS = {
 	&mfm_destroy,
 	&mfm_update,
 	&mfm_log_coef,
-	&mfm_log_coef_new
+	&mfm_log_coef_new,
+	&mfm_log_split,
+	&mfm_log_merge
 };

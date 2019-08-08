@@ -52,6 +52,7 @@
 
 // Core
 #include "../include/gibbs.h"
+#include "../include/split_merge.h"
 #include "../include/mixture.h"
 
 // Analysis and other non-sampler helpers
@@ -76,10 +77,16 @@
 
 static PyMethodDef ModuleMethods[] = {
     {
-        "gibbs_iter",
+        "gibbs",
         (PyCFunction) gibbs_iter_py,
         METH_VARARGS,
         DOCSTRING_GIBBS_ITER
+    },
+    {
+        "split_merge",
+        (PyCFunction) split_merge_py,
+        METH_VARARGS,
+        DOCSTRING_SPLIT_MERGE
     },
     {
         "init_model",

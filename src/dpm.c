@@ -85,6 +85,38 @@ double dpm_log_coef_new(void *params, int nc)
 
 
 /**
+ * Log coefficients for split procedure
+ * @param params model hyperparameters
+ * @param nc Number of clusters
+ * @param n1 Number of points in first proposed split cluster
+ * @param n2 Number of points in second proposed split cluster
+ * @return P(c_split) / P(c_nosplit)
+ */
+double dpm_log_split(void *params, int nc, int n1, int n2)
+{
+	struct dpm_params_t *params_tc = (struct dpm_params_tc *) params;
+	return (
+		log(params_tc->alpha)
+		+ lgamma(n1) + lgamma(n2)
+		- lgamma(n1 + n2));
+}
+
+
+/**
+ * Log coefficients for merge procedure
+ * @param params model hyperparameters
+ * @param nc Number of clusters
+ * @param n1 Number of points in first proposed split cluster
+ * @param n2 Number of points in second proposed split cluster
+ * @return P(c_merge) / P(c_nomerge)
+ */
+double dpm_log_merge(void *params, int nc, int n1, int n2)
+{
+	return -1 * dpm_log_split(params, nc, n1, n2);
+}
+
+
+/**
  * dpm_methods package
  */
 ModelMethods DPM_METHODS = {
@@ -92,5 +124,7 @@ ModelMethods DPM_METHODS = {
 	&dpm_destroy,
 	&dpm_update,
 	&dpm_log_coef,
-	&dpm_log_coef_new
+	&dpm_log_coef_new,
+	&dpm_log_split,
+	&dpm_log_merge
 };

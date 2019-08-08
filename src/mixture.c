@@ -82,10 +82,11 @@ void destroy_mixture(PyObject *model_py)
 
 /**
  * Add Component: allocates new component, and appends to components capsule
- * @param components: components_t struct containing components
+ * @param components components_t struct containing components
+ * @param component component to add; if NULL, allocates a new component
  * @return true if addition successful
  */
-bool add_component(struct mixture_model_t *model)
+bool add_component(struct mixture_model_t *model, void *component)
 {
     // Handle exponential over-allocation
     if(model->mem_size <= model->num_clusters) {
@@ -101,9 +102,14 @@ bool add_component(struct mixture_model_t *model)
         else { model->clusters = clusters_new; }
     }
 
-    // Allocate new
-    model->clusters[model->num_clusters] = (
-        model->comp_methods->create(model->comp_params));
+    // Allocate new only if passed component is NULL; otherwise simply assign
+    if(component == NULL) {
+        model->clusters[model->num_clusters] = (
+            model->comp_methods->create(model->comp_params));
+    }
+    else {
+        model->clusters[model->num_clusters] = component;
+    }
     model->num_clusters += 1;
 
     return true;
@@ -113,10 +119,25 @@ bool add_component(struct mixture_model_t *model)
 /**
  * Remove component from component vector.
  * @param components : component vector struct
+ * @param assignments : if not NULL, updates assignment indices
  * @param idx : index to remove
  */
-void remove_component(struct mixture_model_t *model, int idx)
+void remove_component(
+    struct mixture_model_t *model, uint16_t *assignments, int idx)
 {
+    if(idx >= model->num_clusters) {
+        printf("[C BACKEND ERROR] Invalid cluster: %d\n", idx);
+        return;
+    }
+
+    // Optionally update assignments
+    if(assignments != NULL) {
+        for(int i = 0; i < model->size; i++) {
+            if(assignments[i] > idx) { assignments[i] -= 1; }
+        }
+    }
+
+    // Update components
     model->comp_methods->destroy(model->clusters[idx]);
     free(model->clusters[idx]);
     for(int i = idx; i < (model->num_clusters - 1); i++) {
@@ -138,16 +159,33 @@ bool remove_empty(struct mixture_model_t *model, uint16_t *assignments)
     // Search for empty
     for(int i = 0; i < model->num_clusters; i++) {
         if(model->comp_methods->get_size((model->clusters)[i]) == 0) {
-            // Deallocate component; remove component from vector
-            remove_component(model, i);
-            // Decrement values
-            for(int j = 0; j < model->size; j++) {
-                if(assignments[j] > i) { assignments[j] -= 1; }
-            }
+            // Deallocate component; remove component from vector; update
+            // assignments
+            remove_component(model, assignments, i);
             return true;
         }
     }
     return false;
+}
+
+
+/**
+ * Get cluster at index (safely)
+ * @param model : mixture_model_t struct to fetch from
+ * @param idx index to fetch
+ * @return fetched component; NULL if unsuccessful
+ */
+void *get_cluster(struct mixture_model_t *model, int idx)
+{
+    if(idx >= model->num_clusters) {
+        printf(
+            "[C BACKEND ERROR] Invalid cluster: %d [total=%d]\n",
+            idx, model->num_clusters);
+        return NULL;
+    }
+    else {
+        return model->clusters[idx];
+    }
 }
 
 
@@ -198,7 +236,7 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
 
     // Allocate enough components
     for(int i = 0; i <= max; i++) {
-        bool success_add = add_component(mixture);
+        bool success_add = add_component(mixture, NULL);
 
         // Check for error
         if(!success_add) {

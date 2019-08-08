@@ -35,7 +35,7 @@ References
 import numpy as np
 
 from bmcc.core import (
-    init_model, gibbs_iter,
+    init_model, gibbs,
     update_mixture,
     update_components)
 from bmcc.least_squares import LstsqResult
@@ -47,13 +47,15 @@ from bmcc.errors import (
 )
 
 
-class GibbsMixtureModel:
-    """Gibbs Sampler for a Mixture Model
+class BayesianMixture:
+    """Abstract MCMC Sampler for a Mixture Model
 
     Parameters
     ----------
     data : np.array
         Data points; row-major (each row is a data point)
+    sampler : function
+        Sampler function (such as ``bmcc.core.gibbs``)
     component_model : Object
         Component object (NormalWishart, etc)
     mixture_model : Object
@@ -127,6 +129,7 @@ class GibbsMixtureModel:
 
     def __init__(
             self, data,
+            sampler=gibbs,
             component_model=None,
             mixture_model=None,
             assignments=None,
@@ -152,6 +155,7 @@ class GibbsMixtureModel:
             assignments = np.zeros(data.shape[0], dtype=np.uint16)
 
         # Save models
+        self.sampler = sampler
         self.component_model = component_model
         self.mixture_model = mixture_model
 
@@ -205,7 +209,7 @@ class GibbsMixtureModel:
 
         for _ in range(iterations):
 
-            gibbs_iter(self.data, self.assignments, self.__model)
+            self.sampler(self.data, self.assignments, self.__model)
 
             comp_update = self.component_model.update(self)
             if comp_update is not None:

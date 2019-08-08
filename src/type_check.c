@@ -18,6 +18,8 @@
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
+#include "../include/mixture.h"
+
 
 /**
  * Run type checks on data and assignment arrays
@@ -109,6 +111,7 @@ bool type_check_square(PyArrayObject *data_py, int dim)
             PyExc_TypeError, "Array does not match data dimensions.");
         return false;
     }
+
     return true;
 }
 
@@ -126,15 +129,83 @@ bool type_check_assignments(PyArrayObject *arr1, PyArrayObject *arr2)
             PyExc_TypeError, "Vectors must have 1 dimension.");
         return false;
     }
+
     if(PyArray_DIM(arr1, 0) != PyArray_DIM(arr2, 0)) {
         PyErr_SetString(
             PyExc_TypeError, "Vectors have different length.");
         return false;
     }
+
     if((PyArray_TYPE(arr1) != NPY_UINT16) || (PyArray_TYPE(arr2) != NPY_UINT16)) {
         PyErr_SetString(
             PyExc_TypeError, "Vectors must have type uint16.");
         return false;
     }
+
+    return true;
+}
+
+
+/**
+ * Check that models support gibbs
+ */
+bool supports_gibbs(struct mixture_model_t *model)
+{
+    // Mixture Methods
+    bool mixture_is_gibbs = (
+        (model->model_methods->log_coef != NULL) &&
+        (model->model_methods->log_coef_new != NULL));
+    if(!mixture_is_gibbs) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Selected mixture model does not support gibbs sampling (log_coef "
+            "and log_coef_new methods must not be NULL)");
+        return false;
+    }
+
+    // Component Methods
+    bool component_is_gibbs = (
+        (model->comp_methods->loglik_ratio != NULL) &&
+        (model->comp_methods->loglik_new != NULL));
+    if(!component_is_gibbs) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Selected component model does not support gibbs sampling "
+            "(loglik_ratio and loglik_new methods must not be NULL)");
+        return false;
+    }
+
+    return true;
+}
+
+
+/**
+ * Check that models support split merge
+ */
+bool supports_split_merge(struct mixture_model_t *model)
+{
+    // Mixture methods
+    bool mixture_is_sm = (
+        (model->model_methods->log_split != NULL) &&
+        (model->model_methods->log_merge != NULL));
+    if(!mixture_is_sm) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Selected mixture model does not support split merge sampling "
+            "(log_split and log_merge methods must not be NULL)");
+        return false;
+    }
+
+    // Component methods
+    bool component_is_sm = (
+        (model->comp_methods->split_merge != NULL));
+    if(!component_is_sm) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Selected component model does not support split merge sampling "
+            "(split_merge method must not be NULL)");
+        return false;
+    }
+
     return true;
 }

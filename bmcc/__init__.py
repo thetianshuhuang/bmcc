@@ -62,6 +62,10 @@ from bmcc.core import (
     COMPONENT_NORMAL_WISHART,
     COMPONENT_SYMMETRIC_NORMAL,
 
+    # MCMC functions
+    gibbs,
+    split_merge,
+
     # Functions
     pairwise_probability,
     aggregation_score,
@@ -88,11 +92,12 @@ from bmcc.r_helpers import (
 
 # -- Python Utilities ---------------------------------------------------------
 
-from bmcc.models import MFM, DPM, Hybrid, NormalWishart, SymmetricNormal
-from bmcc.mixture import GibbsMixtureModel
-from bmcc.base_result import BaseResult
-from bmcc.least_squares import LstsqResult, membership_matrix
-from bmcc.plot import plot_clusterings
+from bmcc.analysis import *
+from bmcc.analysis import __all__ as __analysis_all
+from bmcc.models import *
+from bmcc.models import __all__ as __models_all
+
+from bmcc.mixture import BayesianMixture
 from bmcc.simulate import GaussianMixture
 
 
@@ -121,7 +126,7 @@ __email__ = "thetianshuhuang@gmail.com"
 #
 # -----------------------------------------------------------------------------
 
-__all__ = [
+__all__ = __models_all + __analysis_all + [
     # Helpers
     "is_np_array",
     "is_uint16",
@@ -143,23 +148,8 @@ __all__ = [
     "aggregation_score",
     "segregation_score",
 
-    # Models
-    "MFM",
-    "DPM",
-    "Hybrid",
-    "NormalWishart",
-    "SymmetricNormal",
-
     # Core
-    "GibbsMixtureModel",
-
-    # Analysis
-    "BaseResult",
-    "LstsqResult",
-    "membership_matrix",
-
-    # Plots
-    "plot_clusterings",
+    "BayesianMixture",
 
     # Simulation
     "GaussianMixture"

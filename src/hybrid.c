@@ -109,5 +109,7 @@ ModelMethods HYBRID_METHODS = {
 	&hybrid_destroy,
 	&hybrid_update,
 	&hybrid_log_coef,
-	&hybrid_log_coef_new
+	&hybrid_log_coef_new,
+	NULL,
+	NULL,
 };

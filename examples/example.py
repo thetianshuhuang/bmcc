@@ -13,16 +13,32 @@ import time
 from tqdm import tqdm
 import bmcc
 
+
 # Create dataset
 dataset = bmcc.GaussianMixture(
     n=1000, k=3, d=3, r=0.7, alpha=40, df=3, symmetric=False, shuffle=False)
 
+
+tmp = 0
+
+
+def hybrid_sm(*args):
+    global tmp
+    tmp += 1
+    if tmp < 100:
+        bmcc.gibbs(*args)
+    else:
+        bmcc.split_merge(*args)
+
+
 # Create mixture model
-model = bmcc.GibbsMixtureModel(
+model = bmcc.BayesianMixture(
     data=dataset.data,
+    sampler=bmcc.split_merge,
     component_model=bmcc.NormalWishart(df=3),
     mixture_model=bmcc.MFM(
         gamma=1, prior=lambda k: poisson.logpmf(k, 4)),
+    # mixture_model=bmcc.DPM(alpha=1, use_eb=False),
     assignments=np.zeros(1000).astype(np.uint16),
     thinning=5)
 

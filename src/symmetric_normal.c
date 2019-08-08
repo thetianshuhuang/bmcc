@@ -217,5 +217,6 @@ ComponentMethods SYMMETRIC_NORMAL = {
 	&sn_add,
 	&sn_remove,
 	&sn_loglik_ratio,
-	&sn_loglik_new
+	&sn_loglik_new,
+	NULL,
 };

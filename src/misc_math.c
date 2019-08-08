@@ -6,9 +6,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-#define RAND_MASK 0x7FFF
-#define RAND_MAX_45 0x200000000000
-
+#include "../include/misc_math.h"
 
 /**
  * Helper function for log multivariate gamma

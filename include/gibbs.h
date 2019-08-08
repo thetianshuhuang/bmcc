@@ -17,7 +17,9 @@
     "assignments : np.array\n" \
     "    Assignment array. Should have type np.uint16.\n" \
     "model : capsule\n" \
-    "    Capsule containing model data.\n" \
+    "    Capsule containing model data. Mixture model and component model " \
+        "used in\n" \
+    "    initialization should support Gibbs sampling."
 
 PyObject *gibbs_iter_py(PyObject *self, PyObject *args);
 

@@ -18,7 +18,6 @@
 #include "../include/mixture.h"
 #include "../include/type_check.h"
 
-
 // ----------------------------------------------------------------------------
 //
 //                            Component Management
@@ -187,6 +186,36 @@ void nw_remove(void *component, void *params, double *point)
 
 
 /**
+ * Get Log Likelihood of unconditional assignment for new cluster probability
+ * m(x_j)
+ * @param params : model hyperparameters
+ * @param point : data point
+ */
+double nw_loglik_new(void *params, double *point)
+{
+    struct nw_params_t *params_tc = (struct nw_params_t *) params;
+    int dim = params_tc->dim;
+    double df = params_tc->df;
+
+    double *chol_up = (double *) malloc(sizeof(double) * dim * dim);
+    for(int i = 0; i < dim * dim; i++) { chol_up[i] = params_tc->s_chol[i]; }
+    cholesky_update(chol_up, point, 1, dim);
+
+    double res = (
+        - log(M_PI) * (dim / 2)
+        + log_mv_gamma(dim, (df + 1) / 2)
+        - log_mv_gamma(dim, df / 2)
+        + cholesky_logdet(params_tc->s_chol, dim) * df / 2
+        - cholesky_logdet(chol_up, dim) * (df + 1) / 2
+    );
+
+    free(chol_up);
+
+    return res;
+}
+
+
+/**
  * Get Marginal Log Likelihood Ratio log(m(x_c+j)/m(x_c))
  * @param component : component c
  * @param params : model hyperparameters
@@ -196,6 +225,9 @@ double nw_loglik_ratio(void *component, void *params, double *point)
 {
     struct nw_component_t *cpt = (struct nw_component_t *) component;
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
+
+    // Deal with empty component separately
+    if(cpt->n == 0) { return nw_loglik_new(params, point); }
 
     int dim = params_tc->dim;
     double df = params_tc->df;
@@ -234,32 +266,32 @@ double nw_loglik_ratio(void *component, void *params, double *point)
 
 
 /**
- * Get Log Likelihood of unconditional assignment for new cluster probability
- * m(x_j)
+ * Get split merge likelihood m(X_A)m(X_B) / m(X_A+B)
  * @param params : model hyperparameters
- * @param point : data point
+ * @param merged : component A+B
+ * @param c1 : component A
+ * @param c2 : component B
  */
-double nw_loglik_new(void *params, double *point)
+double nw_split_merge(void *params, void *merged, void *c1, void *c2)
 {
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
     int dim = params_tc->dim;
     double df = params_tc->df;
 
-    double *chol_up = (double *) malloc(sizeof(double) * dim * dim);
-    for(int i = 0; i < dim * dim; i++) { chol_up[i] = params_tc->s_chol[i]; }
-    cholesky_update(chol_up, point, 1, dim);
+    struct nw_component_t *cpt_merged = (struct nw_component_t *) merged;
+    struct nw_component_t *cpt1 = (struct nw_component_t *) c1;
+    struct nw_component_t *cpt2 = (struct nw_component_t *) c2;
 
-    double res = (
-        - log(M_PI) * (dim / 2)
-        + log_mv_gamma(dim, (df + 1) / 2)
-        - log_mv_gamma(dim, df / 2)
-        + cholesky_logdet(params_tc->s_chol, dim) * df / 2
-        - cholesky_logdet(chol_up, dim) * (df + 1) / 2
+    return (
+        cholesky_logdet(params_tc->s_chol, dim) * df / 2
+        + log_mv_gamma(dim, (df + cpt1->n) / 2)
+        + log_mv_gamma(dim, (df + cpt2->n) / 2)
+        - log_mv_gamma(dim, (df + cpt_merged->n) / 2)
+        + cholesky_logdet(cpt_merged->chol_decomp, dim)
+            * (cpt_merged->n + df) / 2
+        - cholesky_logdet(cpt1->chol_decomp, dim) * (cpt1->n + df) / 2
+        - cholesky_logdet(cpt2->chol_decomp, dim) * (cpt2->n + df) / 2
     );
-
-    free(chol_up);
-
-    return res;
 }
 
 
@@ -276,5 +308,6 @@ ComponentMethods NORMAL_WISHART = {
     &nw_add,
     &nw_remove,
     &nw_loglik_ratio,
-    &nw_loglik_new
+    &nw_loglik_new,
+    &nw_split_merge
 };

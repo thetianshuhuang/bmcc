@@ -48,6 +48,8 @@ typedef struct {
     double (*loglik_ratio)(void *component, void *params, double *point);
     // Unconditional Log Likelihood log(m(x_j))
     double (*loglik_new)(void *params, double *point);
+    // Split merge likelihood ratio P(c1)P(c2) / P(merged)
+    double (*split_merge)(void *params, void *merged, void *c1, void *c2);
 
 } ComponentMethods;
 
@@ -69,6 +71,11 @@ typedef struct model_methods_t {
     double (*log_coef)(void *params, int size, int nc);
     // Log coefficient for new cluster
     double (*log_coef_new)(void *params, int nc);
+
+    // Log coefficient for split
+    double (*log_split)(void *params, int nc, int n1, int n2);
+    // Log coefficient for merge
+    double (*log_merge)(void *params, int nc, int n1, int n2);
 
 } ModelMethods;
 
@@ -119,11 +126,14 @@ struct mixture_model_t *create_mixture(
 // Destroy mixture model struct
 void destroy_components(void *model);
 // Add component to model
-bool add_component(struct mixture_model_t *model);
+bool add_component(struct mixture_model_t *model, void *component);
 // Remove component from model
-void remove_component(struct mixture_model_t *model, int idx);
+void remove_component(
+    struct mixture_model_t *model, uint16_t *assignments, int idx);
 // Remove empty component
 bool remove_empty(struct mixture_model_t *model, uint16_t *assignments);
+// Get cluster at index, safely
+void *get_cluster(struct mixture_model_t *model, int idx);
 
 
 // ----------------------------------------------------------------------------
