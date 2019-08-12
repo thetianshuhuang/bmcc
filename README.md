@@ -2,7 +2,7 @@
 
 Implementation of Markov Chain Monte Carlo Bayesian Clustering techniques, including DPM (Dirichlet Process Mixture Models; [Neal, 2000](https://github.com/thetianshuhuang/bmcc/wiki/References#1-neal-2000)) and MFM (Mixture of Finite Mixtures; [Miller & Harrison, 2018](References#2-miller--harrison-2018))) mixture models, with an abstract Mixture Model and Component Model API.
 
-Both Gibbs samplers [Neal, 2000](https://github.com/thetianshuhuang/bmcc/wiki/References#1-neal-2000), Split Merge samplers [Jain & Neal, 2012] are implemented.
+Both Gibbs samplers [Neal, 2000](https://github.com/thetianshuhuang/bmcc/wiki/References#1-neal-2000), Split Merge samplers [Jain & Neal, 2012](https://github.com/thetianshuhuang/bmcc/wiki/References#jain-neal-2004) are implemented.
 
 Hyperparameter updates for DPM are (optionally) implemented using an Empirical Bayes update procedure [(McAuliffe et. al., 2006)](References#3-mcauliffe-et-al-2006).
 
