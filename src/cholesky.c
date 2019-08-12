@@ -31,10 +31,11 @@ double cholesky_logdet(double *mat, int dim)
  */
 void cholesky_update(double *mat, double *pt, double scale, int dim)
 {
+	// Copy pt
 	double *pt_cpy = (double *) malloc(sizeof(double) * dim);
-
 	for(int i = 0; i < dim; i++) { pt_cpy[i] = scale * pt[i]; }
 
+	// Run downdate procedure (modifies pt_cpy)
 	for(int i = 0; i < dim; i++) {
 		double r = sqrt(
 			mat[i * dim + i] * mat[i * dim + i] + pt_cpy[i] * pt_cpy[i]);
@@ -59,9 +60,11 @@ void cholesky_update(double *mat, double *pt, double scale, int dim)
  */
 void cholesky_downdate(double *mat, double *pt, double scale, int dim)
 {
+	// Copy pt
 	double *pt_cpy = (double *) malloc(sizeof(double) * dim);
 	for(int i = 0; i < dim; i++) { pt_cpy[i] = scale * pt[i]; }
 
+	// Run downdate procedure (modifies pt_cpy)
 	for(int i = 0; i < dim; i++) {
 		double r = sqrt(
 			mat[i * dim + i] * mat[i * dim + i] - pt_cpy[i] * pt_cpy[i]);

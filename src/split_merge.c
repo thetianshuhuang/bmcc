@@ -14,9 +14,11 @@
 #include <stdbool.h>
 
 #include "../include/mixture.h"
+#include "../include/mixture_shortcuts.h"
 #include "../include/misc_math.h"
 #include "../include/type_check.h"
 #include "../include/base_iter.h"
+#include "../include/split_merge_helpers.h"
 
 #include <stdio.h>
 /**
@@ -34,21 +36,15 @@ bool merge(
     double *data, uint16_t *assignments,
     struct mixture_model_t *model)
 {
+    // Modify copy of assignments
+    uint8_t *asn_tmp = malloc(sizeof(uint8_t) * model->size);
+
     // Create merge component; index becomes [size-2]
     void *new_component = model->comp_methods->create(model->comp_params);
-
-    // Modify copy of assignments
-    uint16_t *asn_tmp = malloc(sizeof(uint8_t) * model->size);
-
-    // Add points in clusters c1, c2 to new_component
-    double propose_ratio = 0;
     for(int i = 0; i < model->size; i++) {
-        if(i == c1 || i == c2) {
+        if(assignments[i] == c1 || assignments[i] == c2) {
             double *point = &(data[i * model->dim]);
-            propose_ratio += model->comp_methods->loglik_ratio(
-                new_component, model->comp_params, point);
-            model->comp_methods->add(
-                new_component, model->comp_params, point);
+            model->comp_methods->add(new_component, model->comp_params, point);
             asn_tmp[i] = 1;
         }
         else {
@@ -58,7 +54,8 @@ bool merge(
 
     // Compute acceptance probability
     double mixture_ratio = model->model_methods->log_merge(
-        model->model_params, model->num_clusters,
+        model->model_params,
+        model->num_clusters,
         model->comp_methods->get_size(get_cluster(model, c1)),
         model->comp_methods->get_size(get_cluster(model, c2)));
     double component_ratio = model->comp_methods->split_merge(
@@ -66,14 +63,20 @@ bool merge(
         new_component,
         get_cluster(model, c1),
         get_cluster(model, c2));
+    double propose_ratio = merge_propose_prob(
+        c1, c2, data, assignments, model);
     double p_accept = exp(propose_ratio + mixture_ratio - component_ratio);
-
-    printf(
-        "[merge] propose: %f mixture: %f component: %f p_accept: %f\n",
-        propose_ratio, mixture_ratio, - component_ratio, p_accept);
 
     // Accept -> remove old components, add new components
     if(p_accept > ((double) rand_45_bit() / (double) RAND_MAX_45)) {
+
+        #ifdef SHOW_ACCEPT
+        printf(
+            "[accepted][merge] "
+            "propose: %f mixture: %f component: %f p_accept: %f\n",
+            propose_ratio, mixture_ratio, - component_ratio, log(p_accept));
+        #endif
+
         // Remove larger index first to avoid mangling index linkage
         if(c1 > c2) {
             remove_component(model, assignments, c1);
@@ -95,7 +98,15 @@ bool merge(
     }
     // Reject -> free new component
     else {
-        model->comp_methods->destroy(new_component);
+
+        #ifdef SHOW_REJECT
+        printf(
+            "          [merge] "
+            "propose: %f mixture: %f component: %f p_accept: %f\n",
+            propose_ratio, mixture_ratio, - component_ratio, log(p_accept));
+        #endif
+
+        destroy(model, new_component);
     }
 
     free(asn_tmp);
@@ -106,6 +117,8 @@ bool merge(
 /**
  * Merge Update
  * @param cluster cluster to split
+ * @param p1 first point index
+ * @param p2 second point index
  * @param data data array; row-major
  * @param assignments assignment vector
  * @param components vector containing component structs, stored as void *.
@@ -113,54 +126,64 @@ bool merge(
  * @return true if returned without error
  */
 bool split(
-    int cluster,
+    int cluster, int p1, int p2,
     double *data, uint16_t *assignments,
     struct mixture_model_t *model)
 {
+    // Modify copy of assignments
+    uint8_t *asn_tmp = malloc(sizeof(uint8_t) * model->size);
+
     // Create new clusters
     // If accepted, new1 becomes index [size - 1], new2 becomes [size]
     void *new1 = model->comp_methods->create(model->comp_params);
+    add_point(model, new1, &(data[model->dim * p1]));
+    asn_tmp[p1] = 2;
     void *new2 = model->comp_methods->create(model->comp_params);
+    add_point(model, new2, &(data[model->dim * p2]));
+    asn_tmp[p2] = 1;
 
     // Track propose likelihood
     double propose_ratio = 0;
 
-    // Modify copy of assignments
-    uint16_t *asn_tmp = malloc(sizeof(uint8_t) * model->size);
-
     // Split points randomly, with equal probability for points in splitting
     // cluster
     for(int i = 0; i < model->size; i++) {
-        if(assignments[i] == cluster) {
+        bool not_original = (i != p1) && (i != p2);
+        bool in_merge = (assignments[i] == cluster);
+
+        if(in_merge && not_original) {
+
             double *point = &(data[model->dim * i]);
   
             // Get assignment likelihoods
-            double asn1 = model->comp_methods->loglik_ratio(
-                new1, model->comp_params, point);
-            double asn2 = model->comp_methods->loglik_ratio(
-                new2, model->comp_params, point);
-            double likelihood = exp(asn1) / (exp(asn1) + exp(asn2));
+            double asn1 = marginal_loglik(model, new1, point);
+            double asn2 = marginal_loglik(model, new2, point);
 
-            // Assign randomly
+            // Normalize using logsumexp
+            double denom_log = log(exp(asn1) + exp(asn2));
+            double likelihood = exp(asn1 - denom_log);
+
+            // Assign randomly; track propose ratio taken
             if(likelihood > (double) rand_45_bit() / (double) RAND_MAX_45) {
-                propose_ratio += asn1;
-                model->comp_methods->add(new1, model->comp_params, point);
+                add_point(model, new1, point);
                 asn_tmp[i] = 2;
+                propose_ratio += asn1 - denom_log;
             }
             else {
-                propose_ratio += asn2;
-                model->comp_methods->add(new2, model->comp_params, point);
+                add_point(model, new2, point);
                 asn_tmp[i] = 1;
+                propose_ratio += asn2 - denom_log;
             }
         }
-        else {
+        else if(!in_merge) {
             asn_tmp[i] = 0;
         }
     }
 
     // Compute acceptance probability
     double mixture_ratio = model->model_methods->log_split(
-        model->model_params, model->num_clusters,
+        model->model_params,
+        model->num_clusters,
         model->comp_methods->get_size(new1),
         model->comp_methods->get_size(new2));
     double component_ratio = model->comp_methods->split_merge(
@@ -170,18 +193,24 @@ bool split(
 
     double p_accept = exp(- propose_ratio + mixture_ratio + component_ratio);
 
-    printf(
-        "[split] propose: %f mixture: %f component: %f p_accept: %f\n",
-        - propose_ratio, mixture_ratio, component_ratio, p_accept);
-
     // Accept -> remove old component, add new components
     if(p_accept > ((double) rand_45_bit() / (double) RAND_MAX_45)) {
+
+        #ifdef SHOW_ACCEPT
+        printf(
+            "[accepted][split] "
+            "propose: %f n1: %d n2: %d mixture: %f component: %f p_accept: %f\n",
+            - propose_ratio,
+            model->comp_methods->get_size(new1),
+            model->comp_methods->get_size(new2),
+            mixture_ratio, component_ratio, log(p_accept));
+        #endif
 
         // Remove old
         remove_component(model, assignments, cluster);
         // Add new components
-        add_component(model, new1);
-        add_component(model, new2);
+        add_component(model, new1);  // -2
+        add_component(model, new2);  // -1
 
         // Copy assignments
         // asn_tmp index [0] becomes [size]; [1] becomes [size + 1]
@@ -194,8 +223,19 @@ bool split(
     }
     // Reject -> free new components
     else {
-        model->comp_methods->destroy(new1);
-        model->comp_methods->destroy(new2);
+
+        #ifdef SHOW_REJECT
+        printf(
+            "          [split] "
+            "propose: %f n1: %d n2: %d mixture: %f component: %f p_accept: %f\n",
+            - propose_ratio,
+            model->comp_methods->get_size(new1),
+            model->comp_methods->get_size(new2),
+            mixture_ratio, component_ratio, log(p_accept));
+        #endif
+
+        destroy(model, new1);
+        destroy(model, new2);
     }
 
     free(asn_tmp);
@@ -215,7 +255,7 @@ bool split_merge(
         return merge(assignments[i], assignments[j], data, assignments, model);
     }
     else {
-        return split(assignments[i], data, assignments, model);
+        return split(assignments[i], i, j, data, assignments, model);
     }
 }
 

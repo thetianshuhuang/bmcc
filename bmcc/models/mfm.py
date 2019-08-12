@@ -70,7 +70,7 @@ class MFM:
                 prev = current
                 term = (
                     self.prior(k) +
-                    math.lgamma(t + 1) +
+                    math.lgamma(k + 1) +
                     math.lgamma(self.gamma * k) -
                     math.lgamma(k - t + 1) -
                     math.lgamma(self.gamma * k + N)

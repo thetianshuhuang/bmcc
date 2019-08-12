@@ -223,43 +223,42 @@ double nw_loglik_new(void *params, double *point)
  */
 double nw_loglik_ratio(void *component, void *params, double *point)
 {
+    // Unpack
     struct nw_component_t *cpt = (struct nw_component_t *) component;
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
+    int dim = params_tc->dim;
+    double df = params_tc->df;
 
     // Deal with empty component separately
     if(cpt->n == 0) { return nw_loglik_new(params, point); }
 
-    int dim = params_tc->dim;
-    double df = params_tc->df;
-
-    // Scratch arrays
-    double *chol_up = (double *) malloc(sizeof(double) * dim * dim);
-    double *chol_center = (double *) malloc(sizeof(double) * dim * dim);
+    // |S + X'X'^T| (centered)
+    // Updated Total
     double *total_up = (double *) malloc(sizeof(double) * dim);
-
-    // Copy cholesky decomposition
-    for(int i = 0; i < dim * dim; i++) { chol_up[i] = cpt->chol_decomp[i]; }
-    for(int i = 0; i < dim * dim; i++) { chol_center[i] = cpt->chol_decomp[i]; }
-    
-    // Update point
     for(int i = 0; i < dim; i++) { total_up[i] = cpt->total[i] + point[i]; }
+
+    // Updated Cholesky(S + X'X'^T)
+    double *chol_up = (double *) malloc(sizeof(double) * dim * dim);
+    for(int i = 0; i < dim * dim; i++) { chol_up[i] = cpt->chol_decomp[i]; }
     cholesky_update(chol_up, point, 1, dim);
 
-    // Center cholesky decompositions using downdate procedure
-    cholesky_downdate(chol_center, cpt->total, 1 / sqrt(cpt->n), dim);
+    // Centered
     cholesky_downdate(chol_up, total_up, 1 / sqrt(cpt->n + 1), dim);
+    double logdet_new = cholesky_logdet(chol_up, dim);
+
+    // |S + XX^T| (centered)
+    double logdet = centered_logdet(cpt->chol_decomp, cpt->total, dim, cpt->n);
 
     double res = (
         - log(M_PI) * (dim / 2)
         + log_mv_gamma(dim, (df + cpt->n + 1) / 2)
         - log_mv_gamma(dim, (df + cpt->n) / 2)
-        + cholesky_logdet(chol_center, dim) * (df + cpt->n) / 2
-        - cholesky_logdet(chol_up, dim) * (df + cpt->n + 1) / 2
+        + logdet * (df + cpt->n) / 2
+        - logdet_new * (df + cpt->n + 1) / 2
     );
 
     // Clean up
     free(chol_up);
-    free(chol_center);
     free(total_up);
     return res;
 }
@@ -274,23 +273,37 @@ double nw_loglik_ratio(void *component, void *params, double *point)
  */
 double nw_split_merge(void *params, void *merged, void *c1, void *c2)
 {
+    // Unpack params
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
     int dim = params_tc->dim;
     double df = params_tc->df;
 
+    // Type cast
     struct nw_component_t *cpt_merged = (struct nw_component_t *) merged;
     struct nw_component_t *cpt1 = (struct nw_component_t *) c1;
     struct nw_component_t *cpt2 = (struct nw_component_t *) c2;
 
+    // Get centered log determinants
+    double merged_logdet = centered_logdet(
+        cpt_merged->chol_decomp, cpt_merged->total, dim, cpt_merged->n);
+    double cpt1_logdet = centered_logdet(
+        cpt1->chol_decomp, cpt1->total, dim, cpt1->n);
+    double cpt2_logdet = centered_logdet(
+        cpt2->chol_decomp, cpt2->total, dim, cpt2->n);
+
     return (
-        cholesky_logdet(params_tc->s_chol, dim) * df / 2
+        // Gamma_p((df + |c1|) / 2) * Gamma_p((df + |c2|) / 2)
         + log_mv_gamma(dim, (df + cpt1->n) / 2)
         + log_mv_gamma(dim, (df + cpt2->n) / 2)
+        // Gamma_p(df / 2) * Gamma_p((df + |c1| + |c2) / 2)
+        - log_mv_gamma(dim, df / 2)
         - log_mv_gamma(dim, (df + cpt_merged->n) / 2)
-        + cholesky_logdet(cpt_merged->chol_decomp, dim)
-            * (cpt_merged->n + df) / 2
-        - cholesky_logdet(cpt1->chol_decomp, dim) * (cpt1->n + df) / 2
-        - cholesky_logdet(cpt2->chol_decomp, dim) * (cpt2->n + df) / 2
+        // |S + XX^T|^{(df + |c1| + |c2|) / 2} * |S|^{df / 2}
+        + merged_logdet * (cpt_merged->n + df) / 2
+        + cholesky_logdet(params_tc->s_chol, dim) * df / 2
+        // |S + XX^T|^{(df + |c1|) / 2} * |S + XX^T|^{(df + |c2|) / 2}
+        - cpt1_logdet * (cpt1->n + df) / 2
+        - cpt2_logdet * (cpt2->n + df) / 2
     );
 }
 

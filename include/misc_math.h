@@ -17,5 +17,7 @@ uint64_t rand_45_bit();
 // Sample from weighted vector
 int sample_log_weighted(double *weights, int length);
 
+// Centered log determinant
+double centered_logdet(double *chol, double *total, int d, int n);
 
 #endif

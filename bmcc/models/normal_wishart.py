@@ -29,9 +29,10 @@ class NormalWishart:
 
     CAPSULE = COMPONENT_NORMAL_WISHART
 
-    def __init__(self, df=2):
+    def __init__(self, df=2, scale=None):
 
         self.df = df
+        self.scale = scale
 
     def get_args(self, data):
         """Get component hyperparameters
@@ -52,7 +53,8 @@ class NormalWishart:
         return {
             "df": float(self.df),
             "s_chol": np.linalg.cholesky(
-                1 / self.df * np.linalg.inv(np.cov(data.T)))
+                self.scale if self.scale is not None
+                else 1 / self.df * np.linalg.inv(np.cov(data.T)))
         }
 
     def update(self, mixture):

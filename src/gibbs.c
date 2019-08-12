@@ -9,6 +9,7 @@
 #include <stdbool.h>
 
 #include "../include/mixture.h"
+#include "../include/mixture_shortcuts.h"
 #include "../include/misc_math.h"
 #include "../include/type_check.h"
 #include "../include/base_iter.h"
@@ -71,24 +72,11 @@ bool gibbs_iter(
             else { weights = weights_new; }
         }
 
-        // Get assignment weights
+        // Get assignment and new cluster weights
         for(int i = 0; i < model->num_clusters; i++) {
-            void *c_i = model->clusters[i];
-            weights[i] = (
-                model->comp_methods->loglik_ratio(
-                    c_i, model->comp_params, point) +
-                model->model_methods->log_coef(
-                    model->model_params,
-                    model->comp_methods->get_size(c_i),
-                    model->num_clusters));
+            weights[i] = marginal_loglik(model, model->clusters[i], point);
         }
-
-        // Get new cluster weight
-        weights[model->num_clusters] = (
-            model->model_methods->log_coef_new(
-                model->model_params,
-                model->num_clusters) +
-            model->comp_methods->loglik_new(model->comp_params, point));
+        weights[model->num_clusters] = new_cluster_loglik(model, point);
 
         // Sample new
         int new = sample_log_weighted(weights, model->num_clusters + 1);
@@ -104,8 +92,7 @@ bool gibbs_iter(
         }
 
         // Update component
-        model->comp_methods->add(
-            model->clusters[new], model->comp_params, point);
+        add_point(model, model->clusters[new], point);
         assignments[idx] = new;
     }
 

@@ -31,9 +31,94 @@ import datetime
 import os
 
 
+#
+# -- Module Metadata ----------------------------------------------------------
+#
+
+# Build Date (used mainly for debugging C module)
 BUILD_DATETIME = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+# Description
+MODULE_SHORT_DESC = (
+    "Implementation of Markov Chain Bayesian Clustering techniques, including "
+    "DPM and MFM, with an abstract Mixture Model and Component Model API.")
 
+# Long description; pulled from README (is included in MANIFEST)
+with open("README.md", "r") as f:
+    MODULE_LONG_DESC = f.read()
+
+# Tags / Classifiers (https://pypi.org/classifiers/)
+CLASSIFIERS = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Information Analysis"
+]
+
+# Core Metadata
+META = {
+    "name": "bmcc",
+    "version": "2.0.0",
+    "author": "Tianshu Huang",
+    "author_email": "thetianshuhuang@gmail.com",
+    "description": MODULE_SHORT_DESC,
+    "long_description": MODULE_LONG_DESC,
+    "long_description_content_type": "text/markdown",
+    "url": "https://github.com/thetianshuhuang/bmcc"
+}
+
+
+#
+# -- Debug Configuration ------------------------------------------------------
+#
+# Warning:
+#
+# Enabling these macros will cause the underlying C module to print debug logs.
+# This action will greatly slow down the program (mostly due to terminal output
+# limitations).
+# These logs cannot be silenced through python.
+#
+# Sampling modes may or may not choose to respond to these macros.
+
+DEBUG_MACROS = [
+    # Show message on metropolis-hastings accept
+    # ("SHOW_ACCEPT", 0),
+    # Show message on metropolis-hastings reject
+    # ("SHOW_REJECT", 0),
+]
+
+
+#
+# -- API Names ----------------------------------------------------------------
+#
+# Names used by the C module to label its capsules. These API names must be
+# used by extending modules.
+
+API_NAMES = [
+    ("COMPONENT_METHODS_API", "\"bmcc.core.ComponentMethods\""),
+    ("MODEL_METHODS_API", "\"bmcc.core.ModelMethods\""),
+    ("MIXTURE_MODEL_API", "\"bmcc.core.MixtureModel\"")
+]
+
+
+#
+# -- Other Configuration Options ----------------------------------------------
+#
+OTHER_MACROS = [
+    # Base size for dynamically sized vectors
+    ("BASE_VEC_SIZE", 32),
+    # Build Datetime -- used for debug purposes
+    # Bound to bmcc.CONFIG["BUILD_DATETIME"]
+    ("BUILD_DATETIME", '"' + BUILD_DATETIME + '"'),
+]
+
+
+#
+# -- C Extension --------------------------------------------------------------
+#
 C_EXTENSION = Extension(
     "bmcc.core",
 
@@ -49,42 +134,14 @@ C_EXTENSION = Extension(
     include_dirs=[np.get_include(), './include'],
 
     # Configuration
-    define_macros=[
-        # Base size for dynamically sized vectors
-        ("BASE_VEC_SIZE", 32),
-        # Build Datetime -- used for debug purposes
-        # Bound to bmcc.CONFIG["BUILD_DATETIME"]
-        ("BUILD_DATETIME", '"' + BUILD_DATETIME + '"'),
-        # API Descriptions; needed to create other extensions that modify
-        # core capsules
-        ("COMPONENT_METHODS_API", "\"bmcc.core.ComponentMethods\""),
-        ("MODEL_METHODS_API", "\"bmcc.core.ModelMethods\""),
-        ("MIXTURE_MODEL_API", "\"bmcc.core.MixtureModel\"")
-    ],
+    define_macros=DEBUG_MACROS + API_NAMES + OTHER_MACROS
 )
 
 
-MODULE_SHORT_DESC = (
-    "Implementation of Markov Chain Bayesian Clustering techniques, including "
-    "DPM and MFM, with an abstract Mixture Model and Component Model API.")
-
-with open("README.md", "r") as f:
-    MODULE_LONG_DESC = f.read()
-
-
+#
+# -- Module -------------------------------------------------------------------
+#
 setup(
-    # About
-    name='bmcc',
-    version='1.0.3',
-    author='Tianshu Huang',
-    author_email='thetianshuhuang@gmail.com',
-
-    # Description
-    description=MODULE_SHORT_DESC,
-    long_description=MODULE_LONG_DESC,
-    long_description_content_type="text/markdown",
-    url="https://github.com/thetianshuhuang/bmcc",
-
     # Requirements
     python_requires='>=3, <4',
     install_requires=[
@@ -100,15 +157,9 @@ setup(
     # C Extension
     ext_modules=[C_EXTENSION],
     include_package_data=True,
+    # Classifiers
+    classifiers=CLASSIFIERS,
 
-    # Classifiers (https://pypi.org/classifiers/)
-    classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
-        "Intended Audience :: Science/Research",
-        "Natural Language :: English",
-        "Topic :: Scientific/Engineering :: Mathematics",
-        "Topic :: Scientific/Engineering :: Information Analysis"
-    ]
+    # Core Metadata
+    **META
 )
