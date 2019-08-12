@@ -18,6 +18,13 @@
 
 #include <stdio.h>
 
+
+// ----------------------------------------------------------------------------
+//
+//                           Create/Destroy Mixture
+//
+// ----------------------------------------------------------------------------
+
 /**
  * Create components struct
  * @return allocated components_t; initialized empty
@@ -79,6 +86,12 @@ void destroy_mixture(PyObject *model_py)
     free(model_tc);
 }
 
+
+// ----------------------------------------------------------------------------
+//
+//                          Create/Destroy Component
+//
+// ----------------------------------------------------------------------------
 
 /**
  * Add Component: allocates new component, and appends to components capsule
@@ -169,25 +182,11 @@ bool remove_empty(struct mixture_model_t *model, uint16_t *assignments)
 }
 
 
-/**
- * Get cluster at index (safely)
- * @param model : mixture_model_t struct to fetch from
- * @param idx index to fetch
- * @return fetched component; NULL if unsuccessful
- */
-void *get_cluster(struct mixture_model_t *model, int idx)
-{
-    if(idx >= model->num_clusters) {
-        printf(
-            "[C BACKEND ERROR] Invalid cluster: %d [total=%d]\n",
-            idx, model->num_clusters);
-        return NULL;
-    }
-    else {
-        return model->clusters[idx];
-    }
-}
-
+// ----------------------------------------------------------------------------
+//
+//                             Capsule Management
+//
+// ----------------------------------------------------------------------------
 
 /**
  * Initialize model capsules. See docstring (sourced from mixture.h) for more

@@ -132,8 +132,6 @@ void remove_component(
     struct mixture_model_t *model, uint16_t *assignments, int idx);
 // Remove empty component
 bool remove_empty(struct mixture_model_t *model, uint16_t *assignments);
-// Get cluster at index, safely
-void *get_cluster(struct mixture_model_t *model, int idx);
 
 
 // ----------------------------------------------------------------------------

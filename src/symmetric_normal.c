@@ -210,7 +210,7 @@ double sn_loglik_new(void *params, double *point)
 ComponentMethods SYMMETRIC_NORMAL = {
 	&sn_params_create,
 	&sn_params_destroy,
-	NULL,  // No udpate
+	NULL,  // No update
 	&sn_create,
 	&sn_destroy,
 	&sn_get_size,
@@ -218,5 +218,5 @@ ComponentMethods SYMMETRIC_NORMAL = {
 	&sn_remove,
 	&sn_loglik_ratio,
 	&sn_loglik_new,
-	NULL,
+	NULL,  // Does not support split merge
 };
