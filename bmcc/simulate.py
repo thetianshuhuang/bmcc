@@ -44,6 +44,9 @@ class GaussianMixture:
         cluster centers.
     df : float
         Degrees of freedom for wishart distribution
+    means : array-like
+        If not None, these are used as the means instead of sampling means
+        from a symmetric normal.
     symmetric : bool
         If False, sample cluster covariances from a normal-wishart with df=n.
         Else, set each cluster covariance as the identity.
@@ -93,7 +96,7 @@ class GaussianMixture:
             setattr(self, attr, fz[attr])
 
     def __init_new(
-            self, n=1000, k=3, d=2, r=1, alpha=40, df=None,
+            self, n=1000, k=3, d=2, r=1, alpha=40, df=None, means=None,
             symmetric=False, shuffle=True):
         """Initialize New Gaussian Mixture Simulation"""
 
@@ -121,12 +124,15 @@ class GaussianMixture:
             self.assignments.sort()
 
         # Means: normal, with radius proportional to clusters
-        self.means = [
-            stats.multivariate_normal.rvs(
-                mean=np.zeros(d),
-                cov=np.identity(d) * (alpha * k) ** (1 / d)
-            ) for _ in range(k)
-        ]
+        if means is None:
+            self.means = [
+                stats.multivariate_normal.rvs(
+                    mean=np.zeros(d),
+                    cov=np.identity(d) * (alpha * k) ** (1 / d)
+                ) for _ in range(k)
+            ]
+        else:
+            self.means = means
 
         # Covariances: normal wishart (if not symmetric), else normal
         if symmetric:
