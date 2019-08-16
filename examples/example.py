@@ -19,32 +19,29 @@ dataset = bmcc.GaussianMixture(
     n=1000, k=3, d=3, r=0.7, alpha=40, df=3, symmetric=False, shuffle=False)
 
 
-tmp = 0
+def hybrid(*args, **kwargs):
+
+    for _ in range(5):
+        bmcc.gibbs(*args, **kwargs)
+    bmcc.split_merge(*args, **kwargs)
 
 
-def hybrid_sm(*args):
-    global tmp
-    tmp += 1
-    if tmp < 100:
-        bmcc.gibbs(*args)
-    else:
-        bmcc.split_merge(*args)
-
+mm = bmcc.MFM(gamma=1, prior=lambda k: poisson.logpmf(k, 3))
+# bmcc.DPM(alpha=1, use_eb=False)
+cm = bmcc.NormalWishart(df=3)
 
 # Create mixture model
 model = bmcc.BayesianMixture(
     data=dataset.data,
-    sampler=bmcc.split_merge,
-    component_model=bmcc.NormalWishart(df=3),
-    mixture_model=bmcc.MFM(
-        gamma=1, prior=lambda k: poisson.logpmf(k, 4)),
-    # mixture_model=bmcc.DPM(alpha=1, use_eb=False),
+    sampler=hybrid,
+    component_model=cm,
+    mixture_model=mm,
     assignments=np.zeros(1000).astype(np.uint16),
     thinning=5)
 
 # Run Iterations
 start = time.time()
-for i in tqdm(range(5000)):
+for i in tqdm(range(1000)):
     model.iter()
 print("gibbs_iterate: {:.2f}s [{:.2f} ms/iteration]".format(
     time.time() - start, (time.time() - start) * 1000 / 5000))

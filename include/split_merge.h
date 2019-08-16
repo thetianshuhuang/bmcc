@@ -21,6 +21,6 @@
         "used in\n" \
     "    initialization should support Split Merge sampling."
 
-PyObject *split_merge_py(PyObject *self, PyObject *args);
+PyObject *split_merge_py(PyObject *self, PyObject *args, PyObject *kwargs);
 
 #endif

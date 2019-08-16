@@ -58,6 +58,7 @@
 // Analysis and other non-sampler helpers
 #include "../include/select.h"
 #include "../include/analysis.h"
+#include "../include/type_check.h"
 
 // Mixture Models
 #include "../include/dpm.h"
@@ -78,14 +79,14 @@
 static PyMethodDef ModuleMethods[] = {
     {
         "gibbs",
-        (PyCFunction) gibbs_iter_py,
-        METH_VARARGS,
+        (PyCFunctionWithKeywords) gibbs_iter_py,
+        METH_VARARGS | METH_KEYWORDS,
         DOCSTRING_GIBBS_ITER
     },
     {
         "split_merge",
-        (PyCFunction) split_merge_py,
-        METH_VARARGS,
+        (PyCFunctionWithKeywords) split_merge_py,
+        METH_VARARGS | METH_KEYWORDS,
         DOCSTRING_SPLIT_MERGE
     },
     {
@@ -129,6 +130,12 @@ static PyMethodDef ModuleMethods[] = {
         (PyCFunction) oracle_matrix_py,
         METH_VARARGS,
         DOCSTRING_ORACLE_MATRIX
+    },
+    {
+        "get_capsule_name",
+        (PyCFunction) get_capsule_name_py,
+        METH_VARARGS,
+        DOCSTRING_GET_CAPSULE_NAME
     },
     {NULL, NULL, 0, NULL}
 };

@@ -19,7 +19,7 @@ import numpy as np
 from scipy import stats
 from matplotlib import pyplot as plt
 
-from bmcc.plot import plot_clusterings
+from .analysis import plot_clusterings
 from bmcc.core import oracle_matrix
 
 

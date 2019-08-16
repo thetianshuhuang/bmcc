@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt
 from sklearn.metrics import normalized_mutual_info_score, adjusted_rand_score
 
 from bmcc.core import aggregation_score, segregation_score
-from bmcc.plot import plot_clusterings
+from .plot import plot_clusterings
 from bmcc.errors import WARNING_UINT16_CAST
 
 

@@ -1,4 +1,4 @@
-"""Warning Descriptions"""
+"""Warning and Error Descriptions"""
 
 
 WARNING_FLOAT64_CAST = """
@@ -26,4 +26,15 @@ uint16 array:
         assignments = assignments.astype(np.uint16)
     R/Reticulate:
         assignments_py = np_array(assignments, dtype="uint16", order="C")
+"""
+
+ERROR_NO_CAPSULE = """
+{mtype} model must have a 'CAPSULE' attribute (containing C functions
+describing model methods)
+"""
+
+ERROR_CAPSULE_WRONG_API = """
+{mtype} model capsule does not match the required API.
+Expected API name: {expected}
+Recieved API name: {recieved}
 """

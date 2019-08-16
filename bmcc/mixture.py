@@ -38,13 +38,14 @@ from bmcc.core import (
     init_model, gibbs,
     update_mixture,
     update_components)
-from bmcc.least_squares import LstsqResult
-from bmcc.models import NormalWishart, DPM
-from bmcc.errors import (
-    WARNING_CONTIGUOUS_CAST,
-    WARNING_FLOAT64_CAST,
-    WARNING_UINT16_CAST
+from .analysis import LstsqResult
+from .util.type_check import (
+    check_data,
+    check_assignments,
+    check_mixture_model,
+    check_component_model
 )
+from .util.get_params import get_params
 
 
 class BayesianMixture:
@@ -70,60 +71,6 @@ class BayesianMixture:
     __BASE_HIST_SIZE = 32
 
     #
-    # -- Check Types ----------------------------------------------------------
-    #
-
-    def __check_data(self, data):
-        """Check data array type."""
-
-        # Check types
-        if type(data) != np.ndarray:
-            raise TypeError(
-                "Data must be a numpy array.")
-        if len(data.shape) != 2:
-            raise TypeError(
-                "Data must have 2 dimensions. The points should be stored in "
-                "row-major order (each data point is a row).")
-        if data.dtype != np.float64:
-            print(WARNING_FLOAT64_CAST)
-            data = data.astype(np.float64)
-        if not data.flags['C_CONTIGUOUS']:
-            print(WARNING_CONTIGUOUS_CAST)
-            data = np.ascontiguousarray(data, dtype=np.float64)
-        return data
-
-    def __check_assignments(self, assignments, size):
-        """Check assignment array type."""
-
-        # Check assignments type
-        if type(assignments) != np.ndarray:
-            raise TypeError("Assignments must be an array.")
-        if len(assignments.shape) != 1:
-            raise TypeError("Assignments must be one-dimensional.")
-        if assignments.shape[0] != size:
-            raise TypeError(
-                "Assignments must have the same dimensionality as the number "
-                "of data points.")
-        if assignments.dtype != np.uint16:
-            print(WARNING_UINT16_CAST)
-            assignments = assignments.astype(np.uint16)
-
-        return assignments
-
-    def __check_capsules(self, cmodel, mmodel):
-        """Check for correct capsule types."""
-
-        # Check for capsule
-        if not hasattr(cmodel, "CAPSULE"):
-            raise TypeError(
-                "Component Model must have 'CAPSULE' attribute (containing C "
-                "functions describing model methods)")
-        if not hasattr(mmodel, "CAPSULE"):
-            raise TypeError(
-                "Mixture Model must have 'CAPSULE' attribute (containing C "
-                "functions describing model methods)")
-
-    #
     # -- Initialization -------------------------------------------------------
     #
 
@@ -135,51 +82,23 @@ class BayesianMixture:
             assignments=None,
             thinning=1):
 
-        # Check data first
-        self.data = self.__check_data(data)
+        # Run type checks
+        self.data = check_data(data)
+        self.assignments = check_assignments(assignments, data.shape[0])
+        self.mixture_model = check_mixture_model(mixture_model)
+        self.component_model = check_component_model(
+            component_model, data.shape[1])
 
-        # Provide models
-        if component_model is None:
-            print(
-                "No component model provided; using Normal Wishart with "
-                "df=dim.")
-            component_model = NormalWishart(df=self.data.shape[1])
-        if mixture_model is None:
-            print(
-                "No mixture model provided; using DPM with initial alpha = 1.")
-            mixture_model = DPM(alpha=1)
-        if assignments is None:
-            print(
-                "No initial assignments provided. Assigning all points to the "
-                "same cluster at initialization.")
-            assignments = np.zeros(data.shape[0], dtype=np.uint16)
-
-        # Save models
+        # Save sampler
         self.sampler = sampler
-        self.component_model = component_model
-        self.mixture_model = mixture_model
-
-        # Check assignments now that we have data dimensions
-        self.assignments = self.__check_assignments(assignments, data.shape[0])
-
-        # Create args dict
-        params = {"dim": data.shape[1]}
-        try:
-            params.update(component_model.get_args(data))
-            params.update(mixture_model.get_args(data))
-        except AttributeError:
-            raise TypeError(
-                "Component Model and Mixture Model must have 'get_args' "
-                "attribute (used to fetch dictionary args for capsule "
-                "initializer)")
-
-        # Make sure capsules are present
-        self.__check_capsules(component_model, mixture_model)
 
         # Create model
         self.__model = init_model(
-            self.data, self.assignments,
-            component_model.CAPSULE, mixture_model.CAPSULE, params)
+            self.data,
+            self.assignments,
+            self.component_model.CAPSULE,
+            self.mixture_model.CAPSULE,
+            get_params(data, self.component_model, self.mixture_model))
 
         # Set up thinning
         if type(thinning) != int:

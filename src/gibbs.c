@@ -20,10 +20,14 @@
  * @param assignments assignment vector
  * @param components vector containing component structs, stored as void *.
  *      Component methods are responsible for casting to the correct type.
+ * @param annealing annealing factor
  * @return true if returned without error
  */
 bool gibbs_iter(
-    double *data, uint16_t *assignments, struct mixture_model_t *model)
+    double *data,
+    uint16_t *assignments,
+    struct mixture_model_t *model,
+    double annealing)
 {
 
     // Assignment weight vector: exponentially-overallocated
@@ -74,9 +78,11 @@ bool gibbs_iter(
 
         // Get assignment and new cluster weights
         for(int i = 0; i < model->num_clusters; i++) {
-            weights[i] = marginal_loglik(model, model->clusters[i], point);
+            weights[i] = annealing * marginal_loglik(
+                model, model->clusters[i], point);
         }
-        weights[model->num_clusters] = new_cluster_loglik(model, point);
+        weights[model->num_clusters] = (
+            annealing * new_cluster_loglik(model, point));
 
         // Sample new
         int new = sample_log_weighted(weights, model->num_clusters + 1);
@@ -106,7 +112,7 @@ bool gibbs_iter(
  * Run Gibbs Iteration. See docstring (sourced from gibbs.h) for details on
  * Python calling.
  */
-PyObject *gibbs_iter_py(PyObject *self, PyObject *args)
+PyObject *gibbs_iter_py(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    return base_iter(self, args, &supports_gibbs, &gibbs_iter);
+    return base_iter(self, args, kwargs, &supports_gibbs, &gibbs_iter);
 }

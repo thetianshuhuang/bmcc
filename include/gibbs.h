@@ -19,8 +19,13 @@
     "model : capsule\n" \
     "    Capsule containing model data. Mixture model and component model " \
         "used in\n" \
-    "    initialization should support Gibbs sampling."
+    "    initialization should support Gibbs sampling." \
+    "\n" \
+    "Keyword Args\n" \
+    "------------\n" \
+    "annealing : float\n" \
+    "    annealing factor."
 
-PyObject *gibbs_iter_py(PyObject *self, PyObject *args);
+PyObject *gibbs_iter_py(PyObject *self, PyObject *args, PyObject *kwargs);
 
 #endif

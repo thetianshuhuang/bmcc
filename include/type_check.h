@@ -31,4 +31,19 @@ bool supports_gibbs(struct mixture_model_t *model);
 bool supports_split_merge(struct mixture_model_t *model);
 
 
+#define DOCSTRING_GET_CAPSULE_NAME \
+	"Get name of python capsule.\n" \
+	"\n" \
+	"Parameters\n" \
+	"----------\n" \
+	"capsule : Python Capsule\n" \
+	"    Capsule to fetch name of\n" \
+	"\n" \
+	"Returns\n" \
+	"-------\n" \
+	"str or None\n" \
+	"    str if object is capsule and has a name. None on error."
+
+PyObject *get_capsule_name_py(PyObject *self, PyObject *args);
+
 #endif

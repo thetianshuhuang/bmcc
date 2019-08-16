@@ -21,19 +21,26 @@
  * Wrapper for MCMC iteration; handles error checking, GIL, type unpacking
  */
 PyObject *base_iter(
-		PyObject *self, PyObject *args,
+		PyObject *self, PyObject *args, PyObject *kwargs,
 		bool (*error_check)(struct mixture_model_t *),
-		bool (*iter)(double *, uint16_t *, struct mixture_model_t *))
+		bool (*iter)(double *, uint16_t *, struct mixture_model_t *, double))
 {
     // Get args
     PyArrayObject *data_py;
     PyArrayObject *assignments_py;
     PyObject *model_py;
-    bool success = PyArg_ParseTuple(
-        args, "O!O!O",
+    double annealing = 1;
+    static char *keywords[] = {"data", "assignments", "model", "annealing"};
+
+    // Unpack
+    bool success = PyArg_ParseTupleAndKeywords(
+        args, kwargs, "O!O!O|d", keywords,
         &PyArray_Type, &data_py,
         &PyArray_Type, &assignments_py,
-        &model_py);
+        &model_py,
+        &annealing);
+
+    // Check for errors
     if(!success) { return NULL; }
     if(!type_check(data_py, assignments_py)) { return NULL; }
 
@@ -54,7 +61,8 @@ PyObject *base_iter(
     iter_success = iter(
         (double *) PyArray_DATA(data_py),
         (uint16_t *) PyArray_DATA(assignments_py),
-        model);
+        model,
+        annealing);
 
     Py_END_ALLOW_THREADS;
     Py_DECREF(data_py);

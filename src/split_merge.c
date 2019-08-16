@@ -292,10 +292,14 @@ bool split(
  * @param data data points
  * @param assignments assignment vector
  * @param model mixture model
+ * @param annealing annealing factor
  * @return bool true on success; false on failure
  */
 bool split_merge(
-    double *data, uint16_t *assignments, struct mixture_model_t *model)
+    double *data,
+    uint16_t *assignments,
+    struct mixture_model_t *model,
+    double annealing)
 {
     // Get pivot elements i, j
     int i = (int) (rand_45_bit() % model->size);
@@ -315,8 +319,7 @@ bool split_merge(
  * Run Split Merge Iteration. See docstring (sourced from split_merge.h) for
  * details on Python calling.
  */
-PyObject *split_merge_py(PyObject *self, PyObject *args)
+PyObject *split_merge_py(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    return base_iter(self, args, &supports_split_merge, &split_merge);
+    return base_iter(self, args, kwargs, &supports_split_merge, &split_merge);
 }
-

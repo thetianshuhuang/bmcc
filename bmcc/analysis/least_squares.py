@@ -12,7 +12,7 @@ References
 
 import numpy as np
 from bmcc.core import pairwise_probability
-from bmcc.base_result import BaseResult
+from .base_result import BaseResult
 
 from matplotlib import pyplot as plt
 
