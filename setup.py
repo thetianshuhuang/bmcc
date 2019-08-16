@@ -67,7 +67,8 @@ META = {
     "description": MODULE_SHORT_DESC,
     "long_description": MODULE_LONG_DESC,
     "long_description_content_type": "text/markdown",
-    "url": "https://github.com/thetianshuhuang/bmcc"
+    "url": "https://github.com/thetianshuhuang/bmcc",
+    "classifiers": CLASSIFIERS
 }
 
 
@@ -124,14 +125,14 @@ C_EXTENSION = Extension(
 
     # List module.c first
     sources=[
-        './src/module.c'
+        './core/src/module.c'
     ] + [
-        './src/' + s for s in os.listdir('./src') if s != 'module.c'
+        './core/src/' + s for s in os.listdir('./core/src') if s != 'module.c'
     ],
 
     # Headers; must be in a separate directory from sources since include_dirs
     # only takes directories as an argument
-    include_dirs=[np.get_include(), './include'],
+    include_dirs=[np.get_include(), './core/include'],
 
     # Configuration
     define_macros=DEBUG_MACROS + API_NAMES + OTHER_MACROS
@@ -157,8 +158,6 @@ setup(
     # C Extension
     ext_modules=[C_EXTENSION],
     include_package_data=True,
-    # Classifiers
-    classifiers=CLASSIFIERS,
 
     # Core Metadata
     **META

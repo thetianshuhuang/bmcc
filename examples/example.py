@@ -33,12 +33,11 @@ cm = bmcc.NormalWishart(df=3)
 # Create mixture model
 model = bmcc.BayesianMixture(
     data=dataset.data,
-    sampler=bmcc.gibbs,
+    sampler=hybrid,
     component_model=cm,
     mixture_model=mm,
     assignments=np.zeros(1000).astype(np.uint16),
-    thinning=5,
-    annealing=lambda n: 1 - 0.5 * np.exp(-0.01 * n))
+    thinning=5)
 
 # Run Iterations
 start = time.time()
