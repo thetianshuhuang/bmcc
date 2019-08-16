@@ -54,6 +54,7 @@
 #include "../include/gibbs.h"
 #include "../include/split_merge.h"
 #include "../include/mixture.h"
+#include "../include/cleanup.h"
 
 // Analysis and other non-sampler helpers
 #include "../include/select.h"
@@ -88,6 +89,12 @@ static PyMethodDef ModuleMethods[] = {
         (PyCFunctionWithKeywords) split_merge_py,
         METH_VARARGS | METH_KEYWORDS,
         DOCSTRING_SPLIT_MERGE
+    },
+    {
+        "cleanup_gibbs",
+        (PyCFunctionWithKeywords) cleanup_iter_py,
+        METH_VARARGS | METH_KEYWORDS,
+        DOCSTRING_CLEANUP_GIBBS
     },
     {
         "init_model",

@@ -3,6 +3,7 @@
 from .base_result import BaseResult
 from .least_squares import LstsqResult, membership_matrix
 from .plot import plot_clusterings
+from .cleanup import cleanup_maximum_likelihood
 
 __all__ = [
     # Results
@@ -11,5 +12,8 @@ __all__ = [
     "membership_matrix",
 
     # Plots
-    "plot_clusterings"
+    "plot_clusterings",
+
+    # Cleanup
+    "cleanup_maximum_likelihood"
 ]
