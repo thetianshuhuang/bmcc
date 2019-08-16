@@ -30,11 +30,11 @@ PyObject *base_iter(
     PyArrayObject *assignments_py;
     PyObject *model_py;
     double annealing = 1;
-    static char *keywords[] = {"data", "assignments", "model", "annealing"};
 
     // Unpack
+    static char *kw[] = {"data", "assignments", "model", "annealing", NULL};
     bool success = PyArg_ParseTupleAndKeywords(
-        args, kwargs, "O!O!O|d", keywords,
+        args, kwargs, "O!O!O|d", kw,
         &PyArray_Type, &data_py,
         &PyArray_Type, &assignments_py,
         &model_py,

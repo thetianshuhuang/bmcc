@@ -69,6 +69,11 @@ class BayesianMixture:
     thinning : int
         Thinning factor (only saves one sample every <thinning> iterations).
         Use thinning=1 for no thinning.
+    annealing : function(int) -> float
+        Annealing factor; should take in an int (iteration number) and return
+        a float. All log likelihoods are multiplied by this factor when
+        sampling. If None, the annealing is fixed at 1 (no annealing). The
+        iteration count is 0-indexed.
     """
 
     __BASE_HIST_SIZE = 32
@@ -83,7 +88,8 @@ class BayesianMixture:
             component_model=None,
             mixture_model=None,
             assignments=None,
-            thinning=1):
+            thinning=1,
+            annealing=None):
 
         # Run type checks
         self.data = check_data(data)
@@ -94,6 +100,7 @@ class BayesianMixture:
 
         # Save sampler
         self.sampler = sampler
+        self.annealing = annealing
 
         # Create model
         self.__model = init_model(
@@ -131,7 +138,13 @@ class BayesianMixture:
 
         for _ in range(iterations):
 
-            self.sampler(self.data, self.assignments, self.__model)
+            if self.annealing is None:
+                annealing = 1
+            else:
+                annealing = self.annealing(self.iterations)
+
+            self.sampler(
+                self.data, self.assignments, self.__model, annealing=annealing)
 
             comp_update = self.component_model.update(self)
             if comp_update is not None:
