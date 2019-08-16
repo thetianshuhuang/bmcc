@@ -1,13 +1,22 @@
-"""Gibbs Sampler for Abstract Mixture Model
+"""Abstract Sampling for Abstract Mixture Models
 
-Implements a generalized form of Algorithm 3 [1], with support for traditional
-DPM and MFM [2].
+Implements an abstract MCMC sampler for an abstract Mixture Model. Support is
+natively provided for standard Gibbs Sampling following Algorithm 3
+(Neal, 2000), split merge samplers (Jain & Neal, 2004) and all combinations of
+these two methods.
 
 Notes
 -----
-Use by providing a abstract Mixture model and a Component Model.
+Use by providing a sampler, an abstract Mixture model and a Component Model.
 
-Both should have:
+The sampler should take four arguments:
+- data - data matrix
+- assignments - assignment vector
+- model - model capsule. See mixture.h for specifications.
+- annealing - keyword argument; annealing factor. This can be ignored by
+    the sampler if annealing isn't supported.
+
+Both models should have:
 - a 'get_args' method, which takes in the data matrix and returns a dictionary
   containing hyperparameters, which will be used later
 - a 'update' method, which takes in a MixtureModel object
@@ -24,12 +33,12 @@ by copying mixture.h and #including it.
 
 References
 ----------
-[1] Radford M. Neal (2000), "Markov Chain Sampling Methods for Dirichlet
-    Process Mixture Models". Journal of Computational and Graphical Statistics,
-    Vol. 9, No. 2.
-[2] Jeffrey W. Miller, Matthew T. Harrison (2018),
-    "Mixture Models with a Prior on the Number of Components".
-    Journal of the American Statistical Association, Vol. 113, Issue 521.
+Sonia Jain, Radford M. Neal (2004), "A Split-Merge Markov Chain Monte Carlo
+    Procedure for the Dirichlet Process Mixture Model". Journal of
+    Computational and Graphical Statistics, Vol 13, Issue 1.
+Radford M. Neal (2000), "Markov Chain Sampling Methods for Dirichlet Process
+    Mixture Models". Journal of Computational and Graphical Statistics, Vol. 9,
+    No. 2.
 """
 
 import numpy as np

@@ -1,8 +1,8 @@
-"""Mixture of Finite Mixtures Model [1]
+"""Mixture of Finite Mixtures Model (Miller & Harrison, 2018)
 
 References
 ----------
-[1] Jeffrey W. Miller, Matthew T. Harrison (2018),
+Jeffrey W. Miller, Matthew T. Harrison (2018),
     "Mixture Models with a Prior on the Number of Components".
     Journal of the American Statistical Association, Vol. 113, Issue 521.
 """
@@ -15,17 +15,18 @@ from bmcc.core import MODEL_MFM
 
 
 class MFM:
-    """Mixture of Finite Mixtures Model [1]
+    """Mixture of Finite Mixtures Model (Miller & Harrison, 2018)
 
     Keyword Args
     ------------
     gamma : float
-        Dirichlet parameter (model 2, [1])
+        Dirichlet parameter (model 2, Miller & Harrison, 2018)
     prior : function(int) -> float
-        Prior likelihood on the number of clusters; p_K in model 2[1].
+        Prior likelihood on the number of clusters; p_K in model 2.
         Defaults to geometric(0.5).
     error : float
-        Margin for computation of V_n coefficients (equation 3.2 [1])
+        Margin for computation of V_n coefficients
+        (equation 3.2, Miller & Harrison, 2018)
 
     Attributes
     ----------
@@ -45,7 +46,7 @@ class MFM:
         self.prior = prior
 
     def log_v_n(self, N):
-        """Get log(V_n(t)) for 1<=t<=N (equation 3.2, [1]).
+        """Get log(V_n(t)) for 1<=t<=N (equation 3.2, Miller & Harrison, 2018).
 
         Parameters
         ----------
@@ -95,8 +96,10 @@ class MFM:
         -------
         dict
             Argument dictionary to be passed to core.init_mode, with entries:
-            "V_n": log(V_n(t)) coefficients (equation 3.2, [1])
-            "gamma": Dirichlet distribution parameters (model 2, [1])
+            "V_n": log(V_n(t)) coefficients
+                (equation 3.2, Miller & Harrison, 2018)
+            "gamma": Dirichlet distribution parameters
+                (model 2, Miller & Harrison, 2018)
         """
 
         return {

@@ -1,3 +1,4 @@
+"""Get Mixture and Component model parameters"""
 
 
 def get_params(data, cm, mm):

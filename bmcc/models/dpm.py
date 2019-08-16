@@ -3,7 +3,7 @@ parameter alpha
 
 References
 ----------
-[1] Jon D. McAuliffe, David M. Blei, Michael I. Jordan (2006),
+Jon D. McAuliffe, David M. Blei, Michael I. Jordan (2006),
     "Nonparametric empirical Bayes for the Dirichlet process mixture model".
     Statistics and Computing, Vol. 16, Issue 1.
 """
@@ -29,8 +29,8 @@ class DPM:
         unstable for very small N)
     convergence : float
         Convergence criteria for numerical solver of EB update
-        (equation 8 in [1]). Since exact accuracy of alpha is not critical,
-        a relatively large margin (default=0.01) can be used.
+        (equation 8 in McAuliffe et. al, 2006). Since exact accuracy of alpha
+        is not critical, a relatively large margin (default=0.01) can be used.
 
     Attributes
     ----------
@@ -70,7 +70,7 @@ class DPM:
         return {"alpha": float(self.alpha)}
 
     def __dp_update_lhs(self, alpha, N, K):
-        """LHS of equation 8 [1]
+        """LHS of equation 8 (McAuliffe et. al, 2006)
 
         K = sum_{1<=n<=N} alpha / (alpha + n - 1)
 
@@ -86,13 +86,13 @@ class DPM:
         Returns
         -------
         float
-            Value of LHS of equation 8 [1]
+            Value of LHS of equation 8 (McAuliffe et. al, 2006)
         """
 
         return sum(alpha / (alpha + n) for n in range(N)) - K
 
     def update(self, mixture):
-        """Run empirical bayes update [1]
+        """Run empirical bayes update (McAuliffe et. al, 2006)
 
         Parameters
         ----------
@@ -104,8 +104,8 @@ class DPM:
         dict or None
             If EB enabled and past threshold, returns updated hyperparameters,
             with entries:
-            "alpha": DPM mixing parameter, updated according to equation 8 [1]
-            Otherwise, returns None.
+            "alpha": DPM mixing parameter, updated according to equation 8
+                (McAuliffe et. al, 2006). Otherwise, returns None.
         """
 
         self.nc_total += np.max(mixture.assignments) + 1

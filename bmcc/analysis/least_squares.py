@@ -1,10 +1,10 @@
 """Analysis Routines
 
-Implements Least Squares configuration selection [1].
+Implements Least Squares configuration selection (Dahl, 2006).
 
 References
 ----------
-[1] David B. Dahl (2006), "Model-Based Clustering for Expression Data via a
+David B. Dahl (2006), "Model-Based Clustering for Expression Data via a
     Dirichlet Process Mixture Model". Bayesian Inference for Gene Expression
     and Proteomics.
 """
@@ -61,14 +61,15 @@ class LstsqResult(BaseResult):
     DEFAULT_TRACE_PLOTS:
         Show NMI/Rand, Num Clusers, and Aggregation/Segregation by default
     matrix : np.array
-        Pairwise Probability Matrix [1]
+        Pairwise Probability Matrix (Dahl, 2006)
     residuals : np.array
         Squared residuals between membership matrix of each iteration and
-        pairwise probability matrix [1]
+        pairwise probability matrix (Dahl, 2006)
     best_idx : int
-        Index of 'best' clustering configuration according to residuals [1]
+        Index of 'best' clustering configuration according to residuals
+        (Dahl, 2006)
     best : np.array
-        Best clustering configuration [1]
+        Best clustering configuration (Dahl, 2006)
     """
 
     def cluster(self):

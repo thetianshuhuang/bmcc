@@ -3,7 +3,7 @@ Covariance Matrix
 
 References
 ----------
-[1] Jeffrey W. Miller, Matthew T. Harrison (2018),
+Jeffrey W. Miller, Matthew T. Harrison (2018),
     "Mixture Models with a Prior on the Number of Components".
     Journal of the American Statistical Association, Vol. 113, Issue 521.
 """
@@ -40,7 +40,8 @@ class NormalWishart:
         Parameters
         ----------
         data : np.array
-            Dataset; used for scale matrix S = 1/df * Cov^-1(data) [1]
+            Dataset; used for scale matrix S = 1/df * Cov^-1(data)
+            (Miller & Harrison, 2018)
 
         Returns
         -------

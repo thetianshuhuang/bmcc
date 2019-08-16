@@ -1,6 +1,7 @@
 """Simulate Gaussian Mixture
 
-Based on scheme described by Miller, Harrison [1] with normal-wishart
+Based on scheme described by Miller, Harrison (Miller & Harrison, 2018) with
+normal-wishart
 components.
 Some modifications are made: mixing weights are fixed as a
 geometric progression instead of sampled from a dirichlet or gamma distribution
@@ -9,7 +10,7 @@ multivariate normal instead of being fixed.
 
 References
 ----------
-[1] Jeffrey W. Miller, Matthew T. Harrison (2018),
+Jeffrey W. Miller, Matthew T. Harrison (2018),
     "Mixture Models with a Prior on the Number of Components".
     Journal of the American Statistical Association, Vol. 113, Issue 521.
 """
