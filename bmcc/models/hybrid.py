@@ -22,6 +22,9 @@ class Hybrid:
         MFM object to mix
     DPM : bmcc.DPM object
         DPM object to mix
+
+    Keyword Args
+    ------------
     beta : function(n) -> bool (use MFM?)
         Function to decide whether to use MFM or DPM depending on the iteration
         number. Use random.random() or some other randomizer to make this

@@ -16,8 +16,8 @@ from bmcc.core import COMPONENT_NORMAL_WISHART
 class NormalWishart:
     """Normal Wishart Component type
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     df : int
         Degrees of freedom
 

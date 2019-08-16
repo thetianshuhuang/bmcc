@@ -55,6 +55,9 @@ class BayesianMixture:
     ----------
     data : np.array
         Data points; row-major (each row is a data point)
+
+    Keyword Args
+    ------------
     sampler : function
         Sampler function (such as ``bmcc.core.gibbs``)
     component_model : Object

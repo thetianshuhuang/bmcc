@@ -18,8 +18,8 @@ class DPM:
     """Dirichlet Process Mixture Model (also known as Chinese Restaurant
     Process Model)
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     alpha : float
         DPM mixing parameter
     use_eb : bool

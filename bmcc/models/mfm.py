@@ -17,8 +17,8 @@ from bmcc.core import MODEL_MFM
 class MFM:
     """Mixture of Finite Mixtures Model [1]
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     gamma : float
         Dirichlet parameter (model 2, [1])
     prior : function(int) -> float

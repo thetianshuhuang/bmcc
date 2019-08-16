@@ -26,8 +26,8 @@ from bmcc.core import oracle_matrix
 class GaussianMixture:
     """Simulate A Gaussian Mixture Dataset.
 
-    Parameters
-    ----------
+    Keyword Args
+    ------------
     load : bool
         If True, instead takes a single string argument, which should be a file
         containing a saved GaussianMixture object. Defaults to False.

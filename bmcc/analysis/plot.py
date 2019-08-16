@@ -22,8 +22,11 @@ def plot_clusterings(
         Point assignments. Pass an array of all 0s
         (i.e. np.zeros(data.shape[0])) if you only want to look at the points,
         with no computed assignments.
+
+    Keyword Args
+    ------------
     bins : int
-        Number of bins for each histogram.
+        Number of bins for each histogram; defaults to 50.
     kwargs_scatter : dict
         Arguments to be passed on to plt.scatter
     kwargs_hist : dict

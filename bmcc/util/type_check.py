@@ -54,7 +54,28 @@ def check_data(data):
 
 
 def check_assignments(assignments, size):
-    """Check assignment array type."""
+    """Check assignment array type.
+
+    Parameters
+    ----------
+    assignments : np.array
+        Assignment array to check
+    size : int
+        Number of data points
+
+    Raises
+    ------
+    TypeError
+        assignments is not a numpy array, does not have 1 dimension, or does
+        not match the given size
+
+    Returns
+    -------
+    np.array
+        Original assignments if all checks passed. If not uint16, is cast to
+        a uint16 and returned as a copy. If None, a new array is created with
+        all points assigned to the same cluster.
+    """
 
     # No assignments -> skip checks and just build from scratch
     if assignments is None:
@@ -80,6 +101,24 @@ def check_assignments(assignments, size):
 
 
 def check_mixture_model(model):
+    """Check mixture model validity
+
+    Parameters
+    ----------
+    model : Object
+        model to check
+
+    Raises
+    ------
+    TypeError
+        model does not have 'CAPSULE' attribute, or model capsule does not
+        match mixture model API name
+
+    Returns
+    -------
+    object
+        Original object; if original is None, creates a DPM with alpha=1.
+    """
 
     # No model -> skip checks and create new
     if model is None:
@@ -103,6 +142,27 @@ def check_mixture_model(model):
 
 
 def check_component_model(model, dim):
+    """Check component model validity
+
+    Parameters
+    ----------
+    model : Object
+        Model to check
+    dim : int
+        Number of dimensions
+
+    Raises
+    ------
+    TypeError
+        model does not have 'CAPSULE' attribute, or model capsule does not
+        match component API name
+
+    Returns
+    -------
+    object
+        Original object; if original is None, creates a NormalWishart with
+        df=dim.
+    """
 
     # No model -> skip checks and create new
     if model is None:

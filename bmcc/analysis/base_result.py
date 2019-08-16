@@ -18,8 +18,11 @@ class BaseResult:
         Array containing source data points
     hist : np.array
         Array containing MCMC results; each assignment is a row.
+
+    Keyword Args
+    ------------
     burn_in : int
-        Burn in duration
+        Burn in duration; defaults to 0
 
     Attributes
     ----------
