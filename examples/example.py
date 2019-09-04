@@ -26,8 +26,8 @@ def hybrid(*args, **kwargs):
     bmcc.split_merge(*args, **kwargs)
 
 
-# mm = bmcc.MFM(gamma=1, prior=lambda k: poisson.logpmf(k, 3))
-mm = bmcc.DPM(alpha=1, use_eb=False)
+mm = bmcc.MFM(gamma=1, prior=lambda k: poisson.logpmf(k, 3))
+# mm = bmcc.DPM(alpha=1, use_eb=False)
 cm = bmcc.NormalWishart(df=3)
 
 # Create mixture model

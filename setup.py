@@ -135,7 +135,10 @@ C_EXTENSION = Extension(
     include_dirs=[np.get_include(), './core/include'],
 
     # Configuration
-    define_macros=DEBUG_MACROS + API_NAMES + OTHER_MACROS
+    define_macros=DEBUG_MACROS + API_NAMES + OTHER_MACROS,
+
+    # C99 mode in case it isn't set on the machine
+    extra_compile_args=["--std=c99"]
 )
 
 
