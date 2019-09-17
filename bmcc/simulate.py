@@ -160,9 +160,14 @@ class GaussianMixture:
                 __iter = enumerate(zip(self.weights, self.means, self.cov))
                 # Calculate likelihoods
                 for k, (weight, mu, cov) in __iter:
-                    self.__likelihoods[idx, k] = (
-                        weight *
-                        stats.multivariate_normal.pdf(x, mean=mu, cov=cov))
+                    try:
+                        self.__likelihoods[idx, k] = (
+                            weight *
+                            stats.multivariate_normal.pdf(x, mean=mu, cov=cov))
+                    except np.linalg.LinAlgError as e:
+                        print("Could not compute MVN PDF. Cov:")
+                        print(cov)
+                        raise e
                 # Normalize
                 self.__likelihoods[idx] /= sum(self.__likelihoods[idx])
 

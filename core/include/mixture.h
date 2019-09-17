@@ -123,6 +123,7 @@ struct mixture_model_t *create_mixture(
     ModelMethods *model_methods,
     PyObject *params,
     uint32_t size, uint32_t dim);
+
 // Destroy mixture model struct
 void destroy_components(void *model);
 // Add component to model
