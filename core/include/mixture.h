@@ -39,15 +39,15 @@ typedef struct {
     // Get size
     int (*get_size)(void *component);
     // Add point
-    void (*add)(void *component, void *params, double *point);
+    void (*add)(void *component, void *params, void *point);
 
     /* Component Likelihoods */
     // Remove point
-    void (*remove)(void *component, void *params, double *point);
+    void (*remove)(void *component, void *params, void *point);
     // Marginal Log Likelihood Ratio log(m(x_c+j)/m(x_c))
-    double (*loglik_ratio)(void *component, void *params, double *point);
+    double (*loglik_ratio)(void *component, void *params, void *point);
     // Unconditional Log Likelihood log(m(x_j))
-    double (*loglik_new)(void *params, double *point);
+    double (*loglik_new)(void *params, void *point);
     // Split merge likelihood ratio P(c1)P(c2) / P(merged)
     double (*split_merge)(void *params, void *merged, void *c1, void *c2);
 
@@ -98,9 +98,15 @@ struct mixture_model_t {
     void *model_params;
 
     /* Data */
+    // Number of points
     uint32_t size;
+    // Number of dimemsions
     uint32_t dim;
-
+    // Data Type; Numpy enumerated type
+    int npy_type;
+    // Stride (size of data type)
+    int stride;
+ 
     /* Clusters */
     // Cluster vector size
     uint32_t mem_size;
@@ -122,7 +128,7 @@ struct mixture_model_t *create_mixture(
     ComponentMethods *comp_methods,
     ModelMethods *model_methods,
     PyObject *params,
-    uint32_t size, uint32_t dim);
+    uint32_t size, uint32_t dim, int type);
 
 // Destroy mixture model struct
 void destroy_components(void *model);

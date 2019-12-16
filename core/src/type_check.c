@@ -2,7 +2,7 @@
  * Routines to check Numpy Array types.
  *  - Assignment arrays are uint16.
  *    (It's assumed that there will be <<65536 clusters)
- *  - Data arrays are float64 (double).
+ *  - Data arrays have some unspecified data type.
  *  - Data arrays must be C-style contiguous (arr[y][x] = y * xdim + x)
  *  - PyArray_FLAGS (not documented in numpy C api) -- each flag set is a
  *    single bit. Presence of the bit indicates pass (flags & NPY_ARRAY_...)
@@ -22,19 +22,41 @@
 
 
 /**
+ * Utility function to get size of numpy type
+ * @param type : numpy enumerated type
+ * @return int : size of type
+ */
+int type_get_size(int type) {
+    if(
+        (type == NPY_INT8) ||
+        (type == NPY_UINT8)) { return 1; }
+    if(
+        (type == NPY_INT16) ||
+        (type == NPY_UINT16) ||
+        (type == NPY_FLOAT16)) { return 2; }
+    if(
+        (type == NPY_INT32) ||
+        (type == NPY_UINT32) ||
+        (type == NPY_FLOAT32)) { return 4; }
+    if(
+        (type == NPY_INT64) ||
+        (type == NPY_UINT64) ||
+        (type == NPY_FLOAT64)) { return 8; }
+    printf("Type not recognized.\n");
+    return 4;
+}
+
+
+/**
  * Run type checks on data and assignment arrays
  * @param data_py : data numpy array
  * @param assignments_py : assignments numpy array
  * @return true if types and dimensions are correct
  */  
-bool type_check(PyArrayObject *data_py, PyArrayObject *assignments_py)
+bool type_check(
+    PyArrayObject *data_py, PyArrayObject *assignments_py)
 {
     // Check types
-    if(PyArray_TYPE(data_py) != NPY_FLOAT64) {
-        PyErr_SetString(
-            PyExc_TypeError, "Data must have type float64 (double).");
-        return false;
-    }
     if(PyArray_TYPE(assignments_py) != NPY_UINT16) {
         PyErr_SetString(
             PyExc_TypeError, "Assignments must have type uint16.");

@@ -33,7 +33,7 @@
  */
 double merge_propose_prob(
     int c1, int c2,
-    double *data, uint16_t *assignments,
+    void *data, uint16_t *assignments,
     struct mixture_model_t *model)
 {
     // Temporary clusters
@@ -44,7 +44,8 @@ double merge_propose_prob(
     double res = 0;
     for(int i = 0; i < model->size; i++) {
         if(assignments[i] == c1 || assignments[i] == c2) {
-            double *point = &(data[i * model->dim]);
+            
+            void *point = data + i * model->dim * model->stride;
 
             // Likelihoods
             double asn1 = marginal_loglik(
@@ -77,7 +78,7 @@ double merge_propose_prob(
  */
 bool merge(
     int c1, int c2,
-    double *data, uint16_t *assignments,
+    void *data, uint16_t *assignments,
     struct mixture_model_t *model)
 {
     // Modify copy of assignments
@@ -87,7 +88,7 @@ bool merge(
     void *new_component = model->comp_methods->create(model->comp_params);
     for(int i = 0; i < model->size; i++) {
         if(assignments[i] == c1 || assignments[i] == c2) {
-            double *point = &(data[i * model->dim]);
+            void *point = data + i * model->dim * model->stride;
             model->comp_methods->add(new_component, model->comp_params, point);
             asn_tmp[i] = 1;
         }
@@ -171,7 +172,7 @@ bool merge(
  */
 bool split(
     int cluster, int p1, int p2,
-    double *data, uint16_t *assignments,
+    void *data, uint16_t *assignments,
     struct mixture_model_t *model)
 {
     // Modify copy of assignments
@@ -180,10 +181,10 @@ bool split(
     // Create new clusters
     // If accepted, new1 becomes index [size - 1], new2 becomes [size]
     void *new1 = model->comp_methods->create(model->comp_params);
-    add_point(model, new1, &(data[model->dim * p1]));
+    add_point(model, new1, data + p1 * model->dim * model->stride);
     asn_tmp[p1] = 2;
     void *new2 = model->comp_methods->create(model->comp_params);
-    add_point(model, new2, &(data[model->dim * p2]));
+    add_point(model, new2, data + p2 * model->dim * model->stride);
     asn_tmp[p2] = 1;
 
     // Track propose likelihood
@@ -196,8 +197,9 @@ bool split(
         bool in_merge = (assignments[i] == cluster);
 
         if(in_merge && not_original) {
-            double *point = &(data[model->dim * i]);
-  
+
+            void *point = data + i * model->dim * model->stride;
+
             // Get assignment likelihoods
             double asn1 = marginal_loglik(model, new1, point);
             double asn2 = marginal_loglik(model, new2, point);
@@ -296,7 +298,7 @@ bool split(
  * @return bool true on success; false on failure
  */
 bool split_merge(
-    double *data,
+    void *data,
     uint16_t *assignments,
     struct mixture_model_t *model,
     double annealing)

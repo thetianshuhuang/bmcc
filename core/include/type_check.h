@@ -18,7 +18,8 @@
 
 #include <stdbool.h>
 
-
+// Utility function to get size of numpy type
+int type_get_size(int type);
 // Check type of data and assignments
 bool type_check(PyArrayObject *data_py, PyArrayObject *assignments_py);
 // Check type of data against target dimensions

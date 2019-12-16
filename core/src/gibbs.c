@@ -24,7 +24,7 @@
  * @return true if returned without error
  */
 bool gibbs_iter(
-    double *data,
+    void *data,
     uint16_t *assignments,
     struct mixture_model_t *model,
     double annealing)
@@ -41,7 +41,7 @@ bool gibbs_iter(
     // For each sample:
     for(int idx = 0; idx < model->size; idx++) {
 
-        double *point = &data[idx * model->dim];
+        void *point = data + idx * model->dim * model->stride;
 
         // Check assignments vector for error
         if(assignments[idx] >= model->num_clusters) {

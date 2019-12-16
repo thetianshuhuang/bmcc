@@ -39,10 +39,8 @@ PyObject *base_iter(
         &PyArray_Type, &assignments_py,
         &model_py,
         &annealing);
-
-    // Check for errors
+    // Check for unpacking errors
     if(!success) { return NULL; }
-    if(!type_check(data_py, assignments_py)) { return NULL; }
 
     // Unpack capsule
     struct mixture_model_t *model = (
@@ -50,6 +48,8 @@ PyObject *base_iter(
             model_py, MIXTURE_MODEL_API));
     // Check that models supports gibbs
     if(!error_check(model)) { return NULL; }
+    // Check that data has correct type
+    if(!type_check(data_py, assignments_py)) { return NULL; }
 
     bool iter_success; 
     // GIL free zone ----------------------------------------------------------

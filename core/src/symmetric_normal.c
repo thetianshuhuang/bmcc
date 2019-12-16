@@ -123,13 +123,15 @@ int sn_get_size(void *component)
  * @param component : component to add
  * @param point : data point
  */
-void sn_add(void *component, void *params, double *point)
+void sn_add(void *component, void *params, void *point)
 {
     struct sn_component_t *comp_tc = (struct sn_component_t *) component;
     struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
     // Update mean, # of points
-    for(int i = 0; i < params_tc->dim; i++) { comp_tc->total[i] += point[i]; }
+    for(int i = 0; i < params_tc->dim; i++) {
+    	comp_tc->total[i] += ((double *) point)[i];
+    }
     comp_tc->n += 1;
 }
 
@@ -145,7 +147,9 @@ void sn_remove(void *component, void *params, double *point)
     struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
     // Downdate mean, # of points
-    for(int i = 0; i < params_tc->dim; i++) { comp_tc->total[i] -= point[i]; }
+    for(int i = 0; i < params_tc->dim; i++) {
+    	comp_tc->total[i] -= ((double *) point)[i];
+    }
     comp_tc->n -= 1;
 }
 
@@ -156,7 +160,7 @@ void sn_remove(void *component, void *params, double *point)
  * @param params : model hyperparameters
  * @param point : data point
  */
-double sn_loglik_ratio(void *component, void *params, double *point)
+double sn_loglik_ratio(void *component, void *params, void *point)
 {
 	struct sn_component_t *cpt = (struct sn_component_t *) component;
 	struct sn_params_t *params_tc = (struct sn_params_t *) params;
@@ -167,7 +171,7 @@ double sn_loglik_ratio(void *component, void *params, double *point)
 	// (x-mu)^T(x-mu)
 	double acc = 0;
 	for(int i = 0; i < dim; i++) {
-		double centered = point[i] - (cpt->total[i] / cpt->n);
+		double centered = ((double *) point)[i] - (cpt->total[i] / cpt->n);
 		acc += centered * centered;
 	}
 
@@ -186,7 +190,7 @@ double sn_loglik_ratio(void *component, void *params, double *point)
  * @param params : model hyperparameters
  * @param point : data point
  */
-double sn_loglik_new(void *params, double *point)
+double sn_loglik_new(void *params, void *point)
 {
 	struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
@@ -195,7 +199,9 @@ double sn_loglik_new(void *params, double *point)
 
 	// (x-0)^T(x-0)
 	double acc = 0;
-	for(int i = 0; i < dim; i++) { acc += point[i] * point[i]; }
+	for(int i = 0; i < dim; i++) {
+		acc += ((double *) point)[i] * ((double *) point)[i];
+	}
 
 	return (
 		- log(2 * M_PI) * (dim / 2)

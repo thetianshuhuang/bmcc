@@ -27,13 +27,19 @@
 
 /**
  * Create components struct
+ * @param comp_methods : Component model specifications
+ * @param model_methods : Mixture model specifications
+ * @param params : Python dict params
+ * @param size : Number of data points
+ * @param dim : Number of dimensions
+ * @param type : Numpy enumerated type
  * @return allocated components_t; initialized empty
  */
 struct mixture_model_t *create_mixture(
     ComponentMethods *comp_methods,
     ModelMethods *model_methods,
     PyObject *params,
-    uint32_t size, uint32_t dim)
+    uint32_t size, uint32_t dim, int type)
 {
     // Allocate vector
     struct mixture_model_t *mixture = (
@@ -57,8 +63,11 @@ struct mixture_model_t *create_mixture(
         goto error;
     }
 
+    // Size
     mixture->size = size;
     mixture->dim = dim;
+    mixture->npy_type = type;
+    mixture->stride = type_get_size(type);
 
     return mixture;
 
@@ -207,6 +216,15 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
         &comp_methods_py, &model_methods_py,
         &params);
     if(!success) { return NULL; }
+
+    // Unpack arrays
+    uint16_t *asn = PyArray_DATA(assignments_py);
+    void *data = PyArray_DATA(data_py);
+    int size = PyArray_DIM(data_py, 0);
+    int dim = PyArray_DIM(data_py, 1);
+    int data_type = PyArray_TYPE(data_py);
+
+    // Check type
     if(!type_check(data_py, assignments_py)) { return NULL; }
 
     // Unpack capsules
@@ -217,14 +235,9 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
         (ModelMethods *) PyCapsule_GetPointer(
             model_methods_py, MODEL_METHODS_API));
 
-    uint16_t *asn = PyArray_DATA(assignments_py);
-    double *data = PyArray_DATA(data_py);
-    int size = PyArray_DIM(data_py, 0);
-    int dim = PyArray_DIM(data_py, 1);
-
     // Create mixture_t
     struct mixture_model_t *mixture = create_mixture(
-        comp_methods, model_methods, params, size, dim);
+        comp_methods, model_methods, params, size, dim, data_type);
     if(mixture == NULL) { return NULL; }
 
     // Get number of components
@@ -253,7 +266,7 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
         comp_methods->add(
             mixture->clusters[asn[i]],
             mixture->comp_params,
-            &(data[i * dim]));
+            (double *) (data + i * dim * mixture->stride));
     }
 
     return PyCapsule_New(mixture, MIXTURE_MODEL_API, &destroy_mixture);

@@ -1,8 +1,8 @@
 /** 
  * Stochastic Block Model
  */
-/*
 
+/*
 struct sbm_t {
 	// Number of points
 	uint32_t n;

@@ -156,14 +156,16 @@ int nw_get_size(void *component)
  * @param component : component to add
  * @param point : data point
  */
-void nw_add(void *component, void *params, double *point)
+void nw_add(void *component, void *params, void *point)
 {
     struct nw_component_t *comp_tc = (struct nw_component_t *) component;
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
 
     // Update Cholesky decomposition, mean, # of points
     cholesky_update(comp_tc->chol_decomp, point, 1, params_tc->dim);
-    for(int i = 0; i < params_tc->dim; i++) { comp_tc->total[i] += point[i]; }
+    for(int i = 0; i < params_tc->dim; i++) {
+        comp_tc->total[i] += ((double *) point)[i];
+    }
     comp_tc->n += 1;
 }
 
@@ -173,14 +175,17 @@ void nw_add(void *component, void *params, double *point)
  * @param component : component to remove
  * @param point : data point
  */
-void nw_remove(void *component, void *params, double *point)
+void nw_remove(void *component, void *params, void *point)
 {
     struct nw_component_t *comp_tc = (struct nw_component_t *) component;
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
 
     // Downdate Cholesky decomposition, total, # of points
-    cholesky_downdate(comp_tc->chol_decomp, point, 1, params_tc->dim);
-    for(int i = 0; i < params_tc->dim; i++) { comp_tc->total[i] -= point[i]; }
+    cholesky_downdate(
+        comp_tc->chol_decomp, ((double *) point), 1, params_tc->dim);
+    for(int i = 0; i < params_tc->dim; i++) {
+        comp_tc->total[i] -= ((double *) point)[i];
+    }
     comp_tc->n -= 1;
 }
 
@@ -191,7 +196,7 @@ void nw_remove(void *component, void *params, double *point)
  * @param params : model hyperparameters
  * @param point : data point
  */
-double nw_loglik_new(void *params, double *point)
+double nw_loglik_new(void *params, void *point)
 {
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
     int dim = params_tc->dim;
@@ -199,7 +204,7 @@ double nw_loglik_new(void *params, double *point)
 
     double *chol_up = (double *) malloc(sizeof(double) * dim * dim);
     for(int i = 0; i < dim * dim; i++) { chol_up[i] = params_tc->s_chol[i]; }
-    cholesky_update(chol_up, point, 1, dim);
+    cholesky_update(chol_up, ((double *) point), 1, dim);
 
     double res = (
         - log(M_PI) * (dim / 2)
@@ -221,7 +226,7 @@ double nw_loglik_new(void *params, double *point)
  * @param params : model hyperparameters
  * @param point : data point
  */
-double nw_loglik_ratio(void *component, void *params, double *point)
+double nw_loglik_ratio(void *component, void *params, void *point)
 {
     // Unpack
     struct nw_component_t *cpt = (struct nw_component_t *) component;
@@ -230,17 +235,19 @@ double nw_loglik_ratio(void *component, void *params, double *point)
     double df = params_tc->df;
 
     // Deal with empty component separately
-    if(cpt->n == 0) { return nw_loglik_new(params, point); }
+    if(cpt->n == 0) { return nw_loglik_new(params, ((double *) point)); }
 
     // |S + X'X'^T| (centered)
     // Updated Total
     double *total_up = (double *) malloc(sizeof(double) * dim);
-    for(int i = 0; i < dim; i++) { total_up[i] = cpt->total[i] + point[i]; }
+    for(int i = 0; i < dim; i++) {
+        total_up[i] = cpt->total[i] + ((double *) point)[i];
+    }
 
     // Updated Cholesky(S + X'X'^T)
     double *chol_up = (double *) malloc(sizeof(double) * dim * dim);
     for(int i = 0; i < dim * dim; i++) { chol_up[i] = cpt->chol_decomp[i]; }
-    cholesky_update(chol_up, point, 1, dim);
+    cholesky_update(chol_up, ((double *) point), 1, dim);
 
     // Centered
     cholesky_downdate(chol_up, total_up, 1 / sqrt(cpt->n + 1), dim);

@@ -13,10 +13,15 @@ import time
 from tqdm import tqdm
 import bmcc
 
+# Settings
+ITERATIONS = 500
+THINNING = 5
+POINTS = 500
+BURN_IN = 50
 
 # Create dataset
 dataset = bmcc.GaussianMixture(
-    n=1000, k=3, d=3, r=0.7, alpha=40, df=3, symmetric=False, shuffle=False)
+    n=POINTS, k=3, d=3, r=0.7, alpha=40, df=3, symmetric=False, shuffle=False)
 
 
 def hybrid(*args, **kwargs):
@@ -36,19 +41,19 @@ model = bmcc.BayesianMixture(
     sampler=hybrid,
     component_model=cm,
     mixture_model=mm,
-    assignments=np.zeros(1000).astype(np.uint16),
-    thinning=5)
+    assignments=np.zeros(POINTS).astype(np.uint16),
+    thinning=THINNING)
 
 # Run Iterations
 start = time.time()
-for i in tqdm(range(1000)):
+for i in tqdm(range(ITERATIONS)):
     model.iter()
 print("gibbs_iterate: {:.2f}s [{:.2f} ms/iteration]".format(
-    time.time() - start, (time.time() - start) * 1000 / 5000))
+    time.time() - start, (time.time() - start) * 1000 / ITERATIONS))
 
 # Select Least Squares clustering
 start = time.time()
-res = model.select_lstsq(burn_in=100)
+res = model.select_lstsq(burn_in=BURN_IN)
 res.evaluate(
     dataset.assignments,
     oracle=dataset.oracle,
@@ -57,11 +62,11 @@ print("evaluate_lstsq: {:.2f}s".format(time.time() - start))
 print("num_clusters: {}".format(res.num_clusters[res.best_idx]))
 
 # Plot
-res.trace(plot=True)
-res.matrices(plot=True)
+# res.trace(plot=True)
+# res.matrices(plot=True)
 res.clustering(kwargs_scatter={"marker": "."}, plot=True)
 
-bmcc.cleanup_maximum_likelihood(dataset.data, res.best, cm, mm)
-res.clustering(kwargs_scatter={"marker": "."}, plot=True)
+# bmcc.cleanup_maximum_likelihood(dataset.data, res.best, cm, mm)
+# res.clustering(kwargs_scatter={"marker": "."}, plot=True)
 
-dataset.plot_oracle(kwargs_scatter={"marker": "."}, plot=True)
+# dataset.plot_oracle(kwargs_scatter={"marker": "."}, plot=True)
