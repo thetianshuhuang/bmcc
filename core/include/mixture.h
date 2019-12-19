@@ -35,7 +35,7 @@ typedef struct {
     // Allocate component capsule
     void* (*create)(void *params);
     // Destroy component capsule
-    void (*destroy)(void *component);
+    void (*destroy)(void *component, int idx);
     // Get size
     int (*get_size)(void *component);
     // Add point
@@ -50,6 +50,10 @@ typedef struct {
     double (*loglik_new)(void *params, void *point);
     // Split merge likelihood ratio P(c1)P(c2) / P(merged)
     double (*split_merge)(void *params, void *merged, void *c1, void *c2);
+
+    /* Debug and Utility */
+    // Inspect current state (mostly for debug purposes)
+    PyObject (*inspect)(void *params);
 
 } ComponentMethods;
 

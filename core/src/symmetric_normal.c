@@ -42,7 +42,7 @@ void *sn_create(void *params)
 /**
  * Destroy symmetric normal object
  */
-void sn_destroy(void *component)
+void sn_destroy(void *component, int idx)
 {
 	// Free array
 	free(((struct sn_component_t *) component)->total);
@@ -216,7 +216,7 @@ double sn_loglik_new(void *params, void *point)
 ComponentMethods SYMMETRIC_NORMAL = {
 	&sn_params_create,
 	&sn_params_destroy,
-	NULL,  // No update
+	NULL,  	// No update
 	&sn_create,
 	&sn_destroy,
 	&sn_get_size,
@@ -224,5 +224,6 @@ ComponentMethods SYMMETRIC_NORMAL = {
 	&sn_remove,
 	&sn_loglik_ratio,
 	&sn_loglik_new,
-	NULL,  // Does not support split merge
+	NULL,  	// Does not support split merge
+	NULL,	// Nothing to inspect
 };

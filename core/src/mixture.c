@@ -89,7 +89,7 @@ void destroy_mixture(PyObject *model_py)
         (struct mixture_model_t *) PyCapsule_GetPointer(
             model_py, MIXTURE_MODEL_API));
     for(int i = 0; i < model_tc->num_clusters; i++) {
-        model_tc->comp_methods->destroy(model_tc->clusters[i]);
+        model_tc->comp_methods->destroy(model_tc->clusters[i], i);
         free(model_tc->clusters[i]);
     }
     free(model_tc);
@@ -160,7 +160,7 @@ void remove_component(
     }
 
     // Update components
-    model->comp_methods->destroy(model->clusters[idx]);
+    model->comp_methods->destroy(model->clusters[idx], idx);
     free(model->clusters[idx]);
     for(int i = idx; i < (model->num_clusters - 1); i++) {
         model->clusters[i] = model->clusters[i + 1];
@@ -253,7 +253,7 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
         // Check for error
         if(!success_add) {
             for(int j = 0; j < i; j++) {
-                comp_methods->destroy(mixture->clusters[j]);
+                comp_methods->destroy(mixture->clusters[j], j);
             }
             free(mixture->clusters);
             free(mixture);

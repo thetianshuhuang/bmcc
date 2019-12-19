@@ -94,7 +94,7 @@ double dpm_log_coef_new(void *params, int nc)
  */
 double dpm_log_split(void *params, int nc, int n1, int n2)
 {
-	struct dpm_params_t *params_tc = (struct dpm_params_tc *) params;
+	struct dpm_params_t *params_tc = (struct dpm_params_t *) params;
 	return (
 		log(params_tc->alpha)
 		+ lgamma(n1) + lgamma(n2)

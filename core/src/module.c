@@ -80,19 +80,19 @@
 static PyMethodDef ModuleMethods[] = {
     {
         "gibbs",
-        (PyCFunctionWithKeywords) gibbs_iter_py,
+        (PyCFunction) gibbs_iter_py,
         METH_VARARGS | METH_KEYWORDS,
         DOCSTRING_GIBBS_ITER
     },
     {
         "split_merge",
-        (PyCFunctionWithKeywords) split_merge_py,
+        (PyCFunction) split_merge_py,
         METH_VARARGS | METH_KEYWORDS,
         DOCSTRING_SPLIT_MERGE
     },
     {
         "cleanup_gibbs",
-        (PyCFunctionWithKeywords) cleanup_iter_py,
+        (PyCFunction) cleanup_iter_py,
         METH_VARARGS | METH_KEYWORDS,
         DOCSTRING_CLEANUP_GIBBS
     },

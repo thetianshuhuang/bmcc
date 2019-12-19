@@ -20,4 +20,16 @@ int sample_log_weighted(double *weights, int length);
 // Centered log determinant
 double centered_logdet(double *chol, double *total, int d, int n);
 
+// Unif[0, 1] random variable as double
+double rand_double();
+
+// Normal (0, 1) random variable
+double rand_norm();
+
+// Gamma (alpha, 1) random variable
+double rand_gamma(double alpha);
+
+// Beta random variable
+double rand_beta(double alpha, double beta);
+
 #endif

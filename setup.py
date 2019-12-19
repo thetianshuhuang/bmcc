@@ -130,6 +130,9 @@ C_EXTENSION = Extension(
         './core/src/' + s for s in os.listdir('./core/src') if s != 'module.c'
     ],
 
+    # Libraries
+    libraries=["gsl"],
+
     # Headers; must be in a separate directory from sources since include_dirs
     # only takes directories as an argument
     include_dirs=[np.get_include(), './core/include'],

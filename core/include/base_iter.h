@@ -12,6 +12,6 @@
 PyObject *base_iter(
 	PyObject *self, PyObject *args, PyObject *kwargs,
 	bool (*error_check)(struct mixture_model_t *),
-	bool (*iter)(double *, uint16_t *, struct mixture_model_t *, double));
+	bool (*iter)(void *, uint16_t *, struct mixture_model_t *, double));
 
 #endif

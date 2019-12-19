@@ -18,6 +18,7 @@
 #include "../include/mixture.h"
 #include "../include/type_check.h"
 
+
 // ----------------------------------------------------------------------------
 //
 //                            Component Management
@@ -60,7 +61,7 @@ void *nw_create(void *params)
  * Destroy normal wishart object
  * @param component : component to destroy
  */
-void nw_destroy(void *component)
+void nw_destroy(void *component, int idx)
 {
     struct nw_component_t *component_tc = (struct nw_component_t *) component;
     // Free arrays
@@ -321,7 +322,7 @@ double nw_split_merge(void *params, void *merged, void *c1, void *c2)
 ComponentMethods NORMAL_WISHART = {
     &nw_params_create,
     &nw_params_destroy,
-    NULL,  // No update
+    NULL,   // No update
     &nw_create,
     &nw_destroy,
     &nw_get_size,
@@ -329,5 +330,6 @@ ComponentMethods NORMAL_WISHART = {
     &nw_remove,
     &nw_loglik_ratio,
     &nw_loglik_new,
-    &nw_split_merge
+    &nw_split_merge,
+    NULL,   // Nothing to inspect
 };

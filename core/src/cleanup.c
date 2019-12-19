@@ -24,7 +24,7 @@
  * @return true if returned without error
  */
 bool cleanup_iter(
-    double *data,
+    void *data,
     uint16_t *assignments,
     struct mixture_model_t *model,
     double annealing)
@@ -32,7 +32,7 @@ bool cleanup_iter(
 	for(int idx = 0; idx < model->size; idx++) {
 
 		// Remove point
-		double *point = &data[idx * model->dim];
+		void *point = data + idx * model->dim * model->stride;
 		model->comp_methods->remove(
 			model->clusters[assignments[idx]], model->comp_params, point);
 

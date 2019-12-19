@@ -13,10 +13,15 @@
 #define TYPE_CHECK_H
 
 #include <Python.h>
+
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+#define NO_IMPORT_ARRAY
+#define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
 #include <stdbool.h>
+
+#include "../include/mixture.h"
 
 // Utility function to get size of numpy type
 int type_get_size(int type);

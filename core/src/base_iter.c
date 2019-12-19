@@ -23,7 +23,7 @@
 PyObject *base_iter(
 		PyObject *self, PyObject *args, PyObject *kwargs,
 		bool (*error_check)(struct mixture_model_t *),
-		bool (*iter)(double *, uint16_t *, struct mixture_model_t *, double))
+		bool (*iter)(void *, uint16_t *, struct mixture_model_t *, double))
 {
     // Get args
     PyArrayObject *data_py;
@@ -59,7 +59,7 @@ PyObject *base_iter(
     Py_BEGIN_ALLOW_THREADS;
 
     iter_success = iter(
-        (double *) PyArray_DATA(data_py),
+        (void *) PyArray_DATA(data_py),
         (uint16_t *) PyArray_DATA(assignments_py),
         model,
         annealing);

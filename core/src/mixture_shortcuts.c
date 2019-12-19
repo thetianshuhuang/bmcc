@@ -58,13 +58,27 @@ void *add_point(struct mixture_model_t *model, void *cluster, double *point)
 
 
 /**
+ * Get index of cluster
+ * @param model parent model
+ * @param cluster cluster to delete
+ * @return current index of cluster
+ */
+int indexof(struct mixture_model_t *model, void *cluster) {
+    for(int i = 0; i < model->num_clusters; i++) {
+        if(model->clusters[i] == cluster) { return i; }
+    }
+    return 0;
+}
+
+
+/**
  * Delete cluster
  * @param model parent model
  * @param cluster cluster to delete
  */
 void destroy(struct mixture_model_t *model, void *cluster)
 {
-    model->comp_methods->destroy(cluster);
+    model->comp_methods->destroy(cluster, indexof(model, cluster));
     free(cluster);
 }
 
