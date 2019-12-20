@@ -6,15 +6,13 @@
 #define NORMAL_WISHART_H
 
 #include <Python.h>
-#include "mixture.h"
+#include "../mixture.h"
 
 
 // Normal Wishart struct
 struct nw_component_t {
     // Total vector; dimensions [dim]
     double *total;
-    // Number of points
-    uint32_t n;
     // Cholesky decomposition of S + XX^T; dimensions [dim, dim]
     double *chol_decomp;
 };

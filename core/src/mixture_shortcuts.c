@@ -13,17 +13,13 @@
  * @return component_loglik_ratio(pt) * model_coefficient(pt)
  */
 double marginal_loglik(
-    struct mixture_model_t *model, void *cluster, double *point)
+    struct mixture_model_t *model, Component *cluster, void *point)
 {
     return (
         model->comp_methods->loglik_ratio(
-            cluster,
-            model->comp_params,
-            point) +
+            cluster, model->comp_params, point) +
         model->model_methods->log_coef(
-            model->model_params,
-            model->comp_methods->get_size(cluster),
-            model->num_clusters));
+            model->model_params, cluster->size, model->num_clusters));
 }
 
 
@@ -33,7 +29,7 @@ double marginal_loglik(
  * @param point point to evaluate
  * @return component_loglik_new(point) * model_log_coef_new()
  */
-double new_cluster_loglik(struct mixture_model_t *model, double *point)
+double new_cluster_loglik(struct mixture_model_t *model, void *point)
 {
     return (
         model->comp_methods->loglik_new(
@@ -51,23 +47,24 @@ double new_cluster_loglik(struct mixture_model_t *model, double *point)
  * @param cluster cluster to add to
  * @param point point to add
  */
-void *add_point(struct mixture_model_t *model, void *cluster, double *point)
+void add_point(struct mixture_model_t *model, Component *cluster, void *point)
 {
+    cluster->size += 1;
     model->comp_methods->add(cluster, model->comp_params, point);
 }
 
 
-/**
- * Get index of cluster
+/** 
+ * Remove point
  * @param model parent model
- * @param cluster cluster to delete
- * @return current index of cluster
+ * @param cluster cluster to remove from
+ * @param point point to remove
  */
-int indexof(struct mixture_model_t *model, void *cluster) {
-    for(int i = 0; i < model->num_clusters; i++) {
-        if(model->clusters[i] == cluster) { return i; }
-    }
-    return 0;
+void remove_point(
+    struct mixture_model_t *model, Component *cluster, void *point)
+{
+    cluster->size -= 1;
+    model->comp_methods->remove(cluster, model->comp_params, point);
 }
 
 
@@ -76,9 +73,9 @@ int indexof(struct mixture_model_t *model, void *cluster) {
  * @param model parent model
  * @param cluster cluster to delete
  */
-void destroy(struct mixture_model_t *model, void *cluster)
+void destroy(struct mixture_model_t *model, Component *cluster)
 {
-    model->comp_methods->destroy(cluster, indexof(model, cluster));
+    model->comp_methods->destroy(cluster);
     free(cluster);
 }
 
@@ -89,7 +86,7 @@ void destroy(struct mixture_model_t *model, void *cluster)
  * @param idx index to fetch
  * @return fetched component; NULL if unsuccessful
  */
-void *get_cluster(struct mixture_model_t *model, int idx)
+Component *get_cluster(struct mixture_model_t *model, int idx)
 {
     if(idx >= model->num_clusters) {
         printf(

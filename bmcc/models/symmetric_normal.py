@@ -28,7 +28,7 @@ class SymmetricNormal:
 
     def __init__(self, scale=1.0):
 
-        self.scale = scale
+        self.scale = float(scale)
 
     def get_args(self, data):
         """Get component hyperparameters

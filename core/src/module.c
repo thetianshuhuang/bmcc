@@ -51,8 +51,8 @@
 // ----------------------------------------------------------------------------
 
 // Core
-#include "../include/gibbs.h"
-#include "../include/split_merge.h"
+#include "../include/samplers/gibbs.h"
+#include "../include/samplers/split_merge.h"
 #include "../include/mixture.h"
 #include "../include/cleanup.h"
 
@@ -62,13 +62,14 @@
 #include "../include/type_check.h"
 
 // Mixture Models
-#include "../include/dpm.h"
-#include "../include/mfm.h"
-#include "../include/hybrid.h"
+#include "../include/models/dpm.h"
+#include "../include/models/mfm.h"
+#include "../include/models/hybrid.h"
 
 // Component Models
-#include "../include/normal_wishart.h"
-#include "../include/symmetric_normal.h"
+#include "../include/models/normal_wishart.h"
+#include "../include/models/symmetric_normal.h"
+#include "../include/models/sbm.h"
 
 
 // ----------------------------------------------------------------------------
@@ -188,6 +189,9 @@ PyMODINIT_FUNC PyInit_core()
     PyModule_AddObject(
         mod, "COMPONENT_SYMMETRIC_NORMAL", PyCapsule_New(
             &SYMMETRIC_NORMAL, COMPONENT_METHODS_API, NULL));
+    PyModule_AddObject(
+        mod, "COMPONENT_STOCHASTIC_BLOCK_MODEL", PyCapsule_New(
+            &STOCHASTIC_BLOCK_MODEL, COMPONENT_METHODS_API, NULL));
 
     // -- Build Constants & Metadata ------------------------------------------
     PyModule_AddIntMacro(mod, BASE_VEC_SIZE);

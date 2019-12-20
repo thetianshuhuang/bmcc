@@ -9,18 +9,23 @@
 
 // Get marginal log likelihood
 double marginal_loglik(
-	struct mixture_model_t *model, void *cluster, double *point);
+	struct mixture_model_t *model, Component *cluster, void *point);
 
 // Get new cluster log likelihood
-double new_cluster_loglik(struct mixture_model_t *model, double *point);
+double new_cluster_loglik(struct mixture_model_t *model, void *point);
 
 // Add point to cluster
-void *add_point(struct mixture_model_t *model, void *cluster, double *point);
+void add_point(
+	struct mixture_model_t *model, Component *cluster, void *point);
+
+// Remove point from cluster
+void remove_point(
+	struct mixture_model_t *model, Component *cluster, void *point);
 
 // Delete cluster (held separately -- not in model)
-void destroy(struct mixture_model_t *model, void *cluster);
+void destroy(struct mixture_model_t *model, Component *cluster);
 
 // Get cluster at index, safely
-void *get_cluster(struct mixture_model_t *model, int idx);
+Component *get_cluster(struct mixture_model_t *model, int idx);
 
 #endif

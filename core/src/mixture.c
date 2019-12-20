@@ -13,7 +13,6 @@
 
 #include "../include/type_check.h"
 #include "../include/mixture.h"
-#include "../include/normal_wishart.h"
 
 
 #include <stdio.h>
@@ -46,7 +45,8 @@ struct mixture_model_t *create_mixture(
         (struct mixture_model_t *) malloc(sizeof(struct mixture_model_t)));
     mixture->mem_size = BASE_VEC_SIZE;
     mixture->num_clusters = 0;
-    mixture->clusters = (void **) malloc(sizeof(void *) * mixture->mem_size);
+    mixture->clusters = (
+        (Component **) malloc(sizeof(Component *) * mixture->mem_size));
 
     // Bind methods, params, dim
     mixture->comp_methods = comp_methods;
@@ -89,7 +89,7 @@ void destroy_mixture(PyObject *model_py)
         (struct mixture_model_t *) PyCapsule_GetPointer(
             model_py, MIXTURE_MODEL_API));
     for(int i = 0; i < model_tc->num_clusters; i++) {
-        model_tc->comp_methods->destroy(model_tc->clusters[i], i);
+        model_tc->comp_methods->destroy(model_tc->clusters[i]);
         free(model_tc->clusters[i]);
     }
     free(model_tc);
@@ -102,19 +102,34 @@ void destroy_mixture(PyObject *model_py)
 //
 // ----------------------------------------------------------------------------
 
+
+/**
+ * Create new component (not bound)
+ * @param model mixture_model_t struct to create component from
+ * @return Created Component * container
+ */
+Component *create_component(struct mixture_model_t *model)
+{
+    Component *container = (Component *) malloc(sizeof(Component));
+    container->size = 0;
+    container->data = model->comp_methods->create(model->comp_params);
+    return container;
+}
+
+
 /**
  * Add Component: allocates new component, and appends to components capsule
- * @param components components_t struct containing components
+ * @param model mixture_model_t struct containing components
  * @param component component to add; if NULL, allocates a new component
  * @return true if addition successful
  */
-bool add_component(struct mixture_model_t *model, void *component)
+bool add_component(struct mixture_model_t *model, Component *component)
 {
     // Handle exponential over-allocation
     if(model->mem_size <= model->num_clusters) {
         model->mem_size *= 2;
-        void **clusters_new = (void **) realloc(
-            model->clusters, sizeof(void *) * model->mem_size);
+        Component **clusters_new = (Component **) realloc(
+            model->clusters, sizeof(Component *) * model->mem_size);
 
         if(clusters_new == NULL) {
             PyErr_SetString(
@@ -124,14 +139,12 @@ bool add_component(struct mixture_model_t *model, void *component)
         else { model->clusters = clusters_new; }
     }
 
-    // Allocate new only if passed component is NULL; otherwise simply assign
-    if(component == NULL) {
-        model->clusters[model->num_clusters] = (
-            model->comp_methods->create(model->comp_params));
-    }
-    else {
-        model->clusters[model->num_clusters] = component;
-    }
+    // Allocate new only if passed component is NULL
+    if(component == NULL) { component = create_component(model); }
+
+    // Bind & update
+    model->clusters[model->num_clusters] = component;
+    component->idx = model->num_clusters;
     model->num_clusters += 1;
 
     return true;
@@ -160,10 +173,11 @@ void remove_component(
     }
 
     // Update components
-    model->comp_methods->destroy(model->clusters[idx], idx);
+    model->comp_methods->destroy(model->clusters[idx]);
     free(model->clusters[idx]);
     for(int i = idx; i < (model->num_clusters - 1); i++) {
         model->clusters[i] = model->clusters[i + 1];
+        model->clusters[i]->idx = i;
     }
     model->num_clusters -= 1;
 }
@@ -180,7 +194,7 @@ bool remove_empty(struct mixture_model_t *model, uint16_t *assignments)
 {
     // Search for empty
     for(int i = 0; i < model->num_clusters; i++) {
-        if(model->comp_methods->get_size((model->clusters)[i]) == 0) {
+        if((model->clusters)[i]->size == 0) {
             // Deallocate component; remove component from vector; update
             // assignments
             remove_component(model, assignments, i);
@@ -252,9 +266,7 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
 
         // Check for error
         if(!success_add) {
-            for(int j = 0; j < i; j++) {
-                comp_methods->destroy(mixture->clusters[j], j);
-            }
+            for(int j = 1; j < i; j++) { remove_component(mixture, NULL, 0); }
             free(mixture->clusters);
             free(mixture);
             return NULL;
@@ -263,10 +275,9 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
 
     // Add points
     for(int i = 0; i < size; i++) {
-        comp_methods->add(
-            mixture->clusters[asn[i]],
-            mixture->comp_params,
-            (double *) (data + i * dim * mixture->stride));
+        add_point(
+            mixture, mixture->clusters[asn[i]], 
+            (void *) (data + i * dim * mixture->stride));
     }
 
     return PyCapsule_New(mixture, MIXTURE_MODEL_API, &destroy_mixture);

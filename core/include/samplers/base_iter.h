@@ -7,7 +7,7 @@
 
 #include <Python.h>
 
-#include "../include/mixture.h"
+#include "../mixture.h"
 
 PyObject *base_iter(
 	PyObject *self, PyObject *args, PyObject *kwargs,

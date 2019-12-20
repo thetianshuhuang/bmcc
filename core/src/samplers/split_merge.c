@@ -17,7 +17,7 @@
 #include "../include/mixture_shortcuts.h"
 #include "../include/misc_math.h"
 #include "../include/type_check.h"
-#include "../include/base_iter.h"
+#include "../include/samplers/base_iter.h"
 
 #include <stdio.h>
 
@@ -37,8 +37,8 @@ double merge_propose_prob(
     struct mixture_model_t *model)
 {
     // Temporary clusters
-    void *c1_cpy = model->comp_methods->create(model->comp_params);
-    void *c2_cpy = model->comp_methods->create(model->comp_params);
+    // void *c1_cpy = model->comp_methods->create(model->comp_params);
+    // void *c2_cpy = model->comp_methods->create(model->comp_params);
 
     // Iterate over clusters c1, c2
     double res = 0;
@@ -60,8 +60,8 @@ double merge_propose_prob(
     }
 
     // Clean up
-    destroy(model, c1_cpy);
-    destroy(model, c2_cpy);
+    // destroy(model, c1_cpy);
+    // destroy(model, c2_cpy);
     return res;
 }
 
@@ -85,7 +85,7 @@ bool merge(
     uint8_t *asn_tmp = malloc(sizeof(uint8_t) * model->size);
 
     // Create merge component; index becomes [size-2]
-    void *new_component = model->comp_methods->create(model->comp_params);
+    Component *new_component = create_component(model);
     for(int i = 0; i < model->size; i++) {
         if(assignments[i] == c1 || assignments[i] == c2) {
             void *point = data + i * model->dim * model->stride;
@@ -101,8 +101,8 @@ bool merge(
     double mixture_ratio = model->model_methods->log_merge(
         model->model_params,
         model->num_clusters,
-        model->comp_methods->get_size(get_cluster(model, c1)),
-        model->comp_methods->get_size(get_cluster(model, c2)));
+        get_cluster(model, c1)->size,
+        get_cluster(model, c2)->size);
     double component_ratio = model->comp_methods->split_merge(
         model->comp_params,
         new_component,
@@ -180,10 +180,10 @@ bool split(
 
     // Create new clusters
     // If accepted, new1 becomes index [size - 1], new2 becomes [size]
-    void *new1 = model->comp_methods->create(model->comp_params);
+    Component *new1 = create_component(model);
     add_point(model, new1, data + p1 * model->dim * model->stride);
     asn_tmp[p1] = 2;
-    void *new2 = model->comp_methods->create(model->comp_params);
+    Component *new2 = create_component(model);
     add_point(model, new2, data + p2 * model->dim * model->stride);
     asn_tmp[p2] = 1;
 
@@ -229,8 +229,8 @@ bool split(
     double mixture_ratio = model->model_methods->log_split(
         model->model_params,
         model->num_clusters,
-        model->comp_methods->get_size(new1),
-        model->comp_methods->get_size(new2));
+        new1->size,
+        new2->size);
     double component_ratio = model->comp_methods->split_merge(
         model->comp_params,
         get_cluster(model, cluster),
@@ -307,7 +307,6 @@ bool split_merge(
     int i = (int) (rand_45_bit() % model->size);
     int j = i;
     while(i == j) { i = (int) (rand_45_bit() % model->size); }
-
     if(assignments[i] != assignments[j]) {
         return merge(assignments[i], assignments[j], data, assignments, model);
     }

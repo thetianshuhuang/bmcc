@@ -5,7 +5,7 @@
 #include <Python.h>
 #include <math.h>
 
-#include "../include/symmetric_normal.h"
+#include "../include/models/symmetric_normal.h"
 #include "../include/mixture.h"
 
 
@@ -32,9 +32,6 @@ void *sn_create(void *params)
 	component->total = (double *) malloc(sizeof(double) * dim);
 	for(int i = 0; i < dim; i++) { component->total[i] = 0; }
 
-	// # points = 0
-	component->n = 0;
-
 	return component;
 }
 
@@ -42,10 +39,10 @@ void *sn_create(void *params)
 /**
  * Destroy symmetric normal object
  */
-void sn_destroy(void *component, int idx)
+void sn_destroy(Component *component)
 {
-	// Free array
-	free(((struct sn_component_t *) component)->total);
+	free(((struct sn_component_t *) component->data)->total);
+	free(component->data);
 }
 
 
@@ -72,7 +69,7 @@ void *sn_params_create(PyObject *dict)
 			PyExc_KeyError,
 			"Symmetric normal requires 'scale' (symmetric normal scale; "
 			"float), 'scale_all' (aggregate scale for all points; float), "
-			"and 'dim' (data dimennsions; int) arguments.");
+			"and 'dim' (data dimensions; int) arguments.");
 		return NULL;
 	}
 
@@ -107,32 +104,21 @@ void sn_params_destroy(void *params)
 //
 // ----------------------------------------------------------------------------
 
-/**
- * Get size of component
- * @param component : component to get size for
- * @return number of points associated with the component
- */
-int sn_get_size(void *component)
-{
-    return ((struct sn_component_t *) component)->n;
-}
-
 
 /**
  * Add point to symmetric normal object
  * @param component : component to add
  * @param point : data point
  */
-void sn_add(void *component, void *params, void *point)
+void sn_add(Component *component, void *params, void *point)
 {
-    struct sn_component_t *comp_tc = (struct sn_component_t *) component;
+    struct sn_component_t *comp_tc = (struct sn_component_t *) component->data;
     struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
-    // Update mean, # of points
+    // Update mean
     for(int i = 0; i < params_tc->dim; i++) {
     	comp_tc->total[i] += ((double *) point)[i];
     }
-    comp_tc->n += 1;
 }
 
 
@@ -141,16 +127,15 @@ void sn_add(void *component, void *params, void *point)
  * @param component : component to remove
  * @param point : data point
  */
-void sn_remove(void *component, void *params, double *point)
+void sn_remove(Component *component, void *params, double *point)
 {
-    struct sn_component_t *comp_tc = (struct sn_component_t *) component;
+    struct sn_component_t *comp_tc = (struct sn_component_t *) component->data;
     struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
-    // Downdate mean, # of points
+    // Downdate mean
     for(int i = 0; i < params_tc->dim; i++) {
     	comp_tc->total[i] -= ((double *) point)[i];
     }
-    comp_tc->n -= 1;
 }
 
 
@@ -160,9 +145,9 @@ void sn_remove(void *component, void *params, double *point)
  * @param params : model hyperparameters
  * @param point : data point
  */
-double sn_loglik_ratio(void *component, void *params, void *point)
+double sn_loglik_ratio(Component *component, void *params, void *point)
 {
-	struct sn_component_t *cpt = (struct sn_component_t *) component;
+	struct sn_component_t *cpt = (struct sn_component_t *) component->data;
 	struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
 	int dim = params_tc->dim;
@@ -171,7 +156,8 @@ double sn_loglik_ratio(void *component, void *params, void *point)
 	// (x-mu)^T(x-mu)
 	double acc = 0;
 	for(int i = 0; i < dim; i++) {
-		double centered = ((double *) point)[i] - (cpt->total[i] / cpt->n);
+		double centered = (
+			((double *) point)[i] - (cpt->total[i] / component->size));
 		acc += centered * centered;
 	}
 
@@ -214,16 +200,22 @@ double sn_loglik_new(void *params, void *point)
  * Extern for symmetric_normal methods
  */
 ComponentMethods SYMMETRIC_NORMAL = {
+	// Hyperparameters
 	&sn_params_create,
 	&sn_params_destroy,
 	NULL,  	// No update
+
+	// Component Management
 	&sn_create,
 	&sn_destroy,
-	&sn_get_size,
 	&sn_add,
 	&sn_remove,
+
+	// Component Likelihoods
 	&sn_loglik_ratio,
 	&sn_loglik_new,
 	NULL,  	// Does not support split merge
+
+	// Debug
 	NULL,	// Nothing to inspect
 };

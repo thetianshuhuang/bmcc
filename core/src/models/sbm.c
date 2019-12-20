@@ -11,7 +11,7 @@
 
 #include <stdlib.h>
 
-#include "../include/sbm.h"
+#include "../include/models/sbm.h"
 #include "../include/mixture.h"
 #include "../include/type_check.h"
 #include "../include/misc_math.h"
@@ -28,7 +28,6 @@ void *sbm_create(void *params)
 	// Memory
 	struct sbm_component_t *component = (
 		(struct sbm_component_t *) malloc(sizeof(struct sbm_component_t)));
-	component->n = 0;
 	struct sbm_params_t *params_tc = (struct sbm_params_t *) params;
 	component->params = params_tc;
 
@@ -59,10 +58,10 @@ void *sbm_create(void *params)
 }
 
 
-void sbm_destroy(void *component, int idx)
+void sbm_destroy(Component *component)
 {
 	struct sbm_params_t *params = (
-		((struct sbm_component_t *) component)->params);
+		((struct sbm_component_t *) component->data)->params);
 
 	int k = params->k;
 	params->k -= 1;
@@ -70,19 +69,19 @@ void sbm_destroy(void *component, int idx)
 	double *Q_new = malloc(sizeof(double) * (k - 1) * (k - 1));
 
 	// Copy all but current index
-	for(int i = 0; i < idx; i++) {
-		for(int j = 0; j < idx; j++) {
+	for(int i = 0; i < component->idx; i++) {
+		for(int j = 0; j < component->idx; j++) {
 			Q_new[i * (k - 1) + j] = params->Q[i * (k - 1) + j];
 		}
-		for(int j = idx + 1; j < k; j++) {
+		for(int j = component->idx + 1; j < k; j++) {
 			Q_new[i * (k - 1) + j - 1] = params->Q[i * (k - 1) + j];
 		}
 	}
-	for(int i = idx + 1; i < k; i++) {
-		for(int j = 0; j < idx; j++) {
+	for(int i = component->idx + 1; i < k; i++) {
+		for(int j = 0; j < component->idx; j++) {
 			Q_new[(i - 1) * (k - 1) + j] = params->Q[i * (k - 1) + j];
 		}
-		for(int j = idx + 1; j < k; j++) {
+		for(int j = component->idx + 1; j < k; j++) {
 			Q_new[(i - 1) * (k - 1) + j - 1] = params->Q[i * (k - 1) + j];
 		}
 	}
@@ -92,7 +91,7 @@ void sbm_destroy(void *component, int idx)
 	params->Q = Q_new;
 
 	// Free component
-	free(component);
+	free(component->data);
 }
 
 // ----------------------------------------------------------------------------
@@ -184,24 +183,12 @@ void sbm_params_update(void *params, PyObject *dict)
 // ----------------------------------------------------------------------------
 
 /**
- * Get size of component
- * @param component : component to get size for
- * @return number of points associated with the component
- */
-int sbm_get_size(void *component)
-{
-	return ((struct sbm_component_t *) component)->n;
-}
-
-
-/**
  * Add point to SBM object
  * @param component : component to add
  * @param point : data point
  */
-void sbm_add(void *component, void *params, double *point)
+void sbm_add(Component *component, void *params, double *point)
 {
-	((struct sbm_component_t *) component)->n += 1;
 }
 
 
@@ -210,9 +197,8 @@ void sbm_add(void *component, void *params, double *point)
  * @param component : component to remove
  * @param point : data point
  */
-void sbm_remove(void *component, void *params, double *point)
+void sbm_remove(Component *component, void *params, double *point)
 {
-	((struct sbm_component_t *) component)->n -= 1;
 }
 
 
@@ -235,13 +221,14 @@ double sbm_loglik_new(void *params, void *point)
  * @param params : model hyperparameters
  * @param point : data point
  */
-double sbm_loglik_ratio(void *component, void *params, void *point)
+double sbm_loglik_ratio(Component *component, void *params, void *point)
 {
 	return 0;
 }
 
 
-double sbm_split_merge(void *params, void *merged, void *c1, void *c2)
+double sbm_split_merge(
+	void *params, Component *merged, Component *c1, Component *c2)
 {
 	return 0;
 }
@@ -260,15 +247,22 @@ PyObject *sbm_inspect(void *params) {
 
 
 ComponentMethods STOCHASTIC_BLOCK_MODEL = {
+	// Hyperparameters
 	&sbm_params_create,
 	&sbm_params_destroy,
 	&sbm_params_update,
+
+	// Component Management
+	&sbm_create,
 	&sbm_destroy,
-	&sbm_get_size,
 	&sbm_add,
 	&sbm_remove,
+
+	// Component Likelihoods
 	&sbm_loglik_ratio,
 	&sbm_loglik_new,
 	&sbm_split_merge,
+
+	// Debug
 	&sbm_inspect
 };

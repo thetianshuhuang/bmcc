@@ -5,7 +5,7 @@
 #ifndef HYBRID_H
 #define HYBRID_H
 
-#include "mixture.h"
+#include "../mixture.h"
 
 ModelMethods HYBRID_METHODS;
 

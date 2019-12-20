@@ -241,6 +241,6 @@ PyObject *get_capsule_name_py(PyObject *self, PyObject *args)
     PyObject *capsule;
     if(!PyArg_ParseTuple(args, "O", &capsule)) { return NULL; }
 
-    char *name = PyCapsule_GetName(capsule);
+    const char *name = PyCapsule_GetName(capsule);
     return Py_BuildValue("s", name);
 }

@@ -13,7 +13,7 @@
 #include "../include/mixture_shortcuts.h"
 #include "../include/misc_math.h"
 #include "../include/type_check.h"
-#include "../include/base_iter.h"
+#include "../include/samplers/base_iter.h"
 
 /**
  * Execute cleanup iteration

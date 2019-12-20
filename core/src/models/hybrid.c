@@ -6,8 +6,8 @@
 #include <stdbool.h>
 
 #include "../include/mixture.h"
-#include "../include/dpm.h"
-#include "../include/mfm.h"
+#include "../include/models/dpm.h"
+#include "../include/models/mfm.h"
 
 /**
  * Parameters

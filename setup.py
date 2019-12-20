@@ -120,15 +120,21 @@ OTHER_MACROS = [
 #
 # -- C Extension --------------------------------------------------------------
 #
+def walk(d):
+    return [
+        os.path.join(root, file)
+        for (root, subdirs, files) in os.walk(d)
+        for file in files
+    ]
+
+
 C_EXTENSION = Extension(
     "bmcc.core",
 
     # List module.c first
     sources=[
         './core/src/module.c'
-    ] + [
-        './core/src/' + s for s in os.listdir('./core/src') if s != 'module.c'
-    ],
+    ] + [x for x in walk('./core/src') if x != './core/src/module.c'],
 
     # Libraries
     libraries=["gsl"],

@@ -12,7 +12,7 @@
 #include "../include/mixture_shortcuts.h"
 #include "../include/misc_math.h"
 #include "../include/type_check.h"
-#include "../include/base_iter.h"
+#include "../include/samplers/base_iter.h"
 
 /**
  * Execute gibbs iteration.
@@ -29,7 +29,6 @@ bool gibbs_iter(
     struct mixture_model_t *model,
     double annealing)
 {
-
     // Assignment weight vector: exponentially-overallocated
     // Make sure to check for number of clusters >> BASE_VEC_SIZE!
     int vec_size = BASE_VEC_SIZE;
@@ -51,15 +50,14 @@ bool gibbs_iter(
             return false;
         }
 
-        // Remove from currently assigned cluster
-        model->comp_methods->remove(
-            model->clusters[assignments[idx]], model->comp_params, point);
+        // Remove current point from currently assigned cluster
+        remove_point(model, model->clusters[assignments[idx]], point);
 
         // Remove empty components
         remove_empty(model, assignments);
 
         // Handle vector resizing
-        if(model->num_clusters + 1 >= vec_size) {
+        while(model->num_clusters + 1 >= vec_size) {
 
             free(weights);
             vec_size *= 2;
@@ -103,7 +101,6 @@ bool gibbs_iter(
     }
 
     free(weights);
-
     return true;
 }
 

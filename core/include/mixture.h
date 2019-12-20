@@ -18,6 +18,19 @@
 // ----------------------------------------------------------------------------
 
 /**
+ * Component Wrapper
+ */
+typedef struct {
+    // Index of component
+    uint32_t idx;
+    // Number of points
+    uint32_t size;
+    // Inner Data
+    void *data;
+} Component;
+
+
+/**
  * Component Methods
  * Definitions for within-component prior and posterior
  */
@@ -35,21 +48,20 @@ typedef struct {
     // Allocate component capsule
     void* (*create)(void *params);
     // Destroy component capsule
-    void (*destroy)(void *component, int idx);
-    // Get size
-    int (*get_size)(void *component);
+    void (*destroy)(Component *component);
     // Add point
-    void (*add)(void *component, void *params, void *point);
+    void (*add)(Component *component, void *params, void *point);
+    // Remove point
+    void (*remove)(Component *component, void *params, void *point);
 
     /* Component Likelihoods */
-    // Remove point
-    void (*remove)(void *component, void *params, void *point);
     // Marginal Log Likelihood Ratio log(m(x_c+j)/m(x_c))
-    double (*loglik_ratio)(void *component, void *params, void *point);
+    double (*loglik_ratio)(Component *component, void *params, void *point);
     // Unconditional Log Likelihood log(m(x_j))
     double (*loglik_new)(void *params, void *point);
     // Split merge likelihood ratio P(c1)P(c2) / P(merged)
-    double (*split_merge)(void *params, void *merged, void *c1, void *c2);
+    double (*split_merge)(
+        void *params, Component *merged, Component *c1, Component *c2);
 
     /* Debug and Utility */
     // Inspect current state (mostly for debug purposes)
@@ -117,7 +129,7 @@ struct mixture_model_t {
     // Number of clusters
     uint32_t num_clusters;
     // Clusters
-    void **clusters;
+    Component **clusters;
 };
 
 
@@ -136,11 +148,17 @@ struct mixture_model_t *create_mixture(
 
 // Destroy mixture model struct
 void destroy_components(void *model);
+
+// Create component (but do not bind)
+Component *create_component(struct mixture_model_t *model);
+
 // Add component to model
-bool add_component(struct mixture_model_t *model, void *component);
+bool add_component(struct mixture_model_t *model, Component *component);
+
 // Remove component from model
 void remove_component(
     struct mixture_model_t *model, uint16_t *assignments, int idx);
+
 // Remove empty component
 bool remove_empty(struct mixture_model_t *model, uint16_t *assignments);
 

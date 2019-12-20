@@ -6,15 +6,13 @@
 #define SYMMETRIC_NORMAL_H
 
 #include <Python.h>
-#include "mixture.h"
+#include "../mixture.h"
 
 
 // Symmetric normal struct
 struct sn_component_t {
 	// Total vector; dimensions [dim]
 	double *total;
-	// Number of points
-	uint32_t n;
 };
 
 

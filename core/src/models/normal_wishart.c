@@ -14,7 +14,7 @@
 
 #include "../include/cholesky.h"
 #include "../include/misc_math.h"
-#include "../include/normal_wishart.h"
+#include "../include/models/normal_wishart.h"
 #include "../include/mixture.h"
 #include "../include/type_check.h"
 
@@ -43,9 +43,6 @@ void *nw_create(void *params)
     component->total = (double *) malloc(sizeof(double) * dim);
     for(int i= 0; i < dim; i++) { component->total[i] = 0; }
 
-    // # points = 0
-    component->n = 0;
-
     // Copy over starting value [S + XX^T] = [S]
     component->chol_decomp = (double *) malloc(sizeof(double) * dim * dim);
     double *chol_src = params_tc->s_chol;
@@ -61,12 +58,15 @@ void *nw_create(void *params)
  * Destroy normal wishart object
  * @param component : component to destroy
  */
-void nw_destroy(void *component, int idx)
+void nw_destroy(Component *component)
 {
-    struct nw_component_t *component_tc = (struct nw_component_t *) component;
+    struct nw_component_t *component_tc = (
+        (struct nw_component_t *) component->data);
     // Free arrays
     free(component_tc->total);
     free(component_tc->chol_decomp);
+    // Free nw_component_t
+    free(component_tc);
 }
 
 
@@ -142,24 +142,13 @@ void nw_params_destroy(void *params)
 // ----------------------------------------------------------------------------
 
 /**
- * Get size of component
- * @param component : component to get size for
- * @return number of points associated with the component
- */
-int nw_get_size(void *component)
-{
-    return ((struct nw_component_t *) component)->n;
-}
-
-
-/**
  * Add point to normal wishart object
  * @param component : component to add
  * @param point : data point
  */
-void nw_add(void *component, void *params, void *point)
+void nw_add(Component *component, void *params, void *point)
 {
-    struct nw_component_t *comp_tc = (struct nw_component_t *) component;
+    struct nw_component_t *comp_tc = (struct nw_component_t *) component->data;
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
 
     // Update Cholesky decomposition, mean, # of points
@@ -167,7 +156,6 @@ void nw_add(void *component, void *params, void *point)
     for(int i = 0; i < params_tc->dim; i++) {
         comp_tc->total[i] += ((double *) point)[i];
     }
-    comp_tc->n += 1;
 }
 
 
@@ -176,9 +164,9 @@ void nw_add(void *component, void *params, void *point)
  * @param component : component to remove
  * @param point : data point
  */
-void nw_remove(void *component, void *params, void *point)
+void nw_remove(Component *component, void *params, void *point)
 {
-    struct nw_component_t *comp_tc = (struct nw_component_t *) component;
+    struct nw_component_t *comp_tc = (struct nw_component_t *) component->data;
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
 
     // Downdate Cholesky decomposition, total, # of points
@@ -187,7 +175,6 @@ void nw_remove(void *component, void *params, void *point)
     for(int i = 0; i < params_tc->dim; i++) {
         comp_tc->total[i] -= ((double *) point)[i];
     }
-    comp_tc->n -= 1;
 }
 
 
@@ -227,16 +214,17 @@ double nw_loglik_new(void *params, void *point)
  * @param params : model hyperparameters
  * @param point : data point
  */
-double nw_loglik_ratio(void *component, void *params, void *point)
+double nw_loglik_ratio(Component *component, void *params, void *point)
 {
     // Unpack
-    struct nw_component_t *cpt = (struct nw_component_t *) component;
+    struct nw_component_t *cpt = (struct nw_component_t *) component->data;
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
     int dim = params_tc->dim;
+    int size = component->size;
     double df = params_tc->df;
 
     // Deal with empty component separately
-    if(cpt->n == 0) { return nw_loglik_new(params, ((double *) point)); }
+    if(size == 0) { return nw_loglik_new(params, ((double *) point)); }
 
     // |S + X'X'^T| (centered)
     // Updated Total
@@ -251,18 +239,18 @@ double nw_loglik_ratio(void *component, void *params, void *point)
     cholesky_update(chol_up, ((double *) point), 1, dim);
 
     // Centered
-    cholesky_downdate(chol_up, total_up, 1 / sqrt(cpt->n + 1), dim);
+    cholesky_downdate(chol_up, total_up, 1 / sqrt(size + 1), dim);
     double logdet_new = cholesky_logdet(chol_up, dim);
 
     // |S + XX^T| (centered)
-    double logdet = centered_logdet(cpt->chol_decomp, cpt->total, dim, cpt->n);
+    double logdet = centered_logdet(cpt->chol_decomp, cpt->total, dim, size);
 
     double res = (
         - log(M_PI) * (dim / 2)
-        + log_mv_gamma(dim, (df + cpt->n + 1) / 2)
-        - log_mv_gamma(dim, (df + cpt->n) / 2)
-        + logdet * (df + cpt->n) / 2
-        - logdet_new * (df + cpt->n + 1) / 2
+        + log_mv_gamma(dim, (df + size + 1) / 2)
+        - log_mv_gamma(dim, (df + size) / 2)
+        + logdet * (df + size) / 2
+        - logdet_new * (df + size + 1) / 2
     );
 
     // Clean up
@@ -279,7 +267,8 @@ double nw_loglik_ratio(void *component, void *params, void *point)
  * @param c1 : component A
  * @param c2 : component B
  */
-double nw_split_merge(void *params, void *merged, void *c1, void *c2)
+double nw_split_merge(
+    void *params, Component *merged, Component *c1, Component *c2)
 {
     // Unpack params
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
@@ -287,31 +276,31 @@ double nw_split_merge(void *params, void *merged, void *c1, void *c2)
     double df = params_tc->df;
 
     // Type cast
-    struct nw_component_t *cpt_merged = (struct nw_component_t *) merged;
-    struct nw_component_t *cpt1 = (struct nw_component_t *) c1;
-    struct nw_component_t *cpt2 = (struct nw_component_t *) c2;
+    struct nw_component_t *cpt_merged = (struct nw_component_t *) merged->data;
+    struct nw_component_t *cpt1 = (struct nw_component_t *) c1->data;
+    struct nw_component_t *cpt2 = (struct nw_component_t *) c2->data;
 
     // Get centered log determinants
     double merged_logdet = centered_logdet(
-        cpt_merged->chol_decomp, cpt_merged->total, dim, cpt_merged->n);
+        cpt_merged->chol_decomp, cpt_merged->total, dim, merged->size);
     double cpt1_logdet = centered_logdet(
-        cpt1->chol_decomp, cpt1->total, dim, cpt1->n);
+        cpt1->chol_decomp, cpt1->total, dim, c1->size);
     double cpt2_logdet = centered_logdet(
-        cpt2->chol_decomp, cpt2->total, dim, cpt2->n);
+        cpt2->chol_decomp, cpt2->total, dim, c2->size);
 
     return (
         // Gamma_p((df + |c1|) / 2) * Gamma_p((df + |c2|) / 2)
-        + log_mv_gamma(dim, (df + cpt1->n) / 2)
-        + log_mv_gamma(dim, (df + cpt2->n) / 2)
+        + log_mv_gamma(dim, (df + c1->size) / 2)
+        + log_mv_gamma(dim, (df + c2->size) / 2)
         // Gamma_p(df / 2) * Gamma_p((df + |c1| + |c2) / 2)
         - log_mv_gamma(dim, df / 2)
-        - log_mv_gamma(dim, (df + cpt_merged->n) / 2)
+        - log_mv_gamma(dim, (df + merged->size) / 2)
         // |S + XX^T|^{(df + |c1| + |c2|) / 2} * |S|^{df / 2}
-        + merged_logdet * (cpt_merged->n + df) / 2
+        + merged_logdet * (merged->size + df) / 2
         + cholesky_logdet(params_tc->s_chol, dim) * df / 2
         // |S + XX^T|^{(df + |c1|) / 2} * |S + XX^T|^{(df + |c2|) / 2}
-        - cpt1_logdet * (cpt1->n + df) / 2
-        - cpt2_logdet * (cpt2->n + df) / 2
+        - cpt1_logdet * (c1->size + df) / 2
+        - cpt2_logdet * (c2->size + df) / 2
     );
 }
 
@@ -320,16 +309,22 @@ double nw_split_merge(void *params, void *merged, void *c1, void *c2)
  * Extern for normal_wishart methods
  */
 ComponentMethods NORMAL_WISHART = {
+    // Hyperparameters
     &nw_params_create,
     &nw_params_destroy,
     NULL,   // No update
+
+    // Component Management
     &nw_create,
     &nw_destroy,
-    &nw_get_size,
     &nw_add,
     &nw_remove,
+
+    // Component Likelihoods
     &nw_loglik_ratio,
     &nw_loglik_new,
     &nw_split_merge,
+
+    // Debug
     NULL,   // Nothing to inspect
 };
