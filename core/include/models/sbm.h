@@ -21,6 +21,8 @@ struct sbm_params_t {
 	// SBM Prior parameters
 	double alpha;
 	double beta;
+	// Pointer to assignments
+	uint16_t *assignments;
 };
 
 ComponentMethods STOCHASTIC_BLOCK_MODEL;

@@ -9,6 +9,7 @@
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
+#include <math.h>
 #include <stdlib.h>
 
 #include "../include/models/sbm.h"
@@ -117,6 +118,7 @@ void *sbm_params_create(PyObject *dict)
 		(alpha_py != NULL) && PyFloat_Check(alpha_py) &&
 		(beta_py != NULL) && PyFloat_Check(beta_py)
 	);
+
 	if(!check) {
 		PyErr_SetString(
 			PyExc_KeyError,
@@ -139,6 +141,8 @@ void *sbm_params_create(PyObject *dict)
 	double *Q = PyArray_DATA(Q_py);
 	params->Q = malloc(sizeof(double) * params->k * params->k);
 	for(int i = 0; i < params->k * params->k; i++) { params->Q[i] = Q[i]; }
+
+	// TODO: link assignments
 
 	return (void *) params;
 }
@@ -187,8 +191,9 @@ void sbm_params_update(void *params, PyObject *dict)
  * @param component : component to add
  * @param point : data point
  */
-void sbm_add(Component *component, void *params, double *point)
+void sbm_add(Component *component, void *params, void *point)
 {
+	// No update
 }
 
 
@@ -197,8 +202,9 @@ void sbm_add(Component *component, void *params, double *point)
  * @param component : component to remove
  * @param point : data point
  */
-void sbm_remove(Component *component, void *params, double *point)
+void sbm_remove(Component *component, void *params, void *point)
 {
+	// No update
 }
 
 
@@ -211,7 +217,29 @@ void sbm_remove(Component *component, void *params, double *point)
 
 double sbm_loglik_new(void *params, void *point)
 {
-	return 0;
+	struct sbm_params_t *params_tc = (struct sbm_params_t *) params;
+	uint8_t *point_tc = (uint8_t *) point;
+
+	// Count number of connections to each cluster
+	uint32_t *connected = malloc(sizeof(uint32_t) * params_tc->k);
+	uint32_t *unconnected = malloc(sizeof(uint32_t) * params_tc->k);
+	for(int i = 0; i < params_tc->n; i++) {
+		int idx = params_tc->assignments[i];
+		if(point_tc[i]) { connected[idx] += 1; }
+		else { unconnected[idx] += 1; }
+	}
+
+	// Compute loglik
+	double loglik = 0;
+	for(int i = 0; i < params_tc->k; i++) {
+		loglik -= log(rand_beta(
+			params_tc->alpha, params_tc->beta));
+		loglik += log(rand_beta(
+			connected[i] + params_tc->alpha,
+			unconnected[i] + params_tc->beta));
+	}
+
+	return loglik;
 }
 
 
@@ -223,14 +251,17 @@ double sbm_loglik_new(void *params, void *point)
  */
 double sbm_loglik_ratio(Component *component, void *params, void *point)
 {
-	return 0;
-}
+	struct sbm_params_t *params_tc = (struct sbm_params_t *) params;
+	uint8_t *point_tc = (uint8_t *) point;
 
-
-double sbm_split_merge(
-	void *params, Component *merged, Component *c1, Component *c2)
-{
-	return 0;
+	double loglik = 0;
+	for(int i = 0; i < params_tc->n; i++) {
+		double q = params_tc->Q[
+			component->idx * params_tc->k + params_tc->assignments[i]];
+		if(point_tc[i]) { loglik += log(q); }
+		else { loglik += log(1 - q); }
+	}
+	return loglik;
 }
 
 
@@ -240,8 +271,23 @@ double sbm_split_merge(
 //
 // ----------------------------------------------------------------------------
 
+/** 
+ * Get Q Array
+ * @return PyArrayObject containing *copy* of Q
+ */
 PyObject *sbm_inspect(void *params) {
-	// TODO: return Q array
+	/*
+	struct sbm_params_t *params_tc = (struct sbm_params_t *) params;
+
+	PyArrayObject *Q_py = PyArray_SimpleNew(
+		2, {params_tc->k, params_tc->k}, NPY_FLOAT64);
+	double *Q = PyArray_DATA(Q_py);
+	for(int i = 0; i < params_tc->k * params_tc->k; i++) {
+		Q[i] = params_tc->Q[i];
+	}
+
+	return Q_py;
+	*/
 	return NULL;
 }
 
@@ -261,7 +307,7 @@ ComponentMethods STOCHASTIC_BLOCK_MODEL = {
 	// Component Likelihoods
 	&sbm_loglik_ratio,
 	&sbm_loglik_new,
-	&sbm_split_merge,
+	NULL,
 
 	// Debug
 	&sbm_inspect

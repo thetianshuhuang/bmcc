@@ -38,7 +38,7 @@ typedef struct {
 
     /* Hyperparameters */
     // Convert python dictionary to hyperparameters struct
-    void* (*params_create)(PyObject *dict);
+    void *(*params_create)(PyObject *dict);
     // Destroy hyperparameters struct
     void (*params_destroy)(void *params);
     // Update hyperparameters
@@ -65,7 +65,7 @@ typedef struct {
 
     /* Debug and Utility */
     // Inspect current state (mostly for debug purposes)
-    PyObject (*inspect)(void *params);
+    PyObject *(*inspect)(void *params);
 
 } ComponentMethods;
 

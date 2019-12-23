@@ -89,7 +89,7 @@ bool merge(
     for(int i = 0; i < model->size; i++) {
         if(assignments[i] == c1 || assignments[i] == c2) {
             void *point = data + i * model->dim * model->stride;
-            model->comp_methods->add(new_component, model->comp_params, point);
+            add_point(model, new_component, point);
             asn_tmp[i] = 1;
         }
         else {

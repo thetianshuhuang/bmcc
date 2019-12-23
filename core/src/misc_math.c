@@ -10,6 +10,7 @@
 #include "../include/cholesky.h"
 #include "../include/misc_math.h"
 
+
 /**
  * Helper function for log multivariate gamma
  * @param x : x value

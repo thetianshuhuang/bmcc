@@ -127,7 +127,7 @@ void sn_add(Component *component, void *params, void *point)
  * @param component : component to remove
  * @param point : data point
  */
-void sn_remove(Component *component, void *params, double *point)
+void sn_remove(Component *component, void *params, void *point)
 {
     struct sn_component_t *comp_tc = (struct sn_component_t *) component->data;
     struct sn_params_t *params_tc = (struct sn_params_t *) params;
