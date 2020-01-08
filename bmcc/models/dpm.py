@@ -52,13 +52,8 @@ class DPM:
         self.nc_total = 0
         self.nc_n = 0
 
-    def get_args(self, data):
+    def get_args(self, data, assignments):
         """Get Model Hyperparameters
-
-        Parameters
-        ----------
-        data : np.array
-            Dataset; used for scale matrix S = 1/df * Cov(data)
 
         Returns
         -------

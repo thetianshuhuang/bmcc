@@ -102,7 +102,7 @@ from bmcc.models import *
 from bmcc.models import __all__ as __models_all
 
 from bmcc.mixture import BayesianMixture
-from bmcc.simulate import GaussianMixture
+from bmcc.simulate import GaussianMixture, StochasticBlockModel
 
 
 # -- Build Constants, API Constants, and Build Metadata -----------------------
@@ -156,5 +156,6 @@ __all__ = __models_all + __analysis_all + [
     "BayesianMixture",
 
     # Simulation
-    "GaussianMixture"
+    "GaussianMixture",
+    "StochasticBlockModel"
 ]

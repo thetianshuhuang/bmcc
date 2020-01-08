@@ -1,13 +1,16 @@
 """Get Mixture and Component model parameters"""
 
 
-def get_params(data, cm, mm):
+def get_params(data, assignments, cm, mm):
     """Get Model Parameters from component and mixture model.
 
     Parameters
     ----------
     data : np.array
         Data matrix. Used for data-dependent priors.
+    assignments : np.array
+        Assignment vector. Passed to models that require a reference to the
+        assigment vector.
     cm : Object
         Component Model object
     mm : Object
@@ -22,8 +25,8 @@ def get_params(data, cm, mm):
     params = {"dim": data.shape[1]}
 
     try:
-        params.update(cm.get_args(data))
-        params.update(mm.get_args(data))
+        params.update(cm.get_args(data, assignments))
+        params.update(mm.get_args(data, assignments))
     except AttributeError:
         raise TypeError(
             "Component Model and Mixture Model must have 'get_args' "

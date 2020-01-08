@@ -27,6 +27,9 @@ class NormalWishart:
         Capsule containing component methods (export from C module)
     """
 
+    DATA_TYPE = np.float64
+    DATA_TYPE_NAME = "float64"
+
     CAPSULE = COMPONENT_NORMAL_WISHART
 
     def __init__(self, df=2, scale=None):
@@ -34,7 +37,7 @@ class NormalWishart:
         self.df = df
         self.scale = scale
 
-    def get_args(self, data):
+    def get_args(self, data, assignments):
         """Get component hyperparameters
 
         Parameters

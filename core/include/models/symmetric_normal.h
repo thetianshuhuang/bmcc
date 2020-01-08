@@ -6,7 +6,7 @@
 #define SYMMETRIC_NORMAL_H
 
 #include <Python.h>
-#include "../mixture.h"
+#include "../include/mixture/mixture.h"
 
 
 // Symmetric normal struct

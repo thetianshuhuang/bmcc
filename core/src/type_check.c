@@ -18,7 +18,7 @@
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
-#include "../include/mixture.h"
+#include "../include/mixture/mixture.h"
 
 
 /**

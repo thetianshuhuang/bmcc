@@ -2,21 +2,21 @@
 
 
 WARNING_FLOAT64_CAST = """
-Data array cast to np.float64. To suppress this message, copy data to a float64
+Data array cast to np.{dtype}. To suppress this message, copy data to a {dtype}
 array:
     Python:
-        data = data.astype(float64)
+        data = data.astype({dtype})
     R/Reticulate:
-        data_py = np_array(data, dtype="float64", order="C")
+        data_py = np_array(data, dtype="{dtype}", order="C")
 """
 
 WARNING_CONTIGUOUS_CAST = """
 Data array copied onto contiguous C array. To suppress this message, copy to a
 contiguous C-style array:
     Python:
-        data = data.ascontiguousarray(data, dtype=np.float64)
+        data = data.ascontiguousarray(data, dtype=np.{dtype})
     R/Reticulate:
-        data_py = np_array(data, dtype="float64", order="C")
+        data_py = np_array(data, dtype="{dtype}", order="C")
 """
 
 WARNING_UINT16_CAST = """

@@ -101,11 +101,14 @@ class BayesianMixture:
             annealing=None):
 
         # Run type checks
-        self.data = check_data(data)
         self.assignments = check_assignments(assignments, data.shape[0])
         self.mixture_model = check_mixture_model(mixture_model)
         self.component_model = check_component_model(
             component_model, data.shape[1])
+        self.data = check_data(
+            data,
+            dtype=self.component_model.DATA_TYPE,
+            dtypename=self.component_model.DATA_TYPE_NAME)
 
         # Save sampler
         self.sampler = sampler
@@ -117,7 +120,9 @@ class BayesianMixture:
             self.assignments,
             self.component_model.CAPSULE,
             self.mixture_model.CAPSULE,
-            get_params(data, self.component_model, self.mixture_model))
+            get_params(
+                data, assignments,
+                self.component_model, self.mixture_model))
 
         # Set up thinning
         if type(thinning) != int:

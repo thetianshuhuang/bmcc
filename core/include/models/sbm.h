@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <Python.h>
-#include "../mixture.h"
+#include "../include/mixture/mixture.h"
 
 
 struct sbm_component_t {
@@ -23,6 +23,8 @@ struct sbm_params_t {
 	double beta;
 	// Pointer to assignments
 	uint16_t *assignments;
+	// Pointer to assignment array (for refcounting)
+	PyObject *assignments_py;
 };
 
 ComponentMethods STOCHASTIC_BLOCK_MODEL;

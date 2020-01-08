@@ -21,7 +21,7 @@
 
 #include <stdbool.h>
 
-#include "../include/mixture.h"
+#include "../include/mixture/mixture.h"
 
 // Utility function to get size of numpy type
 int type_get_size(int type);

@@ -20,11 +20,12 @@ import numpy as np
 from scipy import stats
 from matplotlib import pyplot as plt
 
-from .analysis import plot_clusterings
+from ..analysis import plot_clusterings
+from .base_model import BaseModel, raw
 from bmcc.core import oracle_matrix
 
 
-class GaussianMixture:
+class GaussianMixture(BaseModel):
     """Simulate A Gaussian Mixture Dataset.
 
     Keyword Args
@@ -54,49 +55,19 @@ class GaussianMixture:
     shuffle : bool
         If False, sorts the assignments. Use this to keep the pairwise matrices
         clean.
-
-    Attributes
-    ----------
-    API_NAME : str
-        String identifier for npz objects saved by this class. This class will
-        only save to and load from npz files with the attribute
-        f[API_NAME] = True.
     """
 
-    __INT_KEYS = ['n', 'k', 'd']
-    __FLOAT_KEYS = ['r', 'alpha', 'df']
-    __BOOL_KEYS = ['symmetric', 'shuffle']
-    __ARRAY_KEYS = [
-        'cov', 'means', 'weights',
-        'assignments', 'data']
+    _KEYS = {
+        int: ['n', 'k', 'd'],
+        float: ['r', 'alpha', 'df'],
+        bool: ['symmetric', 'shuffle'],
+        raw: ['cov', 'means', 'weights', 'assignments', 'data']
+    }
 
     API_NAME = "bmcc_GaussianMixture"
+    MODEL_NAME = "Gaussian Mixture"
 
-    def __init__(self, *args, load=False, **kwargs):
-        if load:
-            self.__init_load(*args, **kwargs)
-        else:
-            self.__init_new(*args, **kwargs)
-
-    def __init_load(self, src):
-        """Load from file"""
-
-        fz = np.load(src)
-
-        if self.API_NAME not in fz:
-            raise Exception(
-                "Target file is not a valid GaussianMixture save file.")
-
-        for attr in self.__INT_KEYS:
-            setattr(self, attr, int(fz[attr]))
-        for attr in self.__FLOAT_KEYS:
-            setattr(self, attr, float(fz[attr]))
-        for attr in self.__BOOL_KEYS:
-            setattr(self, attr, bool(fz[attr]))
-        for attr in self.__ARRAY_KEYS:
-            setattr(self, attr, fz[attr])
-
-    def __init_new(
+    def _init_new(
             self, n=1000, k=3, d=2, r=1, alpha=40, df=None, means=None,
             symmetric=False, shuffle=True):
         """Initialize New Gaussian Mixture Simulation"""
@@ -114,15 +85,9 @@ class GaussianMixture:
         self.symmetric = symmetric
         self.shuffle = shuffle
 
-        # Compute weights
-        self.weights = np.array([r**i for i in range(k)])
-        self.weights = self.weights / sum(self.weights)
-
         # Make assignments
-        self.assignments = np.random.choice(
-            k, size=n, p=self.weights).astype(np.uint16)
-        if not shuffle:
-            self.assignments.sort()
+        self.weights, self.assignments = self._make_assignments(
+            n, k, r, shuffle)
 
         # Means: normal, with radius proportional to clusters
         if means is None:
@@ -212,20 +177,6 @@ class GaussianMixture:
             return None
         else:
             return fig
-
-    def save(self, dst):
-        """Save simulated dataset to a file."""
-
-        save_params = {
-            attr: getattr(self, attr)
-            for attr in (
-                self.__INT_KEYS + self.__BOOL_KEYS +
-                self.__FLOAT_KEYS + self.__ARRAY_KEYS
-            )
-        }
-        save_params[self.API_NAME] = True
-
-        np.savez(dst, **save_params)
 
     def __str__(self):
         return (

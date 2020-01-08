@@ -45,14 +45,14 @@ class Hybrid:
         self.beta = beta
         self.iter = 0
 
-    def get_args(self, data):
+    def get_args(self, *args):
         """Get Model Hyperparameters; calls the get_args functions on the
         underlying MFM and DPM objects, and combines them.
 
         Parameters
         ----------
-        data : np.array
-            Dataset; used for scale matrix S = 1/df * Cov(data)
+        *args : np.array[]
+            Passed on to child models
 
         Returns
         -------
@@ -62,8 +62,8 @@ class Hybrid:
         """
 
         args = {"is_mfm": False}
-        args.update(self.MFM.get_args(data))
-        args.update(self.DPM.get_args(data))
+        args.update(self.MFM.get_args(*args))
+        args.update(self.DPM.get_args(*args))
 
         return args
 

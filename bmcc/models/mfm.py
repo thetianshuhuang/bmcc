@@ -84,7 +84,7 @@ class MFM:
 
         return res
 
-    def get_args(self, data):
+    def get_args(self, data, assignments):
         """Get Model Hyperparameters
 
         Parameters

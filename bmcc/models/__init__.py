@@ -8,6 +8,7 @@ from .hybrid import Hybrid
 # Component Models
 from .normal_wishart import NormalWishart
 from .symmetric_normal import SymmetricNormal
+from .sbm import SBM
 
 # Exports
 __all__ = [
@@ -18,5 +19,6 @@ __all__ = [
 
     # Component Models
     "NormalWishart",
-    "SymmetricNormal"
+    "SymmetricNormal",
+    "SBM",
 ]

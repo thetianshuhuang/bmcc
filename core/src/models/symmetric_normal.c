@@ -6,7 +6,7 @@
 #include <math.h>
 
 #include "../include/models/symmetric_normal.h"
-#include "../include/mixture.h"
+#include "../include/mixture/mixture.h"
 
 
 // ----------------------------------------------------------------------------

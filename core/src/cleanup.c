@@ -9,8 +9,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../include/mixture.h"
-#include "../include/mixture_shortcuts.h"
+#include "../include/mixture/mixture.h"
 #include "../include/misc_math.h"
 #include "../include/type_check.h"
 #include "../include/samplers/base_iter.h"

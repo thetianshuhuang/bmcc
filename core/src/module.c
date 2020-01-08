@@ -53,13 +53,14 @@
 // Core
 #include "../include/samplers/gibbs.h"
 #include "../include/samplers/split_merge.h"
-#include "../include/mixture.h"
+#include "../include/mixture/mixture_capsules.h"
 #include "../include/cleanup.h"
 
 // Analysis and other non-sampler helpers
 #include "../include/select.h"
 #include "../include/analysis.h"
 #include "../include/type_check.h"
+#include "../include/sbm_simulate.h"
 
 // Mixture Models
 #include "../include/models/dpm.h"
@@ -138,6 +139,12 @@ static PyMethodDef ModuleMethods[] = {
         (PyCFunction) oracle_matrix_py,
         METH_VARARGS,
         DOCSTRING_ORACLE_MATRIX
+    },
+    {
+        "sbm_simulate",
+        (PyCFunction) sbm_simulate_py,
+        METH_VARARGS,
+        DOCSTRING_SBM_SIMULATE
     },
     {
         "get_capsule_name",

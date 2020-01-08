@@ -13,7 +13,7 @@
 #include <stdlib.h>
 
 #include "../include/models/sbm.h"
-#include "../include/mixture.h"
+#include "../include/mixture/mixture.h"
 #include "../include/type_check.h"
 #include "../include/misc_math.h"
 
@@ -47,8 +47,8 @@ void *sbm_create(void *params)
 	// Write in new row and column
 	for(int i = 0; i < (k + 1); i++) {
 		double rbeta = rand_beta(params_tc->alpha, params_tc->beta);
-		Q_new[(k + 1) * (k + 1) + i] = rbeta;
-		Q_new[i * (k + 1) + (k + 1)] = rbeta;
+		Q_new[(k + 1) * (k) + i] = rbeta;
+		Q_new[i * (k + 1) + (k)] = rbeta;
 	}
 
 	// Swap Q
@@ -111,19 +111,22 @@ void *sbm_params_create(PyObject *dict)
 	PyObject *n_py = (PyObject *) PyDict_GetItemString(dict, "n");
 	PyObject *alpha_py = (PyObject *) PyDict_GetItemString(dict, "alpha");
 	PyObject *beta_py = (PyObject *) PyDict_GetItemString(dict, "beta");
+	PyObject *asn_py = (PyObject *) PyDict_GetItemString(dict, "asn");
 
 	bool check = (
 		(Q_py != NULL) &&
 		(n_py != NULL) && PyLong_Check(n_py) &&
 		(alpha_py != NULL) && PyFloat_Check(alpha_py) &&
-		(beta_py != NULL) && PyFloat_Check(beta_py)
+		(beta_py != NULL) && PyFloat_Check(beta_py) &&
+		(asn_py != NULL)
 	);
 
 	if(!check) {
 		PyErr_SetString(
 			PyExc_KeyError,
 			"SBM requires Q array (SPM likelihood array), n (number of "
-			"points), alpha, beta (SBM prior parameters).");
+			"points), alpha, beta (SBM prior parameters), asn (reference to "
+			"assignment array.");
 		return NULL;
 	}
 
@@ -142,7 +145,10 @@ void *sbm_params_create(PyObject *dict)
 	params->Q = malloc(sizeof(double) * params->k * params->k);
 	for(int i = 0; i < params->k * params->k; i++) { params->Q[i] = Q[i]; }
 
-	// TODO: link assignments
+	// Link assignments
+	params->assignments = PyArray_DATA(asn_py);
+	params->assignments_py = asn_py;
+	Py_INCREF(asn_py);
 
 	return (void *) params;
 }
@@ -154,6 +160,9 @@ void *sbm_params_create(PyObject *dict)
 void sbm_params_destroy(void *params)
 {
 	struct sbm_params_t *params_tc = (struct sbm_params_t *) params_tc;
+
+	Py_DECREF(params_tc->assignments_py);
+
 	free(params_tc->Q);
 	free(params_tc);
 }

@@ -5,7 +5,7 @@
 #include <Python.h>
 #include <stdbool.h>
 
-#include "../include/mixture.h"
+#include "../include/mixture/mixture.h"
 #include "../include/models/dpm.h"
 #include "../include/models/mfm.h"
 

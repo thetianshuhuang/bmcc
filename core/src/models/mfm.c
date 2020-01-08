@@ -11,7 +11,7 @@
 
 #include <math.h>
 
-#include "../include/mixture.h"
+#include "../include/mixture/mixture.h"
 
 /**
  * MFM parameters

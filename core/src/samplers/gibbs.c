@@ -8,8 +8,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../include/mixture.h"
-#include "../include/mixture_shortcuts.h"
+#include "../include/mixture/mixture.h"
 #include "../include/misc_math.h"
 #include "../include/type_check.h"
 #include "../include/samplers/base_iter.h"
@@ -39,6 +38,10 @@ bool gibbs_iter(
 
     // For each sample:
     for(int idx = 0; idx < model->size; idx++) {
+
+        #ifdef SHOW_TRACE
+        printf("gibbs_iter:%d\n", idx);
+        #endif
 
         void *point = data + idx * model->dim * model->stride;
 
@@ -86,10 +89,17 @@ bool gibbs_iter(
         int new = sample_log_weighted(weights, model->num_clusters + 1);
 
         // New cluster?
+        #ifdef SHOW_TRACE
+        printf("  new: %d [k=%d]\n", new, model->num_clusters);
+        #endif
+
         if(new == model->num_clusters) {
             bool success_new = add_component(model, NULL);
             // Check for allocation failure
             if(!success_new) {
+                #ifdef SHOW_FAILURE
+                printf("FAILURE: couldn't add new component\n");
+                #endif
                 free(weights);
                 return false;
             }

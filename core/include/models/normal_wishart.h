@@ -6,7 +6,7 @@
 #define NORMAL_WISHART_H
 
 #include <Python.h>
-#include "../mixture.h"
+#include "../include/mixture/mixture.h"
 
 
 // Normal Wishart struct

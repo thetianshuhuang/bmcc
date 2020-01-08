@@ -16,7 +16,7 @@ from bmcc.core import (
 )
 
 
-def check_data(data):
+def check_data(data, dtype=np.float64, dtypename="float64"):
     """Check data array type.
 
     Parameters
@@ -44,12 +44,12 @@ def check_data(data):
         raise TypeError(
             "Data must have 2 dimensions. The points should be stored in "
             "row-major order (each data point is a row).")
-    if data.dtype != np.float64:
-        print(WARNING_FLOAT64_CAST)
-        data = data.astype(np.float64)
+    if data.dtype != dtype:
+        print(WARNING_FLOAT64_CAST.format(dtype=dtypename))
+        data = data.astype(dtype)
     if not data.flags['C_CONTIGUOUS']:
-        print(WARNING_CONTIGUOUS_CAST)
-        data = np.ascontiguousarray(data, dtype=np.float64)
+        print(WARNING_CONTIGUOUS_CAST.format(dtype=dtypename))
+        data = np.ascontiguousarray(data, dtype=dtype)
     return data
 
 

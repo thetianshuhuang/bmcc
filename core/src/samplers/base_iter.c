@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../include/mixture.h"
+#include "../include/mixture/mixture.h"
 #include "../include/type_check.h"
 
 

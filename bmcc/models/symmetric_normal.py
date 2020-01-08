@@ -24,13 +24,16 @@ class SymmetricNormal:
         Capsule containing component methods (export from C module)
     """
 
+    DATA_TYPE = np.float64
+    DATA_TYPE_NAME = "float64"
+
     CAPSULE = COMPONENT_SYMMETRIC_NORMAL
 
     def __init__(self, scale=1.0):
 
         self.scale = float(scale)
 
-    def get_args(self, data):
+    def get_args(self, data, assignments):
         """Get component hyperparameters
 
         Parameters

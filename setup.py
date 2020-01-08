@@ -89,6 +89,10 @@ DEBUG_MACROS = [
     # ("SHOW_ACCEPT", 0),
     # Show message on metropolis-hastings reject
     # ("SHOW_REJECT", 0),
+    # Show trace on model & component methods
+    # ("SHOW_TRACE", 0),
+    # Show message on failure
+    # ("SHOW_FAILURE", 0)
 ]
 
 

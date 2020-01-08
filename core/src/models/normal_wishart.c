@@ -15,7 +15,7 @@
 #include "../include/cholesky.h"
 #include "../include/misc_math.h"
 #include "../include/models/normal_wishart.h"
-#include "../include/mixture.h"
+#include "../include/mixture/mixture.h"
 #include "../include/type_check.h"
 
 

@@ -139,18 +139,12 @@ struct mixture_model_t {
 //
 // ----------------------------------------------------------------------------
 
-// Create mixture model struct
-struct mixture_model_t *create_mixture(
-    ComponentMethods *comp_methods,
-    ModelMethods *model_methods,
-    PyObject *params,
-    uint32_t size, uint32_t dim, int type);
-
-// Destroy mixture model struct
-void destroy_components(void *model);
 
 // Create component (but do not bind)
 Component *create_component(struct mixture_model_t *model);
+
+// Delete cluster (held separately -- not in model)
+void destroy(struct mixture_model_t *model, Component *cluster);
 
 // Add component to model
 bool add_component(struct mixture_model_t *model, Component *component);
@@ -162,61 +156,23 @@ void remove_component(
 // Remove empty component
 bool remove_empty(struct mixture_model_t *model, uint16_t *assignments);
 
+// Get marginal log likelihood
+double marginal_loglik(
+	struct mixture_model_t *model, Component *cluster, void *point);
 
-// ----------------------------------------------------------------------------
-//
-//                               Python Exports
-//
-// ----------------------------------------------------------------------------
+// Get new cluster log likelihood
+double new_cluster_loglik(struct mixture_model_t *model, void *point);
 
-#define DOCSTRING_INIT_MODEL_CAPSULES \
-    "Initialize model capsules\n" \
-    "\n" \
-    "Parameters\n" \
-    "----------\n" \
-    "data_py : np.array\n" \
-    "    Data array\n" \
-    "assignments_py : np.array\n" \
-    "    Assignment array\n" \
-    "comp_methods : capsule\n" \
-    "    Capsule containing ComponentMethods struct\n" \
-    "model_methods : capsule\n" \
-    "    Capsule containing ModelMethods struct\n" \
-    "params : dict\n" \
-    "    Dictionary containing hyperparameters.\n" \
-    "\n" \
-    "Returns\n" \
-    "-------\n" \
-    "capsule\n" \
-    "    Capsule containing the created struct mixture_model_t"
+// Add point to cluster
+void add_point(
+	struct mixture_model_t *model, Component *cluster, void *point);
 
-PyObject *init_model_capsules_py(PyObject *self, PyObject *args);
+// Remove point from cluster
+void remove_point(
+	struct mixture_model_t *model, Component *cluster, void *point);
 
-
-#define DOCSTRING_UPDATE_MIXTURE \
-    "Update mixture model hyperparameters\n" \
-    "\n" \
-    "Parameters\n" \
-    "----------\n" \
-    "mixture : capsule\n" \
-    "    Capsule containing mixture struct to update hyperparameters for\n" \
-    "update : dict\n" \
-    "    Dictionary to update values with"
-
-PyObject *update_mixture_py(PyObject *self, PyObject *args);
-
-
-#define DOCSTRING_UPDATE_COMPONENTS \
-    "Update component hyperparameters\n" \
-    "\n" \
-    "Parameters\n" \
-    "----------\n" \
-    "mixture : capsule\n" \
-    "    Capsule containing mixture struct to update hyperparameters for\n" \
-    "update : dict\n" \
-    "    Dictionary to update values with"
-
-PyObject *update_components_py(PyObject *self, PyObject *args);
+// Get cluster at index, safely
+Component *get_cluster(struct mixture_model_t *model, int idx);
 
 
 #endif
