@@ -1,3 +1,6 @@
+/**
+ * SBM utility functions
+ */
 
 #include <Python.h>
 
@@ -12,6 +15,9 @@
 #include "../include/misc_math.h"
 
 
+/**
+ * C-accelerated implementation of SBM simulation
+ */
 PyObject *sbm_simulate_py(PyObject *self, PyObject *args)
 {
 	PyArrayObject *Q_py;
@@ -49,8 +55,18 @@ PyObject *sbm_simulate_py(PyObject *self, PyObject *args)
 }
 
 
+/**
+ * Run update for SBM Q array
+ * Returns new Q array; DOES NOT MODIFY.
+ * @param data : data array
+ * @param asn : assignment array
+ * @param n : number of points (size of data, asn)
+ * @param k : number of clusters (size of Q)
+ * @param a : Q beta prior parameter
+ * @param b : Q beta prior parameter
+ */
 double *sbm_update(
-	uint8_t *data, uint16_t *asn, int n, int k, double alpha, double beta)
+	uint8_t *data, uint16_t *asn, int n, int k, double a, double b)
 {
 	// Connection matrix (a and b matrices)
 	double *Q_a = malloc(sizeof(double) * k * k);
@@ -58,8 +74,8 @@ double *sbm_update(
 
 	// Populate with prior
 	for(int i = 0; i < k * k; i++) {
-		Q_a[i] = alpha;
-		Q_b[i] = beta;
+		Q_a[i] = a;
+		Q_b[i] = b;
 	}
 
 	// For each pair of points...
@@ -89,20 +105,22 @@ double *sbm_update(
 }
 
 
-
+/**
+ * Resample Q array for SBM
+ */
 PyObject *sbm_update_py(PyObject *self, PyObject *args)
 {
 	PyObject *data_py;
 	PyObject *asn_py;
 	int k;
-	double alpha;
-	double beta;
+	double a;
+	double b;
 
 	bool success = PyArg_ParseTuple(
 		args, "O!O!idd",
 		&PyArray_Type, &data_py,
 		&PyArray_Type, &asn_py,
-		&k, &alpha, &beta);
+		&k, &a, &b);
 	if(!success) { return NULL; }
 
 	// Get new Q
@@ -110,7 +128,7 @@ PyObject *sbm_update_py(PyObject *self, PyObject *args)
 		(uint8_t *) PyArray_DATA((PyArrayObject *) data_py),
 		(uint16_t *) PyArray_DATA((PyArrayObject *) asn_py),
 		PyArray_DIM((PyArrayObject *) asn_py, 0),
-		k, alpha, beta);
+		k, a, b);
 
 	// Create wrapper
 	npy_intp dims[2] = {k, k};

@@ -1,12 +1,10 @@
+/**
+ * Capsule Manipulation Functions
+ */
+
 #ifndef MIXTURE_CAPSULES_H
 #define MIXTURE_CAPSULES_H
 
-
-// ----------------------------------------------------------------------------
-//
-//                               Python Exports
-//
-// ----------------------------------------------------------------------------
 
 #define DOCSTRING_INIT_MODEL_CAPSULES \
     "Initialize model capsules\n" \
@@ -59,13 +57,42 @@ PyObject *update_components_py(PyObject *self, PyObject *args);
 
 
 #define DOCSTRING_INSPECT_MIXTURE \
-    "todo"
+    "Run the inspect method of a Mixture Model\n" \
+    "\n" \
+    "Parameters\n" \
+    "----------\n" \
+    "mixture : capsule\n" \
+    "    Capsule containing mixture struct to inspect\n" \
+    "\n" \
+    "Returns\n" \
+    "-------\n" \
+    "Some Object\n" \
+    "    Value returned by the inspect method, if available\n" \
+    "\n" \
+    "Raises\n" \
+    "------\n" \
+    "TypeError\n" \
+    "    Input is not a capsule of the correct API, or the mixture model " \
+    "specified\n" \
+    "    does not implement inspect()"
 
 PyObject *inspect_mixture_py(PyObject *self, PyObject *args);
 
 
 #define DOCSTRING_COUNT_CLUSTERS \
-    "todo"
+    "Get the number of clusters currently in the chain\n" \
+    "\n" \
+    "Fetches the cluster number directly from the mixture\n" \
+    "\n" \
+    "Parameters\n" \
+    "----------\n" \
+    "mixture : capsule\n" \
+    "    Capsule containing mixture struct to inspect\n" \
+    "\n" \
+    "Returns\n" \
+    "-------\n" \
+    "int\n" \
+    "    Number of clusters"
 
 PyObject *count_clusters_py(PyObject *self, PyObject *args);
 

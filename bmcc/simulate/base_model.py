@@ -1,3 +1,7 @@
+"""Base Model Class and utilities
+
+Other models import and use this file.
+"""
 
 import numpy as np
 
@@ -5,14 +9,18 @@ from bmcc.core import oracle_matrix
 
 
 def raw(x):
+    """Pass a value directly"""
     return x
 
 
 class BaseModel:
-    """Simulate A Gaussian Mixture Dataset.
+    """Base Model for other simulated models. Handles saving, loading, and
+    interacting with the bmcc API.
 
     Attributes
     ----------
+    _KEYS : dict
+        Keys are functions; values are a list of attributes.
     API_NAME : str
         String identifier for npz objects saved by this class. This class will
         only save to and load from npz files with the attribute
@@ -38,6 +46,25 @@ class BaseModel:
             self._init_new(*args, **kwargs)
 
     def _make_assignments(self, n, k, r, shuffle):
+        """Create assignment array for given mixture parameters
+
+        Parameters
+        ----------
+        n : int
+            Number of data points
+        k : int
+        r : float
+            Balance ratio; the nth cluster has a weight of r^n.
+        shuffle : bool
+            If False, sorts the assignments.
+
+        Returns
+        -------
+        [np.array, np.array]
+            [0] Weight array
+            [1] Assignment array
+        """
+
         # Compute weights
         weights = np.array([r**i for i in range(k)])
         weights = weights / sum(weights)

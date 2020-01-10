@@ -1,3 +1,7 @@
+/**
+ * Create and destroy mixtures
+ */
+
 #ifndef MIXTURE_CREATE_H
 #define MIXTURE_CREATE_H
 

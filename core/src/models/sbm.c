@@ -25,6 +25,11 @@
 //
 // ----------------------------------------------------------------------------
 
+/**
+ * Create SBM object
+ * @param params : model hyperparameters
+ * @return Allocated component structure
+ */
 void *sbm_create(void *params)
 {
     // Memory
@@ -40,7 +45,7 @@ void *sbm_create(void *params)
     double *Q_new = sbm_update(
         PyArray_DATA(params_tc->data),
         PyArray_DATA(params_tc->assignments),
-        params_tc->n, params_tc->k, params_tc->alpha, params_tc->beta);
+        params_tc->n, params_tc->k, params_tc->a, params_tc->b);
 
     // Swap Q
     free(params_tc->Q);
@@ -50,6 +55,10 @@ void *sbm_create(void *params)
 }
 
 
+/**
+ * Destroy SBM object
+ * @param component : component to destroy
+ */
 void sbm_destroy(Component *component)
 {
     struct sbm_params_t *params = (
@@ -98,18 +107,14 @@ void sbm_destroy(Component *component)
 void *sbm_params_create(PyObject *dict)
 {
     // Check Keys
-    PyObject *Q_py = (PyObject *) PyDict_GetItemString(dict, "Q");
-    PyObject *n_py = (PyObject *) PyDict_GetItemString(dict, "n");
-    PyObject *alpha_py = (PyObject *) PyDict_GetItemString(dict, "alpha");
-    PyObject *beta_py = (PyObject *) PyDict_GetItemString(dict, "beta");
+    PyObject *a_py = (PyObject *) PyDict_GetItemString(dict, "a");
+    PyObject *b_py = (PyObject *) PyDict_GetItemString(dict, "b");
     PyObject *asn_py = (PyObject *) PyDict_GetItemString(dict, "asn");
     PyObject *data_py = (PyObject *) PyDict_GetItemString(dict, "data");
 
     bool check = (
-        (Q_py != NULL) &&
-        (n_py != NULL) && PyLong_Check(n_py) &&
-        (alpha_py != NULL) && PyFloat_Check(alpha_py) &&
-        (beta_py != NULL) && PyFloat_Check(beta_py) &&
+        (a_py != NULL) && PyFloat_Check(a_py) &&
+        (a_py != NULL) && PyFloat_Check(a_py) &&
         (asn_py != NULL) &&
         (data_py != NULL)
     );
@@ -117,9 +122,9 @@ void *sbm_params_create(PyObject *dict)
     if(!check) {
         PyErr_SetString(
             PyExc_KeyError,
-            "SBM requires Q array (SPM likelihood array), n (number of "
-            "points), alpha, beta (SBM prior parameters), asn (reference to "
-            "assignment array, data (reference to data matrix).");
+            "SBM requires n (number of points), a, b (SBM prior parameters), "
+            "asn (reference to assignment array, data (reference to data "
+            "matrix).");
         return NULL;
     }
 
@@ -128,15 +133,14 @@ void *sbm_params_create(PyObject *dict)
         (struct sbm_params_t *) malloc(sizeof(struct sbm_params_t)));
 
     // Parameters
-    params->n = (int) PyLong_AsLong(n_py);
+    params->n = PyArray_DIM(asn_py, 0);
     params->k = 0;
-    params->alpha = PyFloat_AsDouble(alpha_py);
-    params->beta = PyFloat_AsDouble(beta_py);
+    params->a = PyFloat_AsDouble(a_py);
+    params->b = PyFloat_AsDouble(b_py);
 
-    // Allocate and copy Q
-    double *Q = PyArray_DATA((PyArrayObject *) Q_py);
-    params->Q = malloc(sizeof(double) * params->k * params->k);
-    for(int i = 0; i < params->k * params->k; i++) { params->Q[i] = Q[i]; }
+    // At this stage, no components have been added yet, so Q is a null
+    // pointer.
+    params->Q = NULL;
 
     // Link assignments & data
     params->assignments = (PyArrayObject *) asn_py;
@@ -242,11 +246,11 @@ double sbm_loglik_new(void *params, void *point)
 
     // Compute loglik
     double loglik = (
-        -1 * params_tc->k * log_beta(params_tc->alpha, params_tc->beta));
+        -1 * params_tc->k * log_beta(params_tc->a, params_tc->b));
     for(int i = 0; i < params_tc->k; i++) {
         loglik += log_beta(
-            connected[i] + params_tc->alpha,
-            unconnected[i] + params_tc->beta);
+            connected[i] + params_tc->a,
+            unconnected[i] + params_tc->b);
     }
 
     return loglik;

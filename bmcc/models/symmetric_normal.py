@@ -22,6 +22,10 @@ class SymmetricNormal:
     ----------
     CAPSULE : capsule
         Capsule containing component methods (export from C module)
+    DATA_TYPE : type
+        Numpy type for this model's input data
+    DATA_TYPE_NAME : str
+        Human readable data type name
     """
 
     DATA_TYPE = np.float64

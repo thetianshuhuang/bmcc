@@ -1,7 +1,11 @@
+/**
+ * Create and destroy mixtures
+ */
 
 #include <Python.h>
 #include "../include/type_check.h"
 #include "../include/mixture/mixture.h"
+
 
 /**
  * Create components struct
