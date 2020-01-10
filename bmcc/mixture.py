@@ -46,7 +46,9 @@ import numpy as np
 from bmcc.core import (
     init_model, gibbs,
     update_mixture,
-    update_components)
+    update_components,
+    inspect_mixture,
+    count_clusters)
 from .analysis import LstsqResult
 from .util.type_check import (
     check_data,
@@ -182,6 +184,10 @@ class BayesianMixture:
                     (self.__hist_size, self.data.shape[0]), refcheck=False)
 
     @property
+    def num_clusters(self):
+        return count_clusters(self.__model)
+
+    @property
     def hist(self):
         """Get the valid slice of the history array.
 
@@ -207,3 +213,19 @@ class BayesianMixture:
         """
 
         return LstsqResult(self.data, self.hist, burn_in=burn_in)
+
+    def inspect(self):
+        """Run inspection on this model's capsule.
+
+        Returns
+        -------
+        arbitrary type
+            Calls the component_model->inspect routine.
+
+        Raises
+        ------
+        TypeError
+            The component model does not implement inspection.
+        """
+
+        return inspect_mixture(self.__model)

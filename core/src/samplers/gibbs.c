@@ -85,6 +85,14 @@ bool gibbs_iter(
         weights[model->num_clusters] = (
             annealing * new_cluster_loglik(model, point));
 
+        #ifdef SHOW_LIKELIHOODS
+        printf("  weights: ");
+        for(int i = 0; i <= model->num_clusters; i++) {
+            printf("%f ", weights[i]);
+        }
+        printf("\n");
+        #endif
+
         // Sample new
         int new = sample_log_weighted(weights, model->num_clusters + 1);
 

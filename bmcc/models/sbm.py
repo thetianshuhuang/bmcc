@@ -1,5 +1,5 @@
 import numpy as np
-from bmcc.core import COMPONENT_STOCHASTIC_BLOCK_MODEL
+from bmcc.core import COMPONENT_STOCHASTIC_BLOCK_MODEL, sbm_update
 
 
 class SBM:
@@ -22,8 +22,19 @@ class SBM:
             "alpha": self.alpha,
             "beta": self.beta,
             "asn": assignments,
+            "data": data
         }
 
     def update(self, mixture):
 
-        return None
+        # Q_old = mixture.inspect()
+
+        # print(Q_old.shape)
+        # print(Q_old)
+        # print(mixture.num_clusters)
+
+        return {
+            "Q": sbm_update(
+                mixture.data, mixture.assignments,
+                mixture.num_clusters, self.alpha, self.beta)
+        }

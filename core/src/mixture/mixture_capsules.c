@@ -125,3 +125,59 @@ PyObject *update_components_py(PyObject *self, PyObject *args)
 
     Py_RETURN_NONE;
 }
+
+
+/**
+ * Inspect Model
+ */
+PyObject *inspect_mixture_py(PyObject *self, PyObject *args)
+{
+    PyObject *mixture;
+    if(!PyArg_ParseTuple(args, "O", &mixture)) { return NULL; }
+
+    struct mixture_model_t *mixture_tc = (
+        (struct mixture_model_t *) PyCapsule_GetPointer(
+            mixture, MIXTURE_MODEL_API));
+
+    // Check validity
+    if(mixture_tc == NULL) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "inspect_mixture requires a MixtureModel capsule.");
+        return NULL;
+    }
+    if(mixture_tc->comp_methods->inspect == NULL) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "this mixture model does not implement inspect().");
+        return NULL;
+    }
+
+    // Inspect
+    return mixture_tc->comp_methods->inspect(mixture_tc->comp_params);
+}
+
+
+/**
+ * Get number of clusters
+ */
+PyObject *count_clusters_py(PyObject *self, PyObject *args)
+{
+    PyObject *mixture;
+    if(!PyArg_ParseTuple(args, "O", &mixture)) { return NULL; }
+
+    struct mixture_model_t *mixture_tc = (
+        (struct mixture_model_t *) PyCapsule_GetPointer(
+            mixture, MIXTURE_MODEL_API));
+
+    // Check validity
+    if(mixture_tc == NULL) {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "count_clusters requires a MixtureModel capsule.");
+        return NULL;
+    }
+
+    return Py_BuildValue("i", mixture_tc->num_clusters);
+}
+

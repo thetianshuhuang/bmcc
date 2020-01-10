@@ -28,6 +28,16 @@ double log_mv_gamma(int p, double x)
 
 
 /**
+ * Helper function for logbeta
+ */
+double log_beta(int a, int b)
+{
+    return lgamma(a) + lgamma(b) - lgamma(a + b);
+}
+
+
+
+/**
  * Sample 45-bit integer, since RAND_MASK only has 15 bits of precision
  * @return Sampled 45-bit integer
  */
@@ -137,22 +147,23 @@ double rand_gamma(double alpha)
     // Must have alpha > 1
     if(alpha < 1) { return 0; }
 
-    double d = alpha - (1 / 3);
-    double c = 1 / 3 / sqrt(d);
+    double d = alpha - (1.0 / 3.0);
+    double c = 1.0 / 3.0 / sqrt(d);
     
     while(true) {
         double z = 0;
         double v = 0;
         do {
             z = rand_norm();
-            v = pow(1 + c * z, 3);
+            v = 1 + c * z;
         } while(v <= 0);
 
+        v = pow(v, 3);
         double u = rand_double();
 
         bool accept = (
             (log(u) < 0.5 * z * z + d - d * v + d * log(v)) ||
-            (u < 1 - 0.0331 * pow(z, 4)));
+            (u < 1.0 - 0.0331 * pow(z, 4)));
         if(accept) { return d * v;};
     }
 }
@@ -160,6 +171,6 @@ double rand_gamma(double alpha)
 
 double rand_beta(double alpha, double beta) {
     double x = rand_gamma(alpha);
-    double y = rand_gamma(alpha);
+    double y = rand_gamma(beta);
     return x / (x + y);
 }

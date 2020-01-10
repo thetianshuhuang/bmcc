@@ -57,4 +57,17 @@ PyObject *update_mixture_py(PyObject *self, PyObject *args);
 
 PyObject *update_components_py(PyObject *self, PyObject *args);
 
+
+#define DOCSTRING_INSPECT_MIXTURE \
+    "todo"
+
+PyObject *inspect_mixture_py(PyObject *self, PyObject *args);
+
+
+#define DOCSTRING_COUNT_CLUSTERS \
+    "todo"
+
+PyObject *count_clusters_py(PyObject *self, PyObject *args);
+
+
 #endif

@@ -21,10 +21,10 @@ struct sbm_params_t {
 	// SBM Prior parameters
 	double alpha;
 	double beta;
-	// Pointer to assignments
-	uint16_t *assignments;
 	// Pointer to assignment array (for refcounting)
-	PyObject *assignments_py;
+	PyArrayObject *assignments;
+	// Pointer to data array (for refcounting)
+	PyArrayObject *data;
 };
 
 ComponentMethods STOCHASTIC_BLOCK_MODEL;

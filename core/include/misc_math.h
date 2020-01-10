@@ -11,6 +11,9 @@
 // log(Gamma_p(x)) -- log of multivariate gamma
 double log_mv_gamma(int p, double x);
 
+// log(Beta(a, b))
+double log_beta(int a, int b);
+
 // Get 45-bit random iteger
 uint64_t rand_45_bit();
 

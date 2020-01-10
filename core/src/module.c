@@ -60,7 +60,7 @@
 #include "../include/select.h"
 #include "../include/analysis.h"
 #include "../include/type_check.h"
-#include "../include/sbm_simulate.h"
+#include "../include/sbm_util.h"
 
 // Mixture Models
 #include "../include/models/dpm.h"
@@ -111,6 +111,18 @@ static PyMethodDef ModuleMethods[] = {
         DOCSTRING_UPDATE_MIXTURE
     },
     {
+        "inspect_mixture",
+        (PyCFunction) inspect_mixture_py,
+        METH_VARARGS,
+        DOCSTRING_INSPECT_MIXTURE
+    },
+    {
+        "count_clusters",
+        (PyCFunction) count_clusters_py,
+        METH_VARARGS,
+        DOCSTRING_COUNT_CLUSTERS
+    },
+    {
         "update_components",
         (PyCFunction) update_components_py,
         METH_VARARGS,
@@ -145,6 +157,12 @@ static PyMethodDef ModuleMethods[] = {
         (PyCFunction) sbm_simulate_py,
         METH_VARARGS,
         DOCSTRING_SBM_SIMULATE
+    },
+    {
+        "sbm_update",
+        (PyCFunction) sbm_update_py,
+        METH_VARARGS,
+        DOCSTRING_SBM_UPDATE
     },
     {
         "get_capsule_name",

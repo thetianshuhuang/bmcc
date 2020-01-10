@@ -73,7 +73,7 @@ bool type_check(
     if(!(PyArray_FLAGS(assignments_py) & NPY_ARRAY_C_CONTIGUOUS)) {
         PyErr_SetString(
             PyExc_TypeError,
-            "Assignmnets must be a contiguous C-style array "
+            "Assignments must be a contiguous C-style array "
             "(np.ascontiguousarray)");
         return false;
     }
