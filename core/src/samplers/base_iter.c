@@ -21,7 +21,7 @@
  * Wrapper for MCMC iteration; handles error checking, GIL, type unpacking
  */
 PyObject *base_iter(
-		PyObject *self, PyObject *args, PyObject *kwargs,
+		PyObject *Py_UNUSED(self), PyObject *args, PyObject *kwargs,
 		bool (*error_check)(struct mixture_model_t *),
 		bool (*iter)(void *, uint16_t *, struct mixture_model_t *, double))
 {

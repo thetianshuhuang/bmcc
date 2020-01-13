@@ -105,6 +105,8 @@ void mfm_update(void *params, PyObject *update)
  */
 double mfm_log_coef(void *params, int size, int nc)
 {
+	(void) nc;
+
 	return log(size + ((struct mfm_params_t *) params)->gamma);
 }
 

@@ -30,14 +30,14 @@ bool gibbs_iter(
 {
     // Assignment weight vector: exponentially-overallocated
     // Make sure to check for number of clusters >> BASE_VEC_SIZE!
-    int vec_size = BASE_VEC_SIZE;
+    uint32_t vec_size = BASE_VEC_SIZE;
     if(model->num_clusters > vec_size) {
         vec_size = model->num_clusters + 1;
     }
     double *weights = (double *) malloc(sizeof(double) * vec_size);
 
     // For each sample:
-    for(int idx = 0; idx < model->size; idx++) {
+    for(uint32_t idx = 0; idx < model->size; idx++) {
 
         #ifdef SHOW_TRACE
         printf("gibbs_iter:%d\n", idx);
@@ -78,7 +78,7 @@ bool gibbs_iter(
         }
 
         // Get assignment and new cluster weights
-        for(int i = 0; i < model->num_clusters; i++) {
+        for(uint32_t i = 0; i < model->num_clusters; i++) {
             weights[i] = annealing * marginal_loglik(
                 model, model->clusters[i], point);
         }
@@ -87,14 +87,14 @@ bool gibbs_iter(
 
         #ifdef SHOW_LIKELIHOODS
         printf("  weights: ");
-        for(int i = 0; i <= model->num_clusters; i++) {
+        for(uint32_t i = 0; i <= model->num_clusters; i++) {
             printf("%f ", weights[i]);
         }
         printf("\n");
         #endif
 
         // Sample new
-        int new = sample_log_weighted(weights, model->num_clusters + 1);
+        uint32_t new = sample_log_weighted(weights, model->num_clusters + 1);
 
         // New cluster?
         #ifdef SHOW_TRACE

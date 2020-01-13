@@ -3,6 +3,8 @@
  */
 
 #include <Python.h>
+
+#include <stdint.h>
 #include <math.h>
 
 #include "../include/models/symmetric_normal.h"
@@ -26,11 +28,11 @@ void *sn_create(void *params)
 		(struct sn_component_t *) malloc(sizeof(struct sn_component_t)));
 
 	struct sn_params_t *params_tc = (struct sn_params_t *) params;
-	int dim = params_tc->dim;
+	uint32_t dim = params_tc->dim;
 
 	// Total = 0
 	component->total = (double *) malloc(sizeof(double) * dim);
-	for(int i = 0; i < dim; i++) { component->total[i] = 0; }
+	for(uint32_t i = 0; i < dim; i++) { component->total[i] = 0; }
 
 	return component;
 }
@@ -74,7 +76,7 @@ void *sn_params_create(PyObject *dict)
 	}
 
 	// Unpack dict
-	int dim = (int) PyLong_AsLong(dim_py);
+	uint32_t dim = (int) PyLong_AsLong(dim_py);
 	double scale = PyFloat_AsDouble(scale_py);
 	double scale_all = PyFloat_AsDouble(scale_all_py);
 
@@ -116,7 +118,7 @@ void sn_add(Component *component, void *params, void *point)
     struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
     // Update mean
-    for(int i = 0; i < params_tc->dim; i++) {
+    for(uint32_t i = 0; i < params_tc->dim; i++) {
     	comp_tc->total[i] += ((double *) point)[i];
     }
 }
@@ -133,7 +135,7 @@ void sn_remove(Component *component, void *params, void *point)
     struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
     // Downdate mean
-    for(int i = 0; i < params_tc->dim; i++) {
+    for(uint32_t i = 0; i < params_tc->dim; i++) {
     	comp_tc->total[i] -= ((double *) point)[i];
     }
 }
@@ -150,12 +152,12 @@ double sn_loglik_ratio(Component *component, void *params, void *point)
 	struct sn_component_t *cpt = (struct sn_component_t *) component->data;
 	struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
-	int dim = params_tc->dim;
+	uint32_t dim = params_tc->dim;
 	double scale = params_tc->scale;
 
 	// (x-mu)^T(x-mu)
 	double acc = 0;
-	for(int i = 0; i < dim; i++) {
+	for(uint32_t i = 0; i < dim; i++) {
 		double centered = (
 			((double *) point)[i] - (cpt->total[i] / component->size));
 		acc += centered * centered;
@@ -180,12 +182,12 @@ double sn_loglik_new(void *params, void *point)
 {
 	struct sn_params_t *params_tc = (struct sn_params_t *) params;
 
-	int dim = params_tc->dim;
+	uint32_t dim = params_tc->dim;
 	double scale_all = params_tc->scale_all;
 
 	// (x-0)^T(x-0)
 	double acc = 0;
-	for(int i = 0; i < dim; i++) {
+	for(uint32_t i = 0; i < dim; i++) {
 		acc += ((double *) point)[i] * ((double *) point)[i];
 	}
 

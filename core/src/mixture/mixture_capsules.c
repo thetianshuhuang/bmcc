@@ -20,7 +20,7 @@
  * Initialize model capsules. See docstring (sourced from mixture.h) for more
  * details.
  */
-PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
+PyObject *init_model_capsules_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
     // Get args
     PyArrayObject *data_py;
@@ -92,7 +92,7 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
 /**
  * Update mixture model hyperparameters
  */
-PyObject *update_mixture_py(PyObject *self, PyObject *args)
+PyObject *update_mixture_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
     PyObject *mixture;
     PyObject *update;
@@ -113,7 +113,7 @@ PyObject *update_mixture_py(PyObject *self, PyObject *args)
 /**
  * Update component hyperparameters
  */
-PyObject *update_components_py(PyObject *self, PyObject *args)
+PyObject *update_components_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
     PyObject *mixture;
     PyObject *update;
@@ -134,7 +134,7 @@ PyObject *update_components_py(PyObject *self, PyObject *args)
 /**
  * Inspect Model
  */
-PyObject *inspect_mixture_py(PyObject *self, PyObject *args)
+PyObject *inspect_mixture_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
     PyObject *mixture;
     if(!PyArg_ParseTuple(args, "O", &mixture)) { return NULL; }
@@ -165,7 +165,7 @@ PyObject *inspect_mixture_py(PyObject *self, PyObject *args)
 /**
  * Get number of clusters
  */
-PyObject *count_clusters_py(PyObject *self, PyObject *args)
+PyObject *count_clusters_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
     PyObject *mixture;
     if(!PyArg_ParseTuple(args, "O", &mixture)) { return NULL; }

@@ -13,6 +13,7 @@
 #undef NDEBUG
 #endif
 #include "assert.h"
+#include <stdint.h>
 #include <stdbool.h>
 
 #include "../include/type_check.h"
@@ -106,7 +107,7 @@ bool add_component(struct mixture_model_t *model, Component *component)
  * @param idx : index to remove
  */
 void remove_component(
-    struct mixture_model_t *model, uint16_t *assignments, int idx)
+    struct mixture_model_t *model, uint16_t *assignments, uint32_t idx)
 {
     assert(idx < model->num_clusters);
 
@@ -116,7 +117,7 @@ void remove_component(
 
     // Optionally update assignments
     if(assignments != NULL) {
-        for(int i = 0; i < model->size; i++) {
+        for(uint32_t i = 0; i < model->size; i++) {
             if(assignments[i] > idx) { assignments[i] -= 1; }
             else if(assignments[i] == idx) { assignments[i] = 0; }
         }
@@ -124,7 +125,7 @@ void remove_component(
 
     // Update components
     destroy(model, model->clusters[idx]);
-    for(int i = idx; i < (model->num_clusters - 1); i++) {
+    for(uint32_t i = idx; i < (model->num_clusters - 1); i++) {
         model->clusters[i] = model->clusters[i + 1];
         model->clusters[i]->idx = i;
     }
@@ -146,7 +147,7 @@ bool remove_empty(struct mixture_model_t *model, uint16_t *assignments)
     #endif
 
     // Search for empty
-    for(int i = 0; i < model->num_clusters; i++) {
+    for(uint32_t i = 0; i < model->num_clusters; i++) {
         if((model->clusters)[i]->size == 0) {
             // Deallocate component; remove component from vector; update
             // assignments
@@ -244,7 +245,7 @@ void remove_point(
  * @param idx index to fetch
  * @return fetched component; NULL if unsuccessful
  */
-Component *get_cluster(struct mixture_model_t *model, int idx)
+Component *get_cluster(struct mixture_model_t *model, uint32_t idx)
 {
     assert(idx < model->num_clusters);
     return model->clusters[idx];

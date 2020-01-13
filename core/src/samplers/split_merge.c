@@ -41,7 +41,7 @@ double merge_propose_prob(
 
     // Iterate over clusters c1, c2
     double res = 0;
-    for(int i = 0; i < model->size; i++) {
+    for(uint32_t i = 0; i < model->size; i++) {
         if(assignments[i] == c1 || assignments[i] == c2) {
             
             void *point = data + i * model->dim * model->stride;
@@ -85,7 +85,7 @@ bool merge(
 
     // Create merge component; index becomes [size-2]
     Component *new_component = create_component(model);
-    for(int i = 0; i < model->size; i++) {
+    for(uint32_t i = 0; i < model->size; i++) {
         if(assignments[i] == c1 || assignments[i] == c2) {
             void *point = data + i * model->dim * model->stride;
             add_point(model, new_component, point);
@@ -134,7 +134,7 @@ bool merge(
         if(!success) { return false; }
 
         // Update assignments
-        for(int i = 0; i < model->size; i++) {
+        for(uint32_t i = 0; i < model->size; i++) {
             if(asn_tmp[i] != 0) {
                 assignments[i] = model->num_clusters - 1;
             }
@@ -170,7 +170,7 @@ bool merge(
  * @return true if returned without error
  */
 bool split(
-    int cluster, int p1, int p2,
+    uint32_t cluster, uint32_t p1, uint32_t p2,
     void *data, uint16_t *assignments,
     struct mixture_model_t *model)
 {
@@ -191,7 +191,7 @@ bool split(
 
     // Split points randomly, with equal probability for points in splitting
     // cluster
-    for(int i = 0; i < model->size; i++) {
+    for(uint32_t i = 0; i < model->size; i++) {
         bool not_original = (i != p1) && (i != p2);
         bool in_merge = (assignments[i] == cluster);
 
@@ -259,7 +259,7 @@ bool split(
         // Copy assignments
         // asn_tmp index [0] becomes [size]; [1] becomes [size + 1]
         // After removal, these become [size - 1], [size]
-        for(int i = 0; i < model->size; i++) {
+        for(uint32_t i = 0; i < model->size; i++) {
             if(asn_tmp[i] != 0) {
                 assignments[i] = model->num_clusters - asn_tmp[i];
             }
@@ -302,10 +302,13 @@ bool split_merge(
     struct mixture_model_t *model,
     double annealing)
 {
+    // Does not support annealing
+    (void) annealing;
+
     // Get pivot elements i, j
-    int i = (int) (rand_45_bit() % model->size);
-    int j = i;
-    while(i == j) { i = (int) (rand_45_bit() % model->size); }
+    uint32_t i = (uint32_t) (rand_45_bit() % model->size);
+    uint32_t j = i;
+    while(i == j) { i = (uint32_t) (rand_45_bit() % model->size); }
     if(assignments[i] != assignments[j]) {
         return merge(assignments[i], assignments[j], data, assignments, model);
     }

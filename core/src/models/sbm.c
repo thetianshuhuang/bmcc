@@ -65,25 +65,25 @@ void sbm_destroy(Component *component)
     struct sbm_params_t *params = (
         ((struct sbm_component_t *) component->data)->params);
 
-    int k = params->k;
+    uint32_t k = params->k;
     params->k -= 1;
 
     double *Q_new = malloc(sizeof(double) * (k - 1) * (k - 1));
 
     // Copy all but current index
-    for(int i = 0; i < component->idx; i++) {
-        for(int j = 0; j < component->idx; j++) {
+    for(uint32_t i = 0; i < component->idx; i++) {
+        for(uint32_t j = 0; j < component->idx; j++) {
             Q_new[i * (k - 1) + j] = params->Q[i * k + j];
         }
-        for(int j = component->idx + 1; j < k; j++) {
+        for(uint32_t j = component->idx + 1; j < k; j++) {
             Q_new[i * (k - 1) + j - 1] = params->Q[i * k + j];
         }
     }
-    for(int i = component->idx + 1; i < k; i++) {
-        for(int j = 0; j < component->idx; j++) {
+    for(uint32_t i = component->idx + 1; i < k; i++) {
+        for(uint32_t j = 0; j < component->idx; j++) {
             Q_new[(i - 1) * (k - 1) + j] = params->Q[i * k + j];
         }
-        for(int j = component->idx + 1; j < k; j++) {
+        for(uint32_t j = component->idx + 1; j < k; j++) {
             Q_new[(i - 1) * (k - 1) + j - 1] = params->Q[i * k + j];
         }
     }
@@ -158,7 +158,7 @@ void *sbm_params_create(PyObject *dict)
  */
 void sbm_params_destroy(void *params)
 {
-    struct sbm_params_t *params_tc = (struct sbm_params_t *) params_tc;
+    struct sbm_params_t *params_tc = (struct sbm_params_t *) params;
 
     Py_DECREF(params_tc->assignments);
     Py_DECREF(params_tc->data);
@@ -181,13 +181,13 @@ void sbm_params_update(void *params, PyObject *dict)
         printf("Warning: SBM did not update Q array.\n");
     }
     else {
-        int k = params_tc->k;
+        uint32_t k = params_tc->k;
 
         // Make sure Q is valid
         if(!type_check_square(Q_py, k)) { return; }
         // Copy Q
         double *Q = (double *) PyArray_DATA(Q_py);
-        for(int i = 0; i < k * k; i++) { params_tc->Q[i] = Q[i]; }
+        for(uint32_t i = 0; i < k * k; i++) { params_tc->Q[i] = Q[i]; }
     }
 }
 
@@ -206,6 +206,9 @@ void sbm_params_update(void *params, PyObject *dict)
 void sbm_add(Component *component, void *params, void *point)
 {
     // No update
+    (void) component;
+    (void) params;
+    (void) point;
 }
 
 
@@ -217,6 +220,9 @@ void sbm_add(Component *component, void *params, void *point)
 void sbm_remove(Component *component, void *params, void *point)
 {
     // No update
+    (void) component;
+    (void) params;
+    (void) point;
 }
 
 
@@ -236,12 +242,12 @@ double sbm_loglik_new(void *params, void *point)
     // Count number of connections to each cluster
     uint32_t *connected = malloc(sizeof(uint32_t) * (params_tc->k));
     uint32_t *unconnected = malloc(sizeof(uint32_t) * (params_tc->k));
-    for(int i = 0; i < params_tc->k; i++) {
+    for(uint32_t i = 0; i < params_tc->k; i++) {
         connected[i] = 0;
         unconnected[i] = 0;
     }
 
-    for(int i = 0; i < params_tc->n; i++) {
+    for(uint32_t i = 0; i < params_tc->n; i++) {
         assert(asn[i] < params_tc->k);
         if(point_tc[i]) { connected[asn[i]] += 1; }
         else { unconnected[asn[i]] += 1; }
@@ -250,7 +256,7 @@ double sbm_loglik_new(void *params, void *point)
     // Compute loglik
     double loglik = (
         -1 * params_tc->k * log_beta(params_tc->a, params_tc->b));
-    for(int i = 0; i < params_tc->k; i++) {
+    for(uint32_t i = 0; i < params_tc->k; i++) {
         loglik += log_beta(
             connected[i] + params_tc->a,
             unconnected[i] + params_tc->b);
@@ -275,7 +281,7 @@ double sbm_loglik_ratio(Component *component, void *params, void *point)
     uint16_t *asn = (uint16_t *) PyArray_DATA(params_tc->assignments);
 
     double loglik = 0;
-    for(int i = 0; i < params_tc->n; i++) {
+    for(uint32_t i = 0; i < params_tc->n; i++) {
         double q = params_tc->Q[component->idx * params_tc->k + asn[i]];
         if(point_tc[i]) { loglik += log(q); }
         else { loglik += log(1 - q); }
@@ -302,7 +308,7 @@ PyObject *sbm_inspect(void *params) {
     const npy_intp dims[] = {params_tc->k, params_tc->k};
     PyArrayObject *Q_old_py = PyArray_SimpleNew(2, dims, NPY_FLOAT64);
     double *Q_old = PyArray_DATA(Q_old_py);
-    for(int i = 0; i < params_tc->k * params_tc->k; i++) {
+    for(uint32_t i = 0; i < params_tc->k * params_tc->k; i++) {
         Q_old[i] = params_tc->Q[i];
     }
 

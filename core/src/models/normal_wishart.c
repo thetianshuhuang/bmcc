@@ -10,6 +10,7 @@
 #include <numpy/arrayobject.h>
 
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "../include/cholesky.h"
@@ -37,16 +38,16 @@ void *nw_create(void *params)
         (struct nw_component_t *) malloc(sizeof(struct nw_component_t)));
     
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
-    int dim = params_tc->dim;
+    uint32_t dim = params_tc->dim;
 
     // Total = [0]
     component->total = (double *) malloc(sizeof(double) * dim);
-    for(int i= 0; i < dim; i++) { component->total[i] = 0; }
+    for(uint32_t i = 0; i < dim; i++) { component->total[i] = 0; }
 
     // Copy over starting value [S + XX^T] = [S]
     component->chol_decomp = (double *) malloc(sizeof(double) * dim * dim);
     double *chol_src = params_tc->s_chol;
-    for(int i = 0; i < dim * dim; i++) {
+    for(uint32_t i = 0; i < dim * dim; i++) {
         component->chol_decomp[i] = chol_src[i];
     }
 
@@ -95,7 +96,7 @@ void *nw_params_create(PyObject *dict)
 
     // Unpack dict
     double df = PyFloat_AsDouble(df_py);
-    int dim = (int) PyLong_AsLong(dim_py);
+    uint32_t dim = (int) PyLong_AsLong(dim_py);
     // Check cholesky size
     PyObject *data_py = PyDict_GetItemString(dict, "s_chol");
     if((data_py == NULL) || !PyArray_Check(data_py) ||
@@ -118,7 +119,7 @@ void *nw_params_create(PyObject *dict)
     // Copy cholesky decomp
     params->s_chol = (double *) malloc(sizeof(double) * dim * dim);
     double *data = PyArray_DATA((PyArrayObject *) data_py);
-    for(int i = 0; i < dim * dim; i++) { params->s_chol[i] = data[i]; }
+    for(uint32_t i = 0; i < dim * dim; i++) { params->s_chol[i] = data[i]; }
 
     return (void *) params;
 }
@@ -153,7 +154,7 @@ void nw_add(Component *component, void *params, void *point)
 
     // Update Cholesky decomposition, mean, # of points
     cholesky_update(comp_tc->chol_decomp, point, 1, params_tc->dim);
-    for(int i = 0; i < params_tc->dim; i++) {
+    for(uint32_t i = 0; i < params_tc->dim; i++) {
         comp_tc->total[i] += ((double *) point)[i];
     }
 }
@@ -172,7 +173,7 @@ void nw_remove(Component *component, void *params, void *point)
     // Downdate Cholesky decomposition, total, # of points
     cholesky_downdate(
         comp_tc->chol_decomp, ((double *) point), 1, params_tc->dim);
-    for(int i = 0; i < params_tc->dim; i++) {
+    for(uint32_t i = 0; i < params_tc->dim; i++) {
         comp_tc->total[i] -= ((double *) point)[i];
     }
 }
@@ -187,11 +188,13 @@ void nw_remove(Component *component, void *params, void *point)
 double nw_loglik_new(void *params, void *point)
 {
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
-    int dim = params_tc->dim;
+    uint32_t dim = params_tc->dim;
     double df = params_tc->df;
 
     double *chol_up = (double *) malloc(sizeof(double) * dim * dim);
-    for(int i = 0; i < dim * dim; i++) { chol_up[i] = params_tc->s_chol[i]; }
+    for(uint32_t i = 0; i < dim * dim; i++) {
+        chol_up[i] = params_tc->s_chol[i];
+    }
     cholesky_update(chol_up, ((double *) point), 1, dim);
 
     double res = (
@@ -219,8 +222,8 @@ double nw_loglik_ratio(Component *component, void *params, void *point)
     // Unpack
     struct nw_component_t *cpt = (struct nw_component_t *) component->data;
     struct nw_params_t *params_tc = (struct nw_params_t *) params;
-    int dim = params_tc->dim;
-    int size = component->size;
+    uint32_t dim = params_tc->dim;
+    uint32_t size = component->size;
     double df = params_tc->df;
 
     // Deal with empty component separately
@@ -229,13 +232,15 @@ double nw_loglik_ratio(Component *component, void *params, void *point)
     // |S + X'X'^T| (centered)
     // Updated Total
     double *total_up = (double *) malloc(sizeof(double) * dim);
-    for(int i = 0; i < dim; i++) {
+    for(uint32_t i = 0; i < dim; i++) {
         total_up[i] = cpt->total[i] + ((double *) point)[i];
     }
 
     // Updated Cholesky(S + X'X'^T)
     double *chol_up = (double *) malloc(sizeof(double) * dim * dim);
-    for(int i = 0; i < dim * dim; i++) { chol_up[i] = cpt->chol_decomp[i]; }
+    for(uint32_t i = 0; i < dim * dim; i++) {
+        chol_up[i] = cpt->chol_decomp[i];
+    }
     cholesky_update(chol_up, ((double *) point), 1, dim);
 
     // Centered

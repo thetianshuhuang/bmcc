@@ -151,7 +151,7 @@ bool add_component(struct mixture_model_t *model, Component *component);
 
 // Remove component from model
 void remove_component(
-    struct mixture_model_t *model, uint16_t *assignments, int idx);
+    struct mixture_model_t *model, uint16_t *assignments, uint32_t idx);
 
 // Remove empty component
 bool remove_empty(struct mixture_model_t *model, uint16_t *assignments);
@@ -172,7 +172,7 @@ void remove_point(
 	struct mixture_model_t *model, Component *cluster, void *point);
 
 // Get cluster at index, safely
-Component *get_cluster(struct mixture_model_t *model, int idx);
+Component *get_cluster(struct mixture_model_t *model, uint32_t idx);
 
 
 #endif
