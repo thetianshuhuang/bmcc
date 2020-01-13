@@ -84,6 +84,7 @@ void destroy_mixture(PyObject *model_py)
     for(int i = model_tc->num_clusters; i > 0; i--) {
         destroy(model_tc, model_tc->clusters[i - 1]);
     }
+    free(model_tc->clusters);
     free(model_tc);
 }
 

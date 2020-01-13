@@ -71,7 +71,7 @@ PyObject *init_model_capsules_py(PyObject *self, PyObject *args)
 
         // Check for error
         if(!success_add) {
-            for(int j = 1; j < i; j++) { remove_component(mixture, NULL, 0); }
+            for(int j = 0; j < i; j++) { remove_component(mixture, NULL, 0); }
             free(mixture->clusters);
             free(mixture);
             return NULL;

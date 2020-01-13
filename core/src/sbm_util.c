@@ -131,10 +131,10 @@ PyObject *sbm_update_py(PyObject *self, PyObject *args)
 		k, a, b);
 
 	// Create wrapper
-	npy_intp dims[2] = {k, k};
-	PyObject *Q_new_py = PyArray_SimpleNewFromData(
-		2, &dims, NPY_FLOAT64, Q_new);
+	const npy_intp dims[] = {k, k};
+	PyArrayObject *Q_new_py = PyArray_SimpleNewFromData(
+		2, dims, NPY_FLOAT64, (void *) Q_new);
 	PyArray_ENABLEFLAGS(Q_new_py, NPY_ARRAY_OWNDATA);
 
-	return Q_new_py;
+	return (PyObject *) Q_new_py;
 }

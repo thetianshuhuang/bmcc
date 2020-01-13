@@ -94,7 +94,9 @@ DEBUG_MACROS = [
     # Show likelihoods
     # ("SHOW_LIKELIHOODS", 0),
     # Show message on failure
-    # ("SHOW_FAILURE", 0)
+    # ("SHOW_FAILURE", 0),
+    # Assert?
+    ("ASSERT", 0)
 ]
 
 

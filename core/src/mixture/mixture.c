@@ -9,6 +9,10 @@
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
+#ifdef ASSERT
+#undef NDEBUG
+#endif
+#include "assert.h"
 #include <stdbool.h>
 
 #include "../include/type_check.h"
@@ -47,8 +51,13 @@ void destroy(struct mixture_model_t *model, Component *cluster)
     printf("    destroy\n");
     #endif
 
-    model->comp_methods->destroy(cluster);
-    free(cluster);
+    if(cluster == NULL) {
+        printf("[C BACKEND ERROR] Tried to destroy NULL cluster\n");
+    }
+    else {
+        model->comp_methods->destroy(cluster);
+        free(cluster);        
+    }
 }
 
 
@@ -99,21 +108,22 @@ bool add_component(struct mixture_model_t *model, Component *component)
 void remove_component(
     struct mixture_model_t *model, uint16_t *assignments, int idx)
 {
-    if(idx >= model->num_clusters) {
-        printf("[C BACKEND ERROR] Invalid cluster: %d\n", idx);
-        return;
-    }
+    assert(idx < model->num_clusters);
+
+    #ifdef SHOW_TRACE
+    printf("    remove_component\n");
+    #endif
 
     // Optionally update assignments
     if(assignments != NULL) {
         for(int i = 0; i < model->size; i++) {
             if(assignments[i] > idx) { assignments[i] -= 1; }
+            else if(assignments[i] == idx) { assignments[i] = 0; }
         }
     }
 
     // Update components
-    model->comp_methods->destroy(model->clusters[idx]);
-    free(model->clusters[idx]);
+    destroy(model, model->clusters[idx]);
     for(int i = idx; i < (model->num_clusters - 1); i++) {
         model->clusters[i] = model->clusters[i + 1];
         model->clusters[i]->idx = i;
@@ -131,6 +141,10 @@ void remove_component(
  */
 bool remove_empty(struct mixture_model_t *model, uint16_t *assignments)
 {
+    #ifdef SHOW_TRACE
+    printf("    remove_empty\n");
+    #endif
+
     // Search for empty
     for(int i = 0; i < model->num_clusters; i++) {
         if((model->clusters)[i]->size == 0) {
@@ -232,13 +246,6 @@ void remove_point(
  */
 Component *get_cluster(struct mixture_model_t *model, int idx)
 {
-    if(idx >= model->num_clusters) {
-        printf(
-            "[C BACKEND ERROR] Invalid cluster: %d [total=%d]\n",
-            idx, model->num_clusters);
-        return NULL;
-    }
-    else {
-        return model->clusters[idx];
-    }
+    assert(idx < model->num_clusters);
+    return model->clusters[idx];
 }

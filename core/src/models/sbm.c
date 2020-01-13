@@ -9,6 +9,10 @@
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
+#ifdef ASSERT
+#undef NDEBUG
+#endif
+#include <assert.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -38,10 +42,7 @@ void *sbm_create(void *params)
     struct sbm_params_t *params_tc = (struct sbm_params_t *) params;
     component->params = params_tc;
 
-    // Number of clusters (alias)
-    int k = params_tc->k;
     params_tc->k += 1;
-
     double *Q_new = sbm_update(
         PyArray_DATA(params_tc->data),
         PyArray_DATA(params_tc->assignments),
@@ -72,18 +73,18 @@ void sbm_destroy(Component *component)
     // Copy all but current index
     for(int i = 0; i < component->idx; i++) {
         for(int j = 0; j < component->idx; j++) {
-            Q_new[i * (k - 1) + j] = params->Q[i * (k - 1) + j];
+            Q_new[i * (k - 1) + j] = params->Q[i * k + j];
         }
         for(int j = component->idx + 1; j < k; j++) {
-            Q_new[i * (k - 1) + j - 1] = params->Q[i * (k - 1) + j];
+            Q_new[i * (k - 1) + j - 1] = params->Q[i * k + j];
         }
     }
     for(int i = component->idx + 1; i < k; i++) {
         for(int j = 0; j < component->idx; j++) {
-            Q_new[(i - 1) * (k - 1) + j] = params->Q[i * (k - 1) + j];
+            Q_new[(i - 1) * (k - 1) + j] = params->Q[i * k + j];
         }
         for(int j = component->idx + 1; j < k; j++) {
-            Q_new[(i - 1) * (k - 1) + j - 1] = params->Q[i * (k - 1) + j];
+            Q_new[(i - 1) * (k - 1) + j - 1] = params->Q[i * k + j];
         }
     }
 
@@ -133,7 +134,7 @@ void *sbm_params_create(PyObject *dict)
         (struct sbm_params_t *) malloc(sizeof(struct sbm_params_t)));
 
     // Parameters
-    params->n = PyArray_DIM(asn_py, 0);
+    params->n = PyArray_DIM((PyArrayObject *) asn_py, 0);
     params->k = 0;
     params->a = PyFloat_AsDouble(a_py);
     params->b = PyFloat_AsDouble(b_py);
@@ -233,13 +234,15 @@ double sbm_loglik_new(void *params, void *point)
     uint16_t *asn = (uint16_t *) PyArray_DATA(params_tc->assignments);
 
     // Count number of connections to each cluster
-    uint32_t *connected = malloc(sizeof(uint32_t) * params_tc->k);
-    uint32_t *unconnected = malloc(sizeof(uint32_t) * params_tc->k);
+    uint32_t *connected = malloc(sizeof(uint32_t) * (params_tc->k));
+    uint32_t *unconnected = malloc(sizeof(uint32_t) * (params_tc->k));
     for(int i = 0; i < params_tc->k; i++) {
         connected[i] = 0;
         unconnected[i] = 0;
     }
+
     for(int i = 0; i < params_tc->n; i++) {
+        assert(asn[i] < params_tc->k);
         if(point_tc[i]) { connected[asn[i]] += 1; }
         else { unconnected[asn[i]] += 1; }
     }
@@ -253,6 +256,8 @@ double sbm_loglik_new(void *params, void *point)
             unconnected[i] + params_tc->b);
     }
 
+    free(connected);
+    free(unconnected);
     return loglik;
 }
 
@@ -287,21 +292,21 @@ double sbm_loglik_ratio(Component *component, void *params, void *point)
 
 /** 
  * Get Q Array, and sample new array
- * @return PyArrayObject containing *copy* of Q and resampled Q array
+ * @return PyArrayObject containing *copy* of Q
  */
 PyObject *sbm_inspect(void *params) {
 
     struct sbm_params_t *params_tc = (struct sbm_params_t *) params;
 
     // Copy of Q
-    npy_intp dims[2] = {params_tc->k, params_tc->k};
-    PyArrayObject *Q_old_py = PyArray_SimpleNew(2, &dims, NPY_FLOAT64);
+    const npy_intp dims[] = {params_tc->k, params_tc->k};
+    PyArrayObject *Q_old_py = PyArray_SimpleNew(2, dims, NPY_FLOAT64);
     double *Q_old = PyArray_DATA(Q_old_py);
     for(int i = 0; i < params_tc->k * params_tc->k; i++) {
         Q_old[i] = params_tc->Q[i];
     }
 
-    return Q_old_py;
+    return (PyObject *) Q_old_py;
 }
 
 

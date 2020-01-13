@@ -40,10 +40,10 @@ class StochasticBlockModel(BaseModel):
     """
 
     _KEYS = {
-        int: ['n', 'k', 'd'],
+        int: ['n', 'k'],
         float: ["a", "b"],
         bool: ['shuffle'],
-        raw: ['Q', 'data'],
+        raw: ['Q', 'data', 'assignments'],
     }
 
     API_NAME = "bmcc_StochasticBlockModel"
