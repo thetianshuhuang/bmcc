@@ -236,7 +236,7 @@ bool supports_split_merge(struct mixture_model_t *model)
 /**
  * Get Capsule Name
  */
-PyObject *get_capsule_name_py(PyObject *self, PyObject *args)
+PyObject *get_capsule_name_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
     PyObject *capsule;
     if(!PyArg_ParseTuple(args, "O", &capsule)) { return NULL; }

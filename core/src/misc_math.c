@@ -10,6 +10,8 @@
 #include "../include/cholesky.h"
 #include "../include/misc_math.h"
 
+// No longer using GSL; simply replicate PI definition
+#define M_PI 3.14159265358979323846264338328
 
 /**
  * Helper function for log multivariate gamma

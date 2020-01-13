@@ -28,7 +28,10 @@ bool cleanup_iter(
     struct mixture_model_t *model,
     double annealing)
 {
-	for(int idx = 0; idx < model->size; idx++) {
+	// No annealing in deterministic code
+	(void) annealing;
+
+	for(uint32_t idx = 0; idx < model->size; idx++) {
 
 		// Remove point
 		void *point = data + idx * model->dim * model->stride;
@@ -39,9 +42,9 @@ bool cleanup_iter(
 		remove_empty(model, assignments);
 
 		// Find maximum likelihood assignment
-		int idx_best = 0;
+		uint32_t idx_best = 0;
 		double loglik_best = -INFINITY;
-		for(int i = 0; i < model->num_clusters; i++) {
+		for(uint32_t i = 0; i < model->num_clusters; i++) {
 			double loglik_new = marginal_loglik(
 				model, model->clusters[i], point);
 			if(loglik_new > loglik_best) {
@@ -64,7 +67,8 @@ bool cleanup_iter(
  * Run cleanup iteration. See docstring (sourced from cleanup.h) for details on
  * Python calling.
  */
-PyObject *cleanup_iter_py(PyObject *self, PyObject *args, PyObject *kwargs)
+PyObject *cleanup_iter_py(
+	PyObject *self, PyObject *args, PyObject *kwargs)
 {
 	return base_iter(self, args, kwargs, &supports_gibbs, &cleanup_iter);
 }

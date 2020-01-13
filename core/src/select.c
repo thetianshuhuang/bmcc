@@ -68,7 +68,7 @@ double membership_residual(double *prob, uint16_t *asn, int size)
 /** 
  * Get pairwise probability matrix and residuals
  */
-PyObject *pairwise_probability_py(PyObject *self, PyObject *args)
+PyObject *pairwise_probability_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
     PyArrayObject *hist_py;
     int burn_in;

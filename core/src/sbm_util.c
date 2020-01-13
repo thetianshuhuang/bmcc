@@ -18,7 +18,7 @@
 /**
  * C-accelerated implementation of SBM simulation
  */
-PyObject *sbm_simulate_py(PyObject *self, PyObject *args)
+PyObject *sbm_simulate_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
 	PyArrayObject *Q_py;
 	PyArrayObject *A_py;
@@ -108,7 +108,7 @@ double *sbm_update(
 /**
  * Resample Q array for SBM
  */
-PyObject *sbm_update_py(PyObject *self, PyObject *args)
+PyObject *sbm_update_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
 	PyObject *data_py;
 	PyObject *asn_py;

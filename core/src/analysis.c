@@ -17,7 +17,7 @@
 /**
  * Get aggregation score.
  */
-PyObject *aggregation_score_py(PyObject *self, PyObject *args)
+PyObject *aggregation_score_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
 	PyArrayObject *actual_py;
 	PyArrayObject *asn_py;
@@ -51,7 +51,7 @@ PyObject *aggregation_score_py(PyObject *self, PyObject *args)
 /**
  * Get segregation score.
  */
-PyObject *segregation_score_py(PyObject *self, PyObject *args)
+PyObject *segregation_score_py(PyObject *Py_UNUSED(self), PyObject *args)
 {
 	PyArrayObject *actual_py;
 	PyArrayObject *asn_py;
@@ -68,13 +68,11 @@ PyObject *segregation_score_py(PyObject *self, PyObject *args)
 
 	double total = 0;
 	double score = 0;
-	for(int i = 0; i < dim; i++) {
-		for(int j = 0; j < dim; j++) {
+	for(uint32_t i = 0; i < dim; i++) {
+		for(uint32_t j = 0; j < dim; j++) {
 			if(actual[i] != actual[j]) {
 				total += 1;
-				if(asn[i] != asn[j]) {
-					score += 1;
-				}
+				if(asn[i] != asn[j]) { score += 1; }
 			}
 		}
 	}

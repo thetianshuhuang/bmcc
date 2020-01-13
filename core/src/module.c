@@ -179,7 +179,8 @@ static struct PyModuleDef ModuleDef = {
     "core",
     "C accelerator functions for bayesian clustering algorithms",
     -1,
-    ModuleMethods
+    ModuleMethods,
+    NULL, NULL, NULL, NULL
 };
 
 
