@@ -107,10 +107,17 @@ DEBUG_MACROS = [
 # used by extending modules.
 
 API_NAMES = [
-    ("COMPONENT_METHODS_API", "\\\"bmcc.core.ComponentMethods\\\""),
-    ("MODEL_METHODS_API", "\\\"bmcc.core.ModelMethods\\\""),
-    ("MIXTURE_MODEL_API", "\\\"bmcc.core.MixtureModel\\\"")
+    ("COMPONENT_METHODS_API", "bmcc.core.ComponentMethods"),
+    ("MODEL_METHODS_API", "bmcc.core.ModelMethods"),
+    ("MIXTURE_MODEL_API", "bmcc.core.MixtureModel")
 ]
+
+# Due to windows compiler command line argument fuckery, an OS check is
+# required to add the appropriate open and close quotes.
+if os.name == 'nt':
+    API_NAMES = [(k, "\\\"" + v + "\\\"") for k, v in API_NAMES]
+else:
+    API_NAMES = [(k, "\"" + v + "\"") for k, v in API_NAMES]
 
 
 #
