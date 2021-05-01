@@ -9,6 +9,7 @@
 #define PY_ARRAY_UNIQUE_SYMBOL BAYESIAN_CLUSTERING_C_ARRAY_API
 #include <numpy/arrayobject.h>
 
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdint.h>
 #include <stdlib.h>

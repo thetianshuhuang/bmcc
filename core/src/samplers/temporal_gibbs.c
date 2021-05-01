@@ -1,9 +1,10 @@
 /**
- * Gibbs Sampler
+ * Gibbs Sampler with Temporal Dependence
  */
 
 #include <Python.h>
 
+#include <math.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -14,7 +15,7 @@
 #include "../include/samplers/base_iter.h"
 
 /**
- * Execute gibbs iteration.
+ * Execute temporal gibbs iteration.
  * @param data data array; row-major
  * @param assignments assignment vector
  * @param components vector containing component structs, stored as void *.
@@ -22,7 +23,7 @@
  * @param annealing annealing factor
  * @return true if returned without error
  */
-bool gibbs_iter(
+bool temporal_gibbs_iter(
     void *data,
     uint16_t *assignments,
     struct mixture_model_t *model,
@@ -38,10 +39,6 @@ bool gibbs_iter(
 
     // For each sample:
     for(uint32_t idx = 0; idx < model->size; idx++) {
-
-        #ifdef SHOW_TRACE
-        printf("gibbs_iter:%d\n", idx);
-        #endif
 
         void *point = (char *) data + idx * model->dim * model->stride;
 
@@ -79,27 +76,18 @@ bool gibbs_iter(
 
         // Get assignment and new cluster weights
         for(uint32_t i = 0; i < model->num_clusters; i++) {
-            weights[i] = annealing * marginal_loglik(
-                model, model->clusters[i], point);
-        }
-        weights[model->num_clusters] = (
-            annealing * new_cluster_loglik(model, point));
+            bool prev = (idx > 0) && (i == assignments[idx - 1]);
+            bool curr = (i == assignments[idx]);
+            bool next = (idx < model->size - 1) && (i == assignments[idx + 1]);
 
-        #ifdef SHOW_LIKELIHOODS
-        printf("  weights: ");
-        for(uint32_t i = 0; i <= model->num_clusters; i++) {
-            printf("%f ", weights[i]);
+            weights[i] = marginal_loglik(model, model->clusters[i], point);
+
+            if(!(prev || curr || next)) { weights[i] -= annealing;}
         }
-        printf("\n");
-        #endif
+        weights[model->num_clusters] = new_cluster_loglik(model, point);
 
         // Sample new
         uint32_t new = sample_log_weighted(weights, model->num_clusters + 1);
-
-        // New cluster?
-        #ifdef SHOW_TRACE
-        printf("  new: %d [k=%d]\n", new, model->num_clusters);
-        #endif
 
         if(new == model->num_clusters) {
             bool success_new = add_component(model, NULL);
@@ -127,7 +115,8 @@ bool gibbs_iter(
  * Run Gibbs Iteration. See docstring (sourced from gibbs.h) for details on
  * Python calling.
  */
-PyObject *gibbs_iter_py(PyObject *self, PyObject *args, PyObject *kwargs)
+PyObject *temporal_gibbs_iter_py(PyObject *self, PyObject *args, PyObject *kwargs)
 {
-    return base_iter(self, args, kwargs, &supports_gibbs, &gibbs_iter);
+    return base_iter(
+        self, args, kwargs, &supports_gibbs, &temporal_gibbs_iter);
 }

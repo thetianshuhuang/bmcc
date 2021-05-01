@@ -34,7 +34,7 @@ bool cleanup_iter(
 	for(uint32_t idx = 0; idx < model->size; idx++) {
 
 		// Remove point
-		void *point = data + idx * model->dim * model->stride;
+		void *point = (char *) data + idx * model->dim * model->stride;
 		model->comp_methods->remove(
 			model->clusters[assignments[idx]], model->comp_params, point);
 

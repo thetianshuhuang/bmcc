@@ -61,7 +61,7 @@ CLASSIFIERS = [
 # Core Metadata
 META = {
     "name": "bmcc",
-    "version": "2.0.0",
+    "version": "2.0.2",
     "author": "Tianshu Huang",
     "author_email": "thetianshuhuang@gmail.com",
     "description": MODULE_SHORT_DESC,
@@ -107,9 +107,9 @@ DEBUG_MACROS = [
 # used by extending modules.
 
 API_NAMES = [
-    ("COMPONENT_METHODS_API", "\"bmcc.core.ComponentMethods\""),
-    ("MODEL_METHODS_API", "\"bmcc.core.ModelMethods\""),
-    ("MIXTURE_MODEL_API", "\"bmcc.core.MixtureModel\"")
+    ("COMPONENT_METHODS_API", "\\\"bmcc.core.ComponentMethods\\\""),
+    ("MODEL_METHODS_API", "\\\"bmcc.core.ModelMethods\\\""),
+    ("MIXTURE_MODEL_API", "\\\"bmcc.core.MixtureModel\\\"")
 ]
 
 
@@ -121,7 +121,7 @@ OTHER_MACROS = [
     ("BASE_VEC_SIZE", 32),
     # Build Datetime -- used for debug purposes
     # Bound to bmcc.CONFIG["BUILD_DATETIME"]
-    ("BUILD_DATETIME", '"' + BUILD_DATETIME + '"'),
+    ("BUILD_DATETIME", "\\\"" + BUILD_DATETIME + "\\\""),
 ]
 
 

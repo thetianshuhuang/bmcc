@@ -5,6 +5,7 @@
 #include <Python.h>
 
 #include <stdint.h>
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 #include "../include/models/symmetric_normal.h"

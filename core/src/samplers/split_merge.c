@@ -44,7 +44,7 @@ double merge_propose_prob(
     for(uint32_t i = 0; i < model->size; i++) {
         if(assignments[i] == c1 || assignments[i] == c2) {
             
-            void *point = data + i * model->dim * model->stride;
+            void *point = (char *) data + i * model->dim * model->stride;
 
             // Likelihoods
             double asn1 = marginal_loglik(
@@ -87,7 +87,7 @@ bool merge(
     Component *new_component = create_component(model);
     for(uint32_t i = 0; i < model->size; i++) {
         if(assignments[i] == c1 || assignments[i] == c2) {
-            void *point = data + i * model->dim * model->stride;
+            void *point = (char *) data + i * model->dim * model->stride;
             add_point(model, new_component, point);
             asn_tmp[i] = 1;
         }
@@ -180,10 +180,10 @@ bool split(
     // Create new clusters
     // If accepted, new1 becomes index [size - 1], new2 becomes [size]
     Component *new1 = create_component(model);
-    add_point(model, new1, data + p1 * model->dim * model->stride);
+    add_point(model, new1, (char *) data + p1 * model->dim * model->stride);
     asn_tmp[p1] = 2;
     Component *new2 = create_component(model);
-    add_point(model, new2, data + p2 * model->dim * model->stride);
+    add_point(model, new2, (char *) data + p2 * model->dim * model->stride);
     asn_tmp[p2] = 1;
 
     // Track propose likelihood
@@ -197,7 +197,7 @@ bool split(
 
         if(in_merge && not_original) {
 
-            void *point = data + i * model->dim * model->stride;
+            void *point = (char *) data + i * model->dim * model->stride;
 
             // Get assignment likelihoods
             double asn1 = marginal_loglik(model, new1, point);

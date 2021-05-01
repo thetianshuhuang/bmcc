@@ -52,6 +52,7 @@
 
 // Core
 #include "../include/samplers/gibbs.h"
+#include "../include/samplers/temporal_gibbs.h"
 #include "../include/samplers/split_merge.h"
 #include "../include/mixture/mixture_capsules.h"
 #include "../include/cleanup.h"
@@ -85,6 +86,12 @@ static PyMethodDef ModuleMethods[] = {
         (PyCFunction) gibbs_iter_py,
         METH_VARARGS | METH_KEYWORDS,
         DOCSTRING_GIBBS_ITER
+    },
+    {
+        "temporal_gibbs",
+        (PyCFunction) temporal_gibbs_iter_py,
+        METH_VARARGS | METH_KEYWORDS,
+        DOCSTRING_TEMPORAL_GIBBS_ITER
     },
     {
         "split_merge",

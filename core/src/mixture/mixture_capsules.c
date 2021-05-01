@@ -82,7 +82,7 @@ PyObject *init_model_capsules_py(PyObject *Py_UNUSED(self), PyObject *args)
     for(int i = 0; i < size; i++) {
         add_point(
             mixture, mixture->clusters[asn[i]], 
-            (void *) (data + i * dim * mixture->stride));
+            (void *) ((char *) data + i * dim * mixture->stride));
     }
 
     return PyCapsule_New(mixture, MIXTURE_MODEL_API, &destroy_mixture);

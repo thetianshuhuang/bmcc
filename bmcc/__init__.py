@@ -68,6 +68,7 @@ from bmcc.core import (
 
     # MCMC functions
     gibbs,
+    temporal_gibbs,
     split_merge,
 
     # Functions
@@ -122,6 +123,7 @@ __author__ = "Tianshu Huang"
 __license__ = "MIT"
 __maintainer__ = "Tianshu Huang"
 __email__ = "thetianshuhuang@gmail.com"
+__version__ = "2.0.2"
 
 
 # -----------------------------------------------------------------------------
