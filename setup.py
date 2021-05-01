@@ -115,9 +115,11 @@ API_NAMES = [
 # Due to windows compiler command line argument fuckery, an OS check is
 # required to add the appropriate open and close quotes.
 if os.name == 'nt':
-    API_NAMES = [(k, "\\\"" + v + "\\\"") for k, v in API_NAMES]
+    _ESCAPE_STR = "\\\""
 else:
-    API_NAMES = [(k, "\"" + v + "\"") for k, v in API_NAMES]
+    _ESCAPE_STR = "\""
+
+API_NAMES = [(k, _ESCAPE_STR + v + _ESCAPE_STR) for k, v in API_NAMES]
 
 
 #
@@ -128,7 +130,7 @@ OTHER_MACROS = [
     ("BASE_VEC_SIZE", 32),
     # Build Datetime -- used for debug purposes
     # Bound to bmcc.CONFIG["BUILD_DATETIME"]
-    ("BUILD_DATETIME", "\\\"" + BUILD_DATETIME + "\\\""),
+    ("BUILD_DATETIME", _ESCAPE_STR + BUILD_DATETIME + _ESCAPE_STR),
 ]
 
 
